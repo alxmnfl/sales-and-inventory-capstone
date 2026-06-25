@@ -223,9 +223,27 @@ $month_label = date('F Y');
 
     <!-- ── TOP BAR ── -->
     <header class="topbar">
-        <div class="branch-filter">
-            <i class="fa-solid fa-code-branch"></i>
-            <select id="globalBranchFilter" onchange="loadAllSections()" title="Filter intelligence sections by branch">
+        <div class="branch-filter" id="branchFilterWrapper">
+            <i class="fa-solid fa-location-dot branch-filter-icon"></i>
+            <button class="branch-select-btn" id="branchSelectBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="branchSelectedLabel">All Branches</span>
+                <i class="fa-solid fa-chevron-down branch-chevron" id="branchChevron"></i>
+            </button>
+            <div class="branch-dropdown-panel" id="branchDropdownPanel" role="listbox" aria-label="Select branch">
+                <div class="branch-option branch-option--selected" data-value="" role="option" aria-selected="true">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>All Branches</span>
+                    <i class="fa-solid fa-check branch-option-check"></i>
+                </div>
+                <?php foreach ($branches_list as $b): ?>
+                <div class="branch-option" data-value="<?= htmlspecialchars($b) ?>" role="option" aria-selected="false">
+                    <i class="fa-solid fa-store"></i>
+                    <span><?= htmlspecialchars($b) ?></span>
+                    <i class="fa-solid fa-check branch-option-check"></i>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <select id="globalBranchFilter" style="display:none" onchange="loadAllSections()">
                 <option value="">All Branches</option>
                 <?php foreach ($branches_list as $b): ?>
                 <option value="<?= htmlspecialchars($b) ?>"><?= htmlspecialchars($b) ?></option>

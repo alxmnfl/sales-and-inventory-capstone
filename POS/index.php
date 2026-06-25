@@ -21,6 +21,7 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 POS</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="pos.css">
 </head>
 <body>
@@ -267,14 +268,38 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
     </div>
     <div class="form-group">
       <label>Category</label>
-      <select id="pCategory" class="pf-select">
-        <option value="">— Select category —</option>
-        <option value="Hoses">Hoses</option>
-        <option value="Fittings">Fittings</option>
-        <option value="Couplers">Couplers</option>
-        <option value="Adapters">Adapters</option>
-        <option value="Accessories">Accessories</option>
-      </select>
+      <div class="cat-drop" id="catDrop">
+        <button type="button" class="cat-drop__btn" id="catDropBtn">
+          <span class="cat-drop__icon"><i class="fa-solid fa-tag" id="catDropIco"></i></span>
+          <span class="cat-drop__text" id="catDropText">— Select category —</span>
+          <i class="fa-solid fa-chevron-down cat-drop__arrow" id="catDropArrow"></i>
+        </button>
+        <div class="cat-drop__menu" id="catDropMenu">
+          <div class="cat-drop__item" data-val="Hoses"       data-ico="fa-droplet">
+            <span class="cat-drop__item-icon"><i class="fa-solid fa-droplet"></i></span>Hoses
+          </div>
+          <div class="cat-drop__item" data-val="Fittings"    data-ico="fa-wrench">
+            <span class="cat-drop__item-icon"><i class="fa-solid fa-wrench"></i></span>Fittings
+          </div>
+          <div class="cat-drop__item" data-val="Couplers"    data-ico="fa-link">
+            <span class="cat-drop__item-icon"><i class="fa-solid fa-link"></i></span>Couplers
+          </div>
+          <div class="cat-drop__item" data-val="Adapters"    data-ico="fa-plug">
+            <span class="cat-drop__item-icon"><i class="fa-solid fa-plug"></i></span>Adapters
+          </div>
+          <div class="cat-drop__item" data-val="Accessories" data-ico="fa-toolbox">
+            <span class="cat-drop__item-icon"><i class="fa-solid fa-toolbox"></i></span>Accessories
+          </div>
+        </div>
+        <select id="pCategory" style="display:none">
+          <option value="">— Select category —</option>
+          <option value="Hoses">Hoses</option>
+          <option value="Fittings">Fittings</option>
+          <option value="Couplers">Couplers</option>
+          <option value="Adapters">Adapters</option>
+          <option value="Accessories">Accessories</option>
+        </select>
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="form-group">
