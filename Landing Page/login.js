@@ -1,4 +1,3 @@
-// ===== BRANCH DATA =====
 const branches = [
     { code: 'DIN', name: 'Lucky 8 — Dinalupihan',    id: 'DIN-01', region: 'Bataan · Central Luzon' },
     { code: 'LPC', name: 'Lucky 8 — Las Piñas City', id: 'LPC-01', region: 'Las Piñas · NCR' },
@@ -65,7 +64,6 @@ function selectBranch(name, code) {
     display.textContent = name;
     display.classList.add('selected');
 
-    // Feed into the hidden form input
     const hiddenInput = document.getElementById('branchInput');
     if (hiddenInput) hiddenInput.value = name;
 
@@ -75,7 +73,7 @@ function selectBranch(name, code) {
     renderBranches(branches);
 }
 
-// ===== TAB SWITCHING =====
+
 function switchTab(tab) {
     const signinTab    = document.getElementById('tab-signin');
     const registerTab  = document.getElementById('tab-register');
@@ -95,7 +93,6 @@ function switchTab(tab) {
     }
 }
 
-// ===== PASSWORD TOGGLE =====
 function togglePassword() {
     const input = document.getElementById('passwordInput');
     const icon  = document.querySelector('.toggle-pw');
@@ -119,7 +116,6 @@ function toggleRegPassword(inputId, icon) {
     }
 }
 
-// ===== ROLE SELECTION =====
 function selectRole(card, roleValue) {
     document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
     card.classList.add('active');
@@ -132,30 +128,26 @@ function selectRole(card, roleValue) {
     const branchInput = document.getElementById('branchInput');
 
     if (roleValue === 'administrator') {
-        // Disable and grey out the branch dropdown
         if (trigger) trigger.classList.add('disabled');
         if (display) { display.textContent = 'All Branches — not applicable'; display.classList.add('selected'); }
         if (branchInput) branchInput.value = '';
-        // Close it if open
+
         document.getElementById('branchDropdown')?.classList.remove('open');
         document.getElementById('branchArrow')?.classList.remove('open');
     } else {
-        // Re-enable for branch staff
+
         if (trigger) trigger.classList.remove('disabled');
         if (display) { display.textContent = 'Select one of 19 branches...'; display.classList.remove('selected'); }
         if (branchInput) branchInput.value = '';
     }
 }
 
-// ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
     renderBranches(branches);
 
-    // Read the tab PHP passed (signin or register)
     const tab = typeof initialTab !== 'undefined' ? initialTab : 'signin';
     switchTab(tab);
 
-    // Close branch dropdown on outside click
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#branchSelect')) {
             const dropdown = document.getElementById('branchDropdown');
