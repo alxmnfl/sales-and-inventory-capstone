@@ -154,72 +154,9 @@ $month_label = date('F Y');
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════ SIDEBAR -->
-<aside class="sidebar">
+<?php include 'sidebar.php'; ?>
 
-    <div class="sidebar-logo">
-        <div class="logo-badge">L8</div>
-        <div class="logo-text">
-            <span class="logo-name">LUCKY 8</span>
-            <span class="logo-sub">ADMIN CONSOLE</span>
-        </div>
-    </div>
-
-    <nav class="sidebar-nav">
-        <a href="index.php" class="nav-item active">
-            <i class="nav-icon fa-solid fa-gauge-high"></i>
-            Dashboard
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-boxes-stacked"></i>
-            Inventory
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-chart-line"></i>
-            Sales
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-building"></i>
-            Branches
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-users"></i>
-            Users
-            <span class="nav-badge">3</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-wand-magic-sparkles"></i>
-            Forecasts
-            <span class="nav-badge blue">5</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-shuffle"></i>
-            Movement Intel
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-shield-halved"></i>
-            Audit Trail
-        </a>
-        <a href="#" class="nav-item">
-            <i class="nav-icon fa-solid fa-file-chart-column"></i>
-            Reports
-        </a>
-    </nav>
-
-    <div class="sidebar-footer">
-        <div class="user-avatar"><?= htmlspecialchars($initials) ?></div>
-        <div class="user-info">
-            <div class="user-name"><?= htmlspecialchars($user_name) ?></div>
-            <div class="user-role">Administrator</div>
-        </div>
-        <a href="../Landing Page/login.php" class="logout-btn" title="Sign out">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </a>
-    </div>
-
-</aside>
-
-<div class="main">
+<div class="main" id="mainContent">
 
     <!-- ── TOP BAR ── -->
     <header class="topbar">

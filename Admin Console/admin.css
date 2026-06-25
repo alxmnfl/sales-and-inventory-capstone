@@ -6,6 +6,7 @@ body {
     color: #111827;
     display: flex;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* ── SIDEBAR ── */
@@ -18,16 +19,120 @@ body {
     position: fixed;
     left: 0; top: 0; bottom: 0;
     z-index: 100;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
 }
 
+/* ── SIDEBAR LOGO ── */
 .sidebar-logo {
-    padding: 18px 16px;
+    padding: 0 14px;
+    height: 64px;
     display: flex;
     align-items: center;
     gap: 10px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
     flex-shrink: 0;
+    overflow: hidden;
 }
+
+/* ── BURGER BUTTON ── */
+.sidebar-burger {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+    transition: background 0.2s, color 0.2s, transform 0.3s;
+    flex-shrink: 0;
+}
+.sidebar-burger:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
+.sidebar-burger i {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar.collapsed .sidebar-burger i {
+    transform: rotate(180deg);
+}
+
+/* logo text fade */
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.2s, width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    width: 130px;
+}
+
+/* ── SIDEBAR TRANSITION ── */
+.main { transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* ── NAV TEXT ANIMATION ── */
+.nav-text {
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.2s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    width: 140px;
+}
+.nav-badge {
+    transition: opacity 0.2s ease;
+}
+
+/* ── COLLAPSED SIDEBAR ── */
+.sidebar.collapsed { width: 64px; }
+
+/* hide logo badge + text, center the burger */
+.sidebar.collapsed .logo-badge  { display: none; }
+.sidebar.collapsed .logo-text   { display: none; }
+.sidebar.collapsed .sidebar-logo {
+    justify-content: center;
+    padding: 0;
+}
+.sidebar.collapsed .sidebar-burger { margin-left: 0; }
+
+/* nav items — icon only, perfectly centered */
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 11px 0;
+    gap: 0;
+    border-left: none;           /* remove the 3px shift */
+    padding-left: 0;
+}
+.sidebar.collapsed .nav-item.active {
+    border-left: none;           /* no border on active either */
+    background: rgba(232,97,26,0.15);
+}
+.sidebar.collapsed .nav-text {
+    opacity: 0;
+    width: 0;
+}
+.sidebar.collapsed .nav-badge  { display: none; }
+.sidebar.collapsed .nav-label  { display: none; }
+.sidebar.collapsed .nav-item .nav-icon { width: 20px; font-size: 15px; }
+
+/* footer */
+.sidebar.collapsed .sidebar-footer { justify-content: center; padding: 12px 0; gap: 0; }
+.sidebar.collapsed .user-info  { display: none; }
+.sidebar.collapsed .logout-btn { display: none; }
+
+/* transitions for elements that animate */
+.logo-badge { transition: opacity 0.2s, width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.user-info  { transition: opacity 0.2s, width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.logout-btn { transition: opacity 0.2s; }
+
+.main.sidebar-collapsed { margin-left: 64px; width: calc(100vw - 64px); }
 
 .logo-badge {
     width: 36px; height: 36px;
@@ -38,7 +143,6 @@ body {
     flex-shrink: 0;
 }
 
-.logo-text { display: flex; flex-direction: column; line-height: 1.2; }
 .logo-name  { font-size: 12px; font-weight: 700; color: white; letter-spacing: 0.06em; }
 .logo-sub   { font-size: 9px;  color: rgba(255,255,255,0.38); letter-spacing: 0.12em; }
 
@@ -144,7 +248,7 @@ body {
 /* ── MAIN ── */
 .main {
     margin-left: 240px;
-    flex: 1;
+    width: calc(100vw - 240px);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -363,7 +467,7 @@ body {
 /* ── KPI CARDS ── */
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
     margin-bottom: 20px;
 }
@@ -437,9 +541,10 @@ body {
 /* ── CHARTS ROW ── */
 .charts-row {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: 1fr minmax(0, 340px);
     gap: 14px;
     margin-bottom: 14px;
+    min-width: 0;
 }
 
 .chart-card {
@@ -447,6 +552,7 @@ body {
     border-radius: 12px;
     padding: 20px;
     border: 1px solid #e5e7eb;
+    min-width: 0;
 }
 
 .chart-card-header {
