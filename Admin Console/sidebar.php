@@ -26,7 +26,17 @@ $_r = $_sb->query("
 ");
 if ($_r) $_risk_cnt = (int)$_r->fetch_row()[0];
 
+// Recent activity for notification bell (last 5 audit entries)
+$_notif_items = [];
+$_r = $_sb->query("SELECT action, entity_name, user_name, branch, created_at FROM audit_trail ORDER BY created_at DESC LIMIT 5");
+if ($_r) while ($_row = $_r->fetch_assoc()) $_notif_items[] = $_row;
+
 $_sb->close();
+
+// User info for profile dropdown (read from session)
+$_sb_user_name = $_SESSION['user_name'] ?? 'Admin';
+$_sb_words     = explode(' ', trim($_sb_user_name));
+$_sb_initials  = strtoupper(substr($_sb_words[0],0,1).(isset($_sb_words[1])?substr($_sb_words[1],0,1):''));
 
 $_nav = [
     ['index.php',       'fa-gauge-high',          'Dashboard',      0,            ''],
@@ -61,24 +71,115 @@ $_nav = [
         <?php endforeach;?>
     </nav>
     <div class="sidebar-footer">
-        <div class="user-avatar"><?=htmlspecialchars($initials)?></div>
+        <div class="user-avatar"><?=htmlspecialchars($_sb_initials)?></div>
         <div class="user-info">
-            <div class="user-name"><?=htmlspecialchars($user_name)?></div>
+            <div class="user-name"><?=htmlspecialchars($_sb_user_name)?></div>
             <div class="user-role">Administrator</div>
         </div>
         <a href="../Landing Page/login.php" class="logout-btn" title="Sign out">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </a>
     </div>
+<?php
+/* ── Pre-build inner HTML in PHP so json_encode() handles all escaping ── */
+
+// Notification panel inner HTML
+ob_start(); ?>
+<div class="topbar-drop-header">Recent Activity</div>
+<?php if(empty($_notif_items)): ?>
+<div class="topbar-drop-empty"><i class="fa-regular fa-bell-slash"></i>No recent activity</div>
+<?php else: foreach($_notif_items as $_ni):
+    $_ni_class = strpos($_ni['action'],'DELETE')!==false?'notif-dot-del':(strpos($_ni['action'],'ADD')!==false?'notif-dot-add':(strpos($_ni['action'],'EDIT')!==false?'notif-dot-edit':'notif-dot-sale'));
+    $_ni_icon  = strpos($_ni['action'],'DELETE')!==false?'fa-trash':(strpos($_ni['action'],'ADD')!==false?'fa-plus':(strpos($_ni['action'],'EDIT')!==false?'fa-pen':'fa-receipt'));
+?>
+<div class="notif-entry">
+    <div class="notif-entry-action"><i class="fa-solid <?=$_ni_icon?> <?=$_ni_class?>"></i><?=htmlspecialchars($_ni['action']??'')?></div>
+    <div class="notif-entry-meta"><?=htmlspecialchars($_ni['entity_name']??'—')?> &mdash; <?=htmlspecialchars($_ni['user_name']??'')?> &bull; <?=htmlspecialchars($_ni['created_at']??'')?></div>
+</div>
+<?php endforeach; endif; ?>
+<a href="audit-trail.php" class="topbar-drop-item" style="border-top:1px solid #f3f4f6;">
+    <i class="fa-solid fa-shield-halved"></i>View Full Audit Trail
+</a>
+<?php $_notif_inner = ob_get_clean();
+
+// User profile panel inner HTML
+ob_start(); ?>
+<div class="topbar-drop-user">
+    <div class="topbar-drop-avatar"><?=htmlspecialchars($_sb_initials)?></div>
+    <div>
+        <div class="topbar-drop-name"><?=htmlspecialchars($_sb_user_name)?></div>
+        <div class="topbar-drop-role">Administrator</div>
+    </div>
+</div>
+<a href="index.php" class="topbar-drop-item"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
+<a href="users.php" class="topbar-drop-item"><i class="fa-solid fa-users"></i>Manage Users</a>
+<a href="../Landing Page/login.php" class="topbar-drop-item danger"><i class="fa-solid fa-arrow-right-from-bracket"></i>Sign Out</a>
+<?php $_user_inner = ob_get_clean(); ?>
 </aside>
 <script>
 (function(){
+    /* ── Sidebar burger toggle ── */
     var b=document.getElementById('sidebarBurger'),s=document.querySelector('.sidebar');
-    if(!b||!s)return;
-    b.addEventListener('click',function(){
-        var c=s.classList.toggle('collapsed');
-        var m=document.getElementById('mainContent')||document.querySelector('.main');
-        if(m)m.classList.toggle('sidebar-collapsed',c);
+    if(b&&s){
+        b.addEventListener('click',function(){
+            var c=s.classList.toggle('collapsed');
+            var m=document.getElementById('mainContent')||document.querySelector('.main');
+            if(m)m.classList.toggle('sidebar-collapsed',c);
+        });
+    }
+
+    /* ── Topbar dropdowns — appended to body, positioned via getBoundingClientRect ── */
+    document.addEventListener('DOMContentLoaded',function(){
+        var notifBtn = document.querySelector('.icon-btn');
+        var userChip = document.querySelector('.user-chip');
+        if(!notifBtn||!userChip) return;
+
+        // Create both panels as body children (avoids overflow/positioning issues inside small elements)
+        var notifDrop = document.createElement('div');
+        notifDrop.id = 'notifDrop';
+        notifDrop.className = 'topbar-drop';
+        notifDrop.innerHTML = <?=json_encode($_notif_inner)?>;
+        document.body.appendChild(notifDrop);
+
+        var userDrop = document.createElement('div');
+        userDrop.id = 'userDrop';
+        userDrop.className = 'topbar-drop';
+        userDrop.innerHTML = <?=json_encode($_user_inner)?>;
+        document.body.appendChild(userDrop);
+
+        function positionBelow(drop, trigger) {
+            var r = trigger.getBoundingClientRect();
+            drop.style.top   = (r.bottom + 8) + 'px';
+            drop.style.right = (window.innerWidth - r.right) + 'px';
+            drop.style.left  = 'auto';
+        }
+
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var wasOpen = notifDrop.classList.contains('open');
+            notifDrop.classList.remove('open');
+            userDrop.classList.remove('open');
+            if(!wasOpen){ positionBelow(notifDrop, notifBtn); notifDrop.classList.add('open'); }
+        });
+
+        userChip.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var wasOpen = userDrop.classList.contains('open');
+            notifDrop.classList.remove('open');
+            userDrop.classList.remove('open');
+            if(!wasOpen){ positionBelow(userDrop, userChip); userDrop.classList.add('open'); }
+        });
+
+        document.addEventListener('click', function() {
+            notifDrop.classList.remove('open');
+            userDrop.classList.remove('open');
+        });
+
+        // Close on scroll/resize so position stays accurate
+        window.addEventListener('resize', function() {
+            notifDrop.classList.remove('open');
+            userDrop.classList.remove('open');
+        });
     });
 }());
 </script>
