@@ -72,6 +72,24 @@ if ($api_ok) {
 .trend-up{color:#10b981;}
 .trend-dn{color:#ef4444;}
 .py-badge{display:inline-flex;align-items:center;gap:6px;background:#1e3a5f;color:#60a5fa;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;}
+.custom-days-drop{position:relative;display:inline-block;user-select:none;}
+.custom-days-trigger{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 12px;border:1.5px solid #e8611a;border-radius:8px;background:#fff8f5;cursor:pointer;transition:box-shadow .2s,border-color .2s;min-width:148px;}
+.custom-days-trigger:hover{box-shadow:0 0 0 3px rgba(232,97,26,0.12);}
+.custom-days-trigger.open{border-color:#c94e0f;box-shadow:0 0 0 3px rgba(232,97,26,0.12);}
+.custom-days-trigger .dt-icon{color:#e8611a;font-size:13px;flex-shrink:0;}
+.custom-days-trigger .dt-label{font-size:13px;font-weight:600;color:#e8611a;flex:1;}
+.custom-days-trigger .dt-arrow{color:#e8611a;font-size:10px;transition:transform .2s;flex-shrink:0;}
+.custom-days-trigger.open .dt-arrow{transform:rotate(180deg);}
+.custom-days-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:100%;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.10);z-index:999;overflow:hidden;padding:4px;}
+.custom-days-menu.open{display:block;animation:dropIn .15s ease;}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.custom-days-option{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:7px;cursor:pointer;transition:background .15s;}
+.custom-days-option:hover{background:#fff3ee;}
+.custom-days-option.selected{background:#fff3ee;}
+.custom-days-option .do-text{font-size:13px;font-weight:500;color:#374151;flex:1;}
+.custom-days-option.selected .do-text{color:#e8611a;font-weight:600;}
+.custom-days-option .do-check{color:#e8611a;font-size:11px;opacity:0;}
+.custom-days-option.selected .do-check{opacity:1;}
 </style>
 </head>
 <body>
@@ -114,9 +132,25 @@ if ($api_ok) {
                 <option value="">All Branches</option>
                 <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
             </select>
-            <select name="days">
-                <?php foreach([7,14,30,60] as $d):?><option value="<?=$d?>"<?=$d===$days?' selected':''?>><?=$d?> days ahead</option><?php endforeach;?>
-            </select>
+            <!-- hidden input carries the value on form submit -->
+            <input type="hidden" name="days" id="daysValue" value="<?=$days?>">
+            <div class="custom-days-drop" id="customDaysDrop">
+                <div class="custom-days-trigger" id="customDaysTrigger">
+                    <i class="fa-regular fa-calendar dt-icon"></i>
+                    <span class="dt-label" id="customDaysLabel"><?=$days?> days ahead</span>
+                    <i class="fa-solid fa-chevron-down dt-arrow"></i>
+                </div>
+                <div class="custom-days-menu" id="customDaysMenu">
+                    <?php foreach([7,14,30,60] as $d):
+                        $sel = $d===$days ? ' selected' : '';
+                    ?>
+                    <div class="custom-days-option<?=$sel?>" data-value="<?=$d?>">
+                        <span class="do-text"><?=$d?> days ahead</span>
+                        <i class="fa-solid fa-check do-check"></i>
+                    </div>
+                    <?php endforeach;?>
+                </div>
+            </div>
             <button type="submit" class="btn-orange"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Forecast</button>
         </form>
 
@@ -206,6 +240,38 @@ if ($api_ok) {
         <?php endif;?>
     </div>
 </div>
+
+<script>
+(function(){
+    var trigger = document.getElementById('customDaysTrigger');
+    var menu    = document.getElementById('customDaysMenu');
+    var label   = document.getElementById('customDaysLabel');
+    var hidden  = document.getElementById('daysValue');
+
+    trigger.addEventListener('click', function(e){
+        e.stopPropagation();
+        var open = menu.classList.toggle('open');
+        trigger.classList.toggle('open', open);
+    });
+
+    menu.querySelectorAll('.custom-days-option').forEach(function(opt){
+        opt.addEventListener('click', function(){
+            var val = this.getAttribute('data-value');
+            hidden.value = val;
+            label.textContent = val + ' days ahead';
+            menu.querySelectorAll('.custom-days-option').forEach(function(o){ o.classList.remove('selected'); });
+            this.classList.add('selected');
+            menu.classList.remove('open');
+            trigger.classList.remove('open');
+        });
+    });
+
+    document.addEventListener('click', function(){
+        menu.classList.remove('open');
+        trigger.classList.remove('open');
+    });
+})();
+</script>
 
 <?php if ($api_ok && $forecast && $forecast['success']): ?>
 <script>
