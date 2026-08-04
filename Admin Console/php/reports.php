@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once '../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../Landing Page/login.php'); exit;
+    header('Location: ../../Landing Page/login.php'); exit;
 }
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';
@@ -84,30 +84,11 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Reports</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../styles/admin.css">
+<link rel="stylesheet" href="../styles/reports.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-.report-types{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
-.report-type-card{background:#fff;border-radius:12px;padding:20px;border:2px solid #e5e7eb;cursor:pointer;transition:all 0.2s;text-align:left;}
-.report-type-card:hover,.report-type-card.selected{border-color:#e8611a;background:rgba(232,97,26,0.03);}
-.report-type-card .rt-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px;}
-.rt-sales{background:rgba(232,97,26,0.1);color:#e8611a;}
-.rt-inv{background:rgba(16,185,129,0.1);color:#10b981;}
-.rt-audit{background:rgba(99,102,241,0.1);color:#6366f1;}
-.rt-title{font-size:14px;font-weight:700;color:#111827;margin-bottom:4px;}
-.rt-desc{font-size:12px;color:#6b7280;}
-.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.filter-bar input,.filter-bar select{padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;outline:none;}
-.filter-bar input:focus,.filter-bar select:focus{border-color:#e8611a;}
-.filter-bar label{font-size:12px;color:#6b7280;font-weight:500;white-space:nowrap;}
-.btn-orange{background:#e8611a;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-.btn-orange:hover{background:#c94e0f;}
-.btn-green{background:#10b981;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
-.btn-green:hover{background:#059669;}
-.preview-note{font-size:12px;color:#9ca3af;margin-bottom:12px;}
-</style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>

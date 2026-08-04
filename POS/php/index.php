@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 'branch_staff') {
 }
 
 if (!isset($_SESSION['pos_cashier'])) {
-    header('Location: ../Landing Page/login.php');
+    header('Location: ../../Landing Page/login.php');
     exit;
 }
 
@@ -22,7 +22,7 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 POS</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="pos.css">
+<link rel="stylesheet" href="../style/admin.css">
 </head>
 <body>
 
@@ -326,6 +326,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 </div>
 
 <script>const CASHIER = <?= json_encode($cashier) ?>;</script>
-<script src="pos.js"></script>
+<script src="../src/pos.js"></script>
 </body>
 </html>

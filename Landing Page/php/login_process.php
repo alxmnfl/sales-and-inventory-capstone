@@ -46,11 +46,11 @@ $_SESSION['user_role']   = $role;
 $_SESSION['user_branch'] = $branch;
 
 if ($role === 'administrator') {
-    header('Location: ../Admin%20Console/index.php');
+    header('Location: ../../Admin%20Console/index.php');
 } else {
     // Staff — set POS cashier session and send to POS
     $_SESSION['pos_cashier']        = strtoupper($full_name ?? '');
     $_SESSION['pos_cashier_branch'] = strtoupper($branch ?? '');
-    header('Location: ../POS/index.php');
+    header('Location: ../../POS/index.php');
 }
 exit;

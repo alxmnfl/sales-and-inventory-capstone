@@ -9,7 +9,7 @@ if (!isset($_SESSION['pos_cashier'])) {
     exit;
 }
 
-require_once __DIR__ . '/../../Landing Page/db.php';
+require_once __DIR__ . '/../../Landing Page/php/db.php';
 
 $branch = $_SESSION['pos_cashier_branch'] ?? '';
 

@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once '../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../Landing Page/login.php'); exit;
+    header('Location: ../../Landing Page/login.php'); exit;
 }
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';
@@ -57,23 +57,12 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Sales</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../styles/admin.css">
+<link rel="stylesheet" href="../styles/sales.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>
-.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.filter-bar input,.filter-bar select{padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;outline:none;}
-.filter-bar input:focus,.filter-bar select:focus{border-color:#e8611a;}
-.filter-bar label{font-size:12px;color:#6b7280;font-weight:500;}
-.btn-orange{background:#e8611a;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-.btn-orange:hover{background:#c94e0f;}
-.pay-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
-.pay-cash{background:#ecfdf5;color:#10b981;}
-.pay-card{background:#eff6ff;color:#3b82f6;}
-.pay-gcash{background:#fdf4ff;color:#a855f7;}
-</style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>

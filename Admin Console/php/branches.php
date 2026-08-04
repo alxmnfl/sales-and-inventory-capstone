@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once '../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../Landing Page/login.php'); exit;
+    header('Location: ../../Landing Page/login.php'); exit;
 }
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';
@@ -59,26 +59,11 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Branches</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../styles/admin.css">
+<link rel="stylesheet" href="../styles/branches.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-.branch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
-.branch-card{background:#fff;border-radius:12px;padding:20px;border:1px solid #e5e7eb;}
-.branch-card-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
-.branch-icon{width:40px;height:40px;background:rgba(232,97,26,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#e8611a;font-size:16px;flex-shrink:0;}
-.branch-name{font-size:14px;font-weight:700;color:#111827;}
-.branch-loc{font-size:11px;color:#9ca3af;margin-top:2px;}
-.branch-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.bstat{background:#f9fafb;border-radius:8px;padding:10px 12px;}
-.bstat-label{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
-.bstat-val{font-size:17px;font-weight:700;color:#111827;}
-.bstat-sub{font-size:10px;color:#9ca3af;margin-top:2px;}
-.rev-up{color:#10b981;font-size:11px;font-weight:600;}
-.rev-dn{color:#ef4444;font-size:11px;font-weight:600;}
-.low-badge{display:inline-block;background:#fef3c7;color:#d97706;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;margin-top:4px;}
-</style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>

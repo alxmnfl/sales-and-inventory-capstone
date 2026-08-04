@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') 
     exit;
 }
 
-require_once '../../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 $result   = $conn->query("SELECT DISTINCT UPPER(branch) AS branch FROM users WHERE branch IS NOT NULL AND branch != '' ORDER BY branch");
 $branches = [];

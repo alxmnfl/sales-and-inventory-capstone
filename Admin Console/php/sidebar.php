@@ -76,7 +76,7 @@ $_nav = [
             <div class="user-name"><?=htmlspecialchars($_sb_user_name)?></div>
             <div class="user-role">Administrator</div>
         </div>
-        <a href="../Landing Page/login.php" class="logout-btn" title="Sign out">
+        <a href="../../Landing Page/login.php" class="logout-btn" title="Sign out">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </a>
     </div>
@@ -113,7 +113,7 @@ ob_start(); ?>
 </div>
 <a href="index.php" class="topbar-drop-item"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
 <a href="users.php" class="topbar-drop-item"><i class="fa-solid fa-users"></i>Manage Users</a>
-<a href="../Landing Page/login.php" class="topbar-drop-item danger"><i class="fa-solid fa-arrow-right-from-bracket"></i>Sign Out</a>
+<a href="../../Landing Page/login.php" class="topbar-drop-item danger"><i class="fa-solid fa-arrow-right-from-bracket"></i>Sign Out</a>
 <?php $_user_inner = ob_get_clean(); ?>
 </aside>
 <script>

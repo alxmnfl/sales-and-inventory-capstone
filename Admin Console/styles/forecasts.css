@@ -1,0 +1,215 @@
+/* ── API Offline Banner ── */
+.api-offline {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+.api-offline-icon {
+    font-size: 24px;
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.api-offline h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 6px;
+}
+.api-offline p {
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.6;
+    margin: 0;
+}
+.code-block {
+    background: #111827;
+    color: #a3e635;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: monospace;
+    font-size: 12px;
+    margin-top: 10px;
+    line-height: 1.8;
+}
+
+/* ── Filter Bar ── */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.filter-bar select,
+.filter-bar input {
+    padding: 7px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #374151;
+    background: #fff;
+    outline: none;
+}
+.filter-bar select:focus,
+.filter-bar input:focus {
+    border-color: #e8611a;
+}
+
+/* ── Buttons ── */
+.btn-orange {
+    background: #e8611a;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-orange:hover {
+    background: #c94e0f;
+}
+
+/* ── Risk & Trend ── */
+.risk-critical {
+    color: #ef4444;
+    font-weight: 700;
+}
+.risk-high {
+    color: #f59e0b;
+    font-weight: 700;
+}
+.risk-medium {
+    color: #6366f1;
+    font-weight: 600;
+}
+.risk-low {
+    color: #10b981;
+    font-weight: 600;
+}
+.trend-up {
+    color: #10b981;
+}
+.trend-dn {
+    color: #ef4444;
+}
+.py-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #1e3a5f;
+    color: #60a5fa;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+/* ── Custom Days Dropdown ── */
+.custom-days-drop {
+    position: relative;
+    display: inline-block;
+    user-select: none;
+}
+.custom-days-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px 7px 12px;
+    border: 1.5px solid #e8611a;
+    border-radius: 8px;
+    background: #fff8f5;
+    cursor: pointer;
+    transition: box-shadow .2s, border-color .2s;
+    min-width: 148px;
+}
+.custom-days-trigger:hover {
+    box-shadow: 0 0 0 3px rgba(232, 97, 26, 0.12);
+}
+.custom-days-trigger.open {
+    border-color: #c94e0f;
+    box-shadow: 0 0 0 3px rgba(232, 97, 26, 0.12);
+}
+.custom-days-trigger .dt-icon {
+    color: #e8611a;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+.custom-days-trigger .dt-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e8611a;
+    flex: 1;
+}
+.custom-days-trigger .dt-arrow {
+    color: #e8611a;
+    font-size: 10px;
+    transition: transform .2s;
+    flex-shrink: 0;
+}
+.custom-days-trigger.open .dt-arrow {
+    transform: rotate(180deg);
+}
+.custom-days-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    z-index: 999;
+    overflow: hidden;
+    padding: 4px;
+}
+.custom-days-menu.open {
+    display: block;
+    animation: dropIn .15s ease;
+}
+@keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.custom-days-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background .15s;
+}
+.custom-days-option:hover,
+.custom-days-option.selected {
+    background: #fff3ee;
+}
+.custom-days-option .do-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    flex: 1;
+}
+.custom-days-option.selected .do-text {
+    color: #e8611a;
+    font-weight: 600;
+}
+.custom-days-option .do-check {
+    color: #e8611a;
+    font-size: 11px;
+    opacity: 0;
+}
+.custom-days-option.selected .do-check {
+    opacity: 1;
+}

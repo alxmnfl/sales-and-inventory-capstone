@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once '../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../Landing Page/login.php'); exit;
+    header('Location: ../../Landing Page/login.php'); exit;
 }
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';
@@ -63,25 +63,11 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Audit Trail</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../styles/admin.css">
+<link rel="stylesheet" href="../styles/audit-trail.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-.filter-bar input,.filter-bar select{padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;outline:none;}
-.filter-bar input:focus,.filter-bar select:focus{border-color:#e8611a;}
-.filter-bar label{font-size:12px;color:#6b7280;font-weight:500;white-space:nowrap;}
-.btn-orange{background:#e8611a;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-.btn-orange:hover{background:#c94e0f;}
-.btn-ghost{background:#fff;color:#6b7280;border:1px solid #e5e7eb;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
-.btn-ghost:hover{border-color:#e8611a;color:#e8611a;}
-.pagination{display:flex;align-items:center;gap:6px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
-.pg-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:13px;cursor:pointer;text-decoration:none;font-weight:500;}
-.pg-btn:hover{border-color:#e8611a;color:#e8611a;}
-.pg-btn.active{background:#e8611a;color:#fff;border-color:#e8611a;}
-.pg-btn.disabled{opacity:0.4;pointer-events:none;}
-</style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>

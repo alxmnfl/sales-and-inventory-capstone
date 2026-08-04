@@ -9,7 +9,7 @@ if (!isset($_SESSION['pos_cashier'])) {
     exit;
 }
 
-require_once __DIR__ . '/../../Landing Page/db.php';
+require_once __DIR__ . '/../../Landing Page/php/db.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
 $id    = (int)($input['id'] ?? 0);

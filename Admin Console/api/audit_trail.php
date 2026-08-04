@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') 
     exit;
 }
 
-require_once '../../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 // Gracefully handle missing table (migration not yet run)
 $tableCheck = $conn->query("SHOW TABLES LIKE 'audit_trail'");

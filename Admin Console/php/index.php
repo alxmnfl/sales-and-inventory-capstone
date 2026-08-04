@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once '../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 // Auth guard — admin only
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../Landing Page/login.php');
+    header('Location: ../../Landing Page/login.php');
     exit;
 }
 
@@ -147,7 +147,7 @@ $month_label = date('F Y');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Admin Console</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../styles/admin.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -434,7 +434,7 @@ const chartData = {
     }
 };
 </script>
-<script src="admin.js"></script>
+<script src="../src/admin.js"></script>
 
 </body>
 </html>

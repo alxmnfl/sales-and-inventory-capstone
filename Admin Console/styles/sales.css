@@ -1,0 +1,66 @@
+/* ── Filter Bar ── */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.filter-bar input,
+.filter-bar select {
+    padding: 7px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #374151;
+    background: #fff;
+    outline: none;
+}
+.filter-bar input:focus,
+.filter-bar select:focus {
+    border-color: #e8611a;
+}
+.filter-bar label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ── Buttons ── */
+.btn-orange {
+    background: #e8611a;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-orange:hover {
+    background: #c94e0f;
+}
+
+/* ── Payment Badges ── */
+.pay-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.pay-cash {
+    background: #ecfdf5;
+    color: #10b981;
+}
+.pay-card {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+.pay-gcash {
+    background: #fdf4ff;
+    color: #a855f7;
+}

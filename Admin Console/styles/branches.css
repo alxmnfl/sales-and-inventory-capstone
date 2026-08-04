@@ -1,0 +1,92 @@
+/* ── Branch Grid ── */
+.branch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+}
+
+/* ── Branch Card ── */
+.branch-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+}
+.branch-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.branch-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(232, 97, 26, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e8611a;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.branch-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+.branch-loc {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+/* ── Branch Stats ── */
+.branch-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.bstat {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+.bstat-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 4px;
+}
+.bstat-val {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+}
+.bstat-sub {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+.rev-up {
+    color: #10b981;
+    font-size: 11px;
+    font-weight: 600;
+}
+.rev-dn {
+    color: #ef4444;
+    font-size: 11px;
+    font-weight: 600;
+}
+.low-badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #d97706;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 4px;
+}

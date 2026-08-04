@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadProducts() {
   try {
-    const res = await fetch('api/products.php');
+    const res = await fetch('../api/products.php');
     const data = await res.json();
     if (data.success) {
       products = data.products;
@@ -302,7 +302,7 @@ async function completeSale() {
   };
 
   try {
-    const res  = await fetch('api/complete_sale.php', {
+    const res  = await fetch('../api/complete_sale.php', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(payload)
@@ -419,7 +419,7 @@ async function saveProduct() {
   btn.textContent = 'Saving…';
 
   try {
-    const res  = await fetch('api/save_product.php', {
+    const res  = await fetch('../api/save_product.php', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ id, sku, name, category, price, stock })
@@ -454,7 +454,7 @@ async function deleteProduct(targetId) {
   if (!targetId) return;
 
   try {
-    const res  = await fetch('api/delete_product.php', {
+    const res  = await fetch('../api/delete_product.php', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ id: targetId })

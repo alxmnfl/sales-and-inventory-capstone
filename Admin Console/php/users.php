@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once '../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../Landing Page/login.php'); exit;
+    header('Location: ../../Landing Page/login.php'); exit;
 }
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';
@@ -73,38 +73,11 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Users</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../styles/admin.css">
+<link rel="stylesheet" href="../styles/users.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-.role-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-.role-admin{background:rgba(232,97,26,0.12);color:#e8611a;}
-.role-staff{background:#f3f4f6;color:#374151;}
-.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-.status-ok{background:#ecfdf5;color:#10b981;}
-.status-rej{background:#fef2f2;color:#ef4444;}
-.status-pend{background:#fef3c7;color:#d97706;}
-.btn-orange{background:#e8611a;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s;}
-.btn-orange:hover{background:#c94e0f;}
-.btn-ghost{background:transparent;color:#6b7280;border:1px solid #e5e7eb;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;}
-.btn-ghost:hover{border-color:#e8611a;color:#e8611a;}
-.btn-danger{background:transparent;color:#ef4444;border:1px solid #fecaca;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;}
-.btn-danger:hover{background:#fef2f2;}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;}
-.modal-bg.open{display:flex;}
-.modal{background:#fff;border-radius:16px;padding:28px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
-.modal h3{font-size:16px;font-weight:700;color:#111827;margin-bottom:20px;}
-.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
-.form-group label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;}
-.form-group input,.form-group select{padding:8px 11px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#111827;outline:none;}
-.form-group input:focus,.form-group select:focus{border-color:#e8611a;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
-.flash{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:16px;}
-.flash.ok{background:#ecfdf5;color:#10b981;border:1px solid #a7f3d0;}
-.user-avatar-sm{width:32px;height:32px;background:rgba(232,97,26,0.15);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#e8611a;font-size:11px;font-weight:700;}
-</style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>

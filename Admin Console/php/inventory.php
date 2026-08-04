@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once '../Landing Page/db.php';
+require_once '../../Landing Page/php/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../Landing Page/login.php'); exit;
+    header('Location: ../../Landing Page/login.php'); exit;
 }
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';
@@ -86,38 +86,11 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inventory</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../styles/admin.css">
+<link rel="stylesheet" href="../styles/inventory.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-.inv-filters{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.inv-filters input,.inv-filters select{padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#374151;background:#fff;outline:none;}
-.inv-filters input:focus,.inv-filters select:focus{border-color:#e8611a;}
-.inv-filters input{flex:1;min-width:180px;}
-.btn-orange{background:#e8611a;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s;}
-.btn-orange:hover{background:#c94e0f;}
-.btn-ghost{background:transparent;color:#6b7280;border:1px solid #e5e7eb;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;}
-.btn-ghost:hover{border-color:#e8611a;color:#e8611a;}
-.btn-danger{background:transparent;color:#ef4444;border:1px solid #fecaca;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;}
-.btn-danger:hover{background:#fef2f2;}
-.stock-ok{color:#10b981;font-weight:600;}
-.stock-low{color:#f59e0b;font-weight:600;}
-.stock-out{color:#ef4444;font-weight:600;}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;align-items:center;justify-content:center;}
-.modal-bg.open{display:flex;}
-.modal{background:#fff;border-radius:16px;padding:28px;width:480px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
-.modal h3{font-size:16px;font-weight:700;color:#111827;margin-bottom:20px;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
-.form-group label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;}
-.form-group input,.form-group select{padding:8px 11px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#111827;outline:none;}
-.form-group input:focus,.form-group select:focus{border-color:#e8611a;}
-.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
-.flash{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:16px;}
-.flash.ok{background:#ecfdf5;color:#10b981;border:1px solid #a7f3d0;}
-.flash.err{background:#fef2f2;color:#ef4444;border:1px solid #fecaca;}
-</style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
