@@ -79,10 +79,6 @@ $active_tab = $_GET['tab'] ?? 'signin';
                 <span class="status-dot"></span>
                 ALL SYSTEMS OPERATIONAL
             </div>
-            <div class="it-support">
-                <i class="fa-solid fa-headset"></i>
-                IT Support
-            </div>
         </div>
 
         <div class="right-content">
@@ -141,9 +137,9 @@ $active_tab = $_GET['tab'] ?? 'signin';
                     </div>
                 </div>
 
-                <button type="submit" class="signin-btn">SIGN IN &rarr;</button>
+                <button type="submit" class="signin-btn">SIGN IN</button>
 
-                <p class="bottom-link">New here? <a href="#" onclick="switchTab('register'); return false;">Register Here &rarr;</a></p>
+                <p class="bottom-link">New here? <a href="#" onclick="switchTab('register'); return false;">Register Here</a></p>
             </form>
 
             <form id="form-register" class="form-section" method="POST" action="register.php" style="display:none;">
@@ -241,16 +237,9 @@ $active_tab = $_GET['tab'] ?? 'signin';
                     </div>
                 </div>
 
-                <div class="form-group agree-row">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="agree" value="1" required>
-                        <span>I understand my account will remain in <strong>pending</strong> status until an Administrator verifies and approves it, and I agree to the system's audit policy.</span>
-                    </label>
-                </div>
+                <button type="submit" class="signin-btn">REGISTER</button>
 
-                <button type="submit" class="signin-btn">REGISTER &rarr;</button>
-
-                <p class="bottom-link">Already approved? <a href="#" onclick="switchTab('signin'); return false;">Sign in here &rarr;</a></p>
+                <p class="bottom-link">Already have an account? <a href="#" onclick="switchTab('signin'); return false;">Sign in here</a></p>
             </form>
         </div>
 
