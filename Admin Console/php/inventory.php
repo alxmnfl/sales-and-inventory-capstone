@@ -206,7 +206,7 @@ $conn->close();
             </div>
             <div class="form-group"><label>Branch</label>
                 <select name="branch" required>
-                    <option value="">— Select branch —</option>
+                    <option value="">Select branch</option>
                     <?php foreach($branches as $b):?><option><?=htmlspecialchars($b)?></option><?php endforeach;?>
                 </select>
             </div>
