@@ -195,16 +195,6 @@ body {
     flex-shrink: 0;
 }
 
-.it-support {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #555;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-}
-
 .right-content {
     flex: 1;
     padding: 40px 60px;
