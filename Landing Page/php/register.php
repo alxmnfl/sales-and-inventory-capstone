@@ -14,7 +14,7 @@ $branch      = trim($_POST['branch']      ?? '');
 $role        = $_POST['role']             ?? 'branch_staff';
 $password    = $_POST['password']         ?? '';
 $confirm     = $_POST['confirm_password'] ?? '';
-$agree       = $_POST['agree']            ?? '';
+
 
 $role = in_array($role, ['branch_staff', 'administrator']) ? $role : 'branch_staff';
 
@@ -46,12 +46,6 @@ if (strlen($password) < 8) {
 
 if ($password !== $confirm) {
     $_SESSION['reg_error'] = 'Passwords do not match.';
-    header('Location: login.php?tab=register');
-    exit;
-}
-
-if (!$agree) {
-    $_SESSION['reg_error'] = 'You must accept the terms before registering.';
     header('Location: login.php?tab=register');
     exit;
 }
