@@ -122,7 +122,9 @@ $branches_list = [];
 $r = $conn->query("SELECT DISTINCT UPPER(branch) AS branch FROM users WHERE branch IS NOT NULL AND branch != '' ORDER BY branch");
 if ($r) {
     while ($row = $r->fetch_assoc()) {
-        $branches_list[] = $row['branch'];
+        if (strcasecmp($row['branch'], 'ALL BRANCHES') !== 0) {
+            $branches_list[] = $row['branch'];
+        }
     }
 }
 
