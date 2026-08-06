@@ -13,6 +13,7 @@ function selectedBranch() {
 /* ── Load all sections (called on branch change or page init) ── */
 function loadAllSections() {
     const branch = selectedBranch();
+    loadDashboardKpis(branch);
     loadFastMoving(branch);
     loadCriticalStock(branch);
     loadPredictiveAlerts(branch);

@@ -1,9 +1,12 @@
+let abcChart = null;
+
 function buildAbcChart() {
     const ctx = document.getElementById('abcChart').getContext('2d');
+    if (abcChart) abcChart.destroy();
 
     const total = chartData.abc.a + chartData.abc.b + chartData.abc.c;
 
-    new Chart(ctx, {
+    abcChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels:   ['A — Fast Movers', 'B — Steady Movers', 'C — Slow/Non-Movers'],

@@ -457,8 +457,8 @@ $month_label = date('F Y');
     <script src="../src/fast-moving.js"></script>
     <script src="../src/predictive.js"></script>
     <script src="../src/sales-trend-line.js"></script>
-    <script src="../src/users.js"></script>
-
+    <script src="../src/dashboard-kpis.js"></script>
+    
 </body>
 
 </html>
