@@ -3,7 +3,7 @@ function openCheckout() {
   const { total } = cartTotals();
   const count     = cart.reduce((s, c) => s + c.qty, 0);
 
-  document.getElementById('modalSubtitle').textContent = `${count} item${count !== 1 ? 's' : ''} · CEB-MAIN`;
+  document.getElementById('modalSubtitle').textContent = `${count} item${count !== 1 ? 's' : ''} · ${BRANCH}`;
 
   // Reset to CASH
   selectedPayment = 'CASH';

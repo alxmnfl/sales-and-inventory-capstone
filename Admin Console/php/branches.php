@@ -84,7 +84,7 @@ $conn->close();
             <div class="kpi-card">
                 <div class="kpi-top"><span class="kpi-label">Active Branches</span><div class="kpi-icon orange"><i class="fa-solid fa-building"></i></div></div>
                 <div class="kpi-value"><?=(int)$total_branches?></div>
-                <div class="kpi-meta"><span class="badge-up">ALL ONLINE</span></div>
+                <div class="kpi-meta"><span class="badge-up">ALL ONLINE</span> <?= (int)$total_branches ?> branches</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-top"><span class="kpi-label">Total Staff</span><div class="kpi-icon green"><i class="fa-solid fa-user-tie"></i></div></div>

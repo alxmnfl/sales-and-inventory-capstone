@@ -22,7 +22,7 @@ if ($branch !== '') {
         LEFT JOIN pos_sale_items si ON si.product_id = p.id
         LEFT JOIN pos_sales s       ON si.sale_id = s.id
                                    AND s.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        WHERE p.branch = ?
+        WHERE UPPER(p.branch) = ?
         GROUP BY p.id
         ORDER BY total_units DESC
         LIMIT $limit

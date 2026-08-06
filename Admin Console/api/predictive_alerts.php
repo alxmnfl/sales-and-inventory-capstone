@@ -31,7 +31,7 @@ $baseQuery = "
 
 if ($branch !== '') {
     $stmt = $conn->prepare($baseQuery . "
-        WHERE p.branch = ?
+        WHERE UPPER(p.branch) = ?
         GROUP BY p.id
         HAVING days_remaining < 14 AND COALESCE(SUM(si.quantity), 0) > 0
         ORDER BY days_remaining ASC

@@ -9,7 +9,7 @@ function loadAuditTrail(branch, reset) {
 
     if (reset) body.innerHTML = '<div class="intel-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
 
-    fetch(`api/audit_trail.php?branch=${encodeURIComponent(branch)}&page=${auditPage}&limit=${AUDIT_PER_PAGE}`)
+    fetch(`../api/audit_trail.php?branch=${encodeURIComponent(branch)}&page=${auditPage}&limit=${AUDIT_PER_PAGE}`)
         .then(r => r.json())
         .then(data => {
             if (!data.success) {

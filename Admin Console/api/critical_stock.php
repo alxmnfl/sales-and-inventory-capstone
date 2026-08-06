@@ -17,7 +17,7 @@ if ($branch !== '') {
     $stmt = $conn->prepare(
         "SELECT id, name, sku, category, branch, stock
          FROM pos_products
-         WHERE stock < ? AND stock >= 0 AND branch = ?
+         WHERE stock < ? AND stock >= 0 AND UPPER(branch) = ?
          ORDER BY stock ASC"
     );
     $stmt->bind_param('is', $threshold, $branch);

@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') 
 
 require_once '../../Landing Page/php/db.php';
 
-$branch = trim($_GET['branch'] ?? '');
+$branch = strtoupper(trim($_GET['branch'] ?? ''));
 
 if ($branch !== '') {
     $b = $branch;
@@ -20,7 +20,7 @@ if ($branch !== '') {
         FROM pos_sales
         WHERE MONTH(created_at) = MONTH(NOW())
           AND YEAR(created_at)  = YEAR(NOW())
-          AND branch = ?
+          AND UPPER(branch) = ?
     ");
     $stmt->bind_param('s', $b);
     $stmt->execute();
@@ -31,7 +31,7 @@ if ($branch !== '') {
         FROM pos_sales
         WHERE MONTH(created_at) = MONTH(NOW() - INTERVAL 1 MONTH)
           AND YEAR(created_at)  = YEAR(NOW()  - INTERVAL 1 MONTH)
-          AND branch = ?
+          AND UPPER(branch) = ?
     ");
     $stmt->bind_param('s', $b);
     $stmt->execute();
@@ -43,7 +43,7 @@ if ($branch !== '') {
         JOIN pos_sales s ON si.sale_id = s.id
         WHERE MONTH(s.created_at) = MONTH(NOW())
           AND YEAR(s.created_at)  = YEAR(NOW())
-          AND s.branch = ?
+          AND UPPER(s.branch) = ?
     ");
     $stmt->bind_param('s', $b);
     $stmt->execute();
@@ -54,7 +54,7 @@ if ($branch !== '') {
         FROM pos_sales
         WHERE MONTH(created_at) = MONTH(NOW())
           AND YEAR(created_at)  = YEAR(NOW())
-          AND branch = ?
+          AND UPPER(branch) = ?
     ");
     $stmt->bind_param('s', $b);
     $stmt->execute();
@@ -68,7 +68,7 @@ if ($branch !== '') {
         LEFT JOIN pos_sale_items si ON si.sale_id = s.id
         WHERE MONTH(s.created_at) = MONTH(NOW())
           AND YEAR(s.created_at)  = YEAR(NOW())
-          AND s.branch = ?
+          AND UPPER(s.branch) = ?
         GROUP BY DATE(s.created_at)
         ORDER BY d
     ");
@@ -98,7 +98,7 @@ if ($branch !== '') {
         SELECT p.id, COALESCE(SUM(si.total_price), 0) AS revenue
         FROM pos_products p
         LEFT JOIN pos_sale_items si ON si.product_id = p.id
-        WHERE p.branch = ?
+        WHERE UPPER(p.branch) = ?
         GROUP BY p.id
         ORDER BY revenue DESC
     ");
@@ -119,7 +119,7 @@ if ($branch !== '') {
         FROM pos_sales
         WHERE MONTH(created_at) = MONTH(NOW())
           AND YEAR(created_at)  = YEAR(NOW())
-          AND branch = ?
+          AND UPPER(branch) = ?
     ");
     $stmt->bind_param('s', $b);
     $stmt->execute();
@@ -185,7 +185,7 @@ if ($branch !== '') {
     $r = $conn->query("SELECT DATEDIFF(NOW(), MIN(created_at)) + 1 FROM pos_sales WHERE MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())");
     $days_elapsed = max(1, (int)$r->fetch_row()[0]);
 
-    $r = $conn->query("SELECT COUNT(DISTINCT branch) FROM users WHERE branch IS NOT NULL AND branch != '' AND branch != 'ALL BRANCHES'");
+    $r = $conn->query("SELECT COUNT(DISTINCT branch) FROM pos_sales WHERE MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) AND branch IS NOT NULL AND branch != ''");
     $active_branches = (int)$r->fetch_row()[0];
 }
 

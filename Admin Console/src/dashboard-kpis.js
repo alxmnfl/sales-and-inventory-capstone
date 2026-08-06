@@ -1,5 +1,5 @@
 function loadDashboardKpis(branch) {
-    fetch(`api/dashboard-kpis.php?branch=${encodeURIComponent(branch)}`)
+    fetch(`../api/dashboard-kpis.php?branch=${encodeURIComponent(branch)}&_t=${Date.now()}`)
         .then(r => r.json())
         .then(data => {
             if (!data.success) return;
@@ -63,7 +63,7 @@ function loadDashboardKpis(branch) {
                     branchCard.querySelector('.kpi-value').textContent = `${data.active_branches}/${data.active_branches}`;
                     const meta = branchCard.querySelector('.kpi-meta');
                     if (meta) {
-                        meta.innerHTML = `<span class="badge-pill green">↑ ALL ONLINE</span> 99.8% uptime this month`;
+                        meta.innerHTML = `<span class="badge-pill green">↑ ${data.active_branches} ACTIVE</span>`;
                     }
                 }
             }
@@ -105,7 +105,7 @@ function loadDashboardKpis(branch) {
                 const now = new Date();
                 const monthLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' });
                 const scope = branch ? ` · ${esc(branch)}` : '';
-                salesChartCard.textContent = `Daily across all 19 branches${scope} · ${monthLabel}`;
+                salesChartCard.textContent = `Daily across ${data.active_branches} branches${scope} · ${monthLabel}`;
             }
 
             // Update ABC legend counts
@@ -129,7 +129,7 @@ function loadDashboardKpis(branch) {
                 buildAbcChart();
             }
         })
-        .catch(() => {});
+        .catch(err => console.error('Dashboard KPIs load error:', err));
 }
 
 function abbrevPeso(n) {

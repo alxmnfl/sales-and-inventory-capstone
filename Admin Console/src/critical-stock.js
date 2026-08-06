@@ -2,7 +2,7 @@ function loadCriticalStock(branch) {
     const body = document.getElementById('critical-stock-body');
     body.innerHTML = '<div class="intel-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
 
-    fetch(`api/critical_stock.php?branch=${encodeURIComponent(branch)}`)
+    fetch(`../api/critical_stock.php?branch=${encodeURIComponent(branch)}`)
         .then(r => r.json())
         .then(data => {
             if (!data.success || !data.items.length) {

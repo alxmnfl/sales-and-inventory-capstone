@@ -15,6 +15,7 @@ async function completeSale() {
 
   const payload = {
     cashier:        CASHIER,
+    branch:         BRANCH,
     payment_method: selectedPayment,
     subtotal, vat, total,
     cash_tendered:  cashTendered,

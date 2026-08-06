@@ -128,6 +128,9 @@ if ($r) {
     }
 }
 
+$r = $conn->query("SELECT COUNT(DISTINCT branch) FROM users WHERE branch IS NOT NULL AND branch != '' AND branch != 'ALL BRANCHES'");
+$active_branches = (int)$r->fetch_row()[0];
+
 $conn->close();
 
 // ── Helpers 
@@ -271,10 +274,9 @@ $month_label = date('F Y');
                         <span class="kpi-label">Active Branches</span>
                         <div class="kpi-icon blue"><i class="fa-solid fa-store"></i></div>
                     </div>
-                    <div class="kpi-value">19/19</div>
+                    <div class="kpi-value"><?= $active_branches ?>/<?= $active_branches ?></div>
                     <div class="kpi-meta">
-                        <span class="badge-pill green">↑ ALL ONLINE</span>
-                        99.8% uptime this month
+                        <span class="badge-pill green">↑ <?= $active_branches ?> ACTIVE</span>
                     </div>
                 </div>
 
@@ -289,7 +291,7 @@ $month_label = date('F Y');
                         <div>
                             <div class="chart-title">Consolidated Sales Trend</div>
                             <div class="chart-subtitle">
-                                Daily across all 19 branches &middot; <?= $month_label ?>
+                                Daily across <?= $active_branches ?> branches &middot; <?= $month_label ?>
                             </div>
                         </div>
                         <div class="toggle-group">

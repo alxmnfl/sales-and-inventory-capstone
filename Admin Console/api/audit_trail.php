@@ -27,7 +27,7 @@ if ($branch !== '') {
     $stmt = $conn->prepare(
         "SELECT id, user_name, branch, action, entity_name, details, created_at
          FROM audit_trail
-         WHERE branch = ?
+         WHERE UPPER(branch) = ?
          ORDER BY created_at DESC
          LIMIT ? OFFSET ?"
     );

@@ -2,7 +2,7 @@ function loadFastMoving(branch) {
     const body = document.getElementById('fast-moving-body');
     body.innerHTML = '<div class="intel-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
 
-    fetch(`api/fast_moving.php?branch=${encodeURIComponent(branch)}`)
+    fetch(`../api/fast_moving.php?branch=${encodeURIComponent(branch)}`)
         .then(r => r.json())
         .then(data => {
             if (!data.success || !data.items.length) {

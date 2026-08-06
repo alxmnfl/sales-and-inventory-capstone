@@ -244,7 +244,7 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
   </div>
 </div>
 
-<script>const CASHIER = <?= json_encode($cashier) ?>;</script>
+<script>const CASHIER = <?= json_encode($cashier) ?>; const BRANCH = <?= json_encode($branch) ?>;</script>
 
 <script src="../src/pos.js"></script>
 <script src="../src/checkout.js"></script>

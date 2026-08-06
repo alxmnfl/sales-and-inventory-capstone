@@ -41,7 +41,9 @@ try {
                      ? (float)$input['cash_tendered']
                      : null;
     $createdAt     = date('Y-m-d H:i:s');
-    $branch        = $_SESSION['pos_cashier_branch'] ?? '';
+    $sessionBranch = strtoupper(trim($_SESSION['pos_cashier_branch'] ?? ''));
+    $payloadBranch = strtoupper(trim($input['branch'] ?? ''));
+    $branch        = $payloadBranch !== '' ? $payloadBranch : $sessionBranch;
 
     // Insert sale record
     $stmtSale = $conn->prepare(

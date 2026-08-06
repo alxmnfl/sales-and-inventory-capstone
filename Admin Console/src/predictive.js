@@ -2,7 +2,7 @@ function loadPredictiveAlerts(branch) {
     const body = document.getElementById('predictive-body');
     body.innerHTML = '<div class="intel-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
 
-    fetch(`api/predictive_alerts.php?branch=${encodeURIComponent(branch)}`)
+    fetch(`../api/predictive_alerts.php?branch=${encodeURIComponent(branch)}`)
         .then(r => r.json())
         .then(data => {
             if (!data.success || !data.items.length) {
