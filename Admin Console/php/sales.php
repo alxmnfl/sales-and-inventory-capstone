@@ -16,8 +16,7 @@ $date_from= trim($_GET['from']     ?? date('Y-m-01'));
 $date_to  = trim($_GET['to']       ?? date('Y-m-d'));
 
 $where_parts = ["DATE(s.created_at) BETWEEN '$date_from' AND '$date_to'"];
-$params = [];
-if ($branch) { $where_parts[] = "s.branch = ?"; $params[] = $branch; }
+if ($branch) { $where_parts[] = "s.branch = ?"; }
 $where = 'WHERE '.implode(' AND ', $where_parts);
 
 /* ── KPIs ── */
