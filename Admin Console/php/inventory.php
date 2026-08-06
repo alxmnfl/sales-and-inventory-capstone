@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cat   = trim($_POST['category'] ?? '');
         $price = (float)($_POST['price'] ?? 0);
         $stock = (int)($_POST['stock']   ?? 0);
-        $branch= trim($_POST['branch']   ?? '');
+        $branch= '';
         $stmt  = $conn->prepare("INSERT INTO pos_products (sku,name,category,price,stock,branch,added_by) VALUES (?,?,?,?,?,?,?)");
-        $stmt->bind_param('sssdiis',$sku,$name,$cat,$price,$stock,$branch,$_SESSION['user_id']);
+        $stmt->bind_param('sssdisi',$sku,$name,$cat,$price,$stock,$branch,$_SESSION['user_id']);
         $stmt->execute() ? $flash='added' : $flash='err:'.$conn->error;
         $stmt->close();
     }
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stock = (int)($_POST['stock']    ?? 0);
         $branch= trim($_POST['branch']    ?? '');
         $stmt  = $conn->prepare("UPDATE pos_products SET name=?,category=?,price=?,stock=?,branch=? WHERE id=?");
-        $stmt->bind_param('sssdsi',$name,$cat,$price,$stock,$branch,$id);
+        $stmt->bind_param('ssdisi',$name,$cat,$price,$stock,$branch,$id);
         $stmt->execute();
         $stmt->close();
         $flash = 'edited';
@@ -204,12 +204,6 @@ $conn->close();
                 <div class="form-group"><label>Price (₱)</label><input name="price" type="number" step="0.01" min="0" required placeholder="0.00"></div>
                 <div class="form-group"><label>Stock</label><input name="stock" type="number" min="0" required placeholder="0"></div>
             </div>
-            <div class="form-group"><label>Branch</label>
-                <select name="branch" required>
-                    <option value="">Select branch</option>
-                    <?php foreach($branches as $b):?><option><?=htmlspecialchars($b)?></option><?php endforeach;?>
-                </select>
-            </div>
             <datalist id="catList"><?php foreach($categories as $c):?><option value="<?=htmlspecialchars($c)?>"><?php endforeach;?></datalist>
             <div class="modal-footer">
                 <button type="button" class="btn-ghost" onclick="closeModal('addModal')">Cancel</button>
@@ -251,36 +245,6 @@ $conn->close();
     <input type="hidden" name="id" id="deleteId">
 </form>
 
-<script>
-function filterTable(){
-    var q=document.getElementById('searchInp').value.toLowerCase();
-    var br=document.getElementById('branchSel').value.toUpperCase();
-    var cat=document.getElementById('catSel').value;
-    document.querySelectorAll('#invTable tbody tr').forEach(function(tr){
-        var name=tr.dataset.name,sku=tr.dataset.sku,b=tr.dataset.branch,c=tr.dataset.cat;
-        var show=((!q||(name.includes(q)||sku.includes(q)))&&(!br||b===br)&&(!cat||c===cat));
-        tr.style.display=show?'':'none';
-    });
-}
-function openAddModal(){document.getElementById('addModal').classList.add('open');}
-function openEditModal(p){
-    document.getElementById('editId').value=p.id;
-    document.getElementById('editName').value=p.name;
-    document.getElementById('editCat').value=p.category;
-    document.getElementById('editBranch').value=p.branch.toUpperCase();
-    document.getElementById('editPrice').value=p.price;
-    document.getElementById('editStock').value=p.stock;
-    document.getElementById('editModal').classList.add('open');
-}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function confirmDelete(id,name){
-    if(!confirm('Delete "'+name+'"? This cannot be undone.'))return;
-    document.getElementById('deleteId').value=id;
-    document.getElementById('deleteForm').submit();
-}
-document.querySelectorAll('.modal-bg').forEach(function(m){
-    m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});
-});
-</script>
+<script src="../src/inventory.js"></script>
 </body>
 </html>

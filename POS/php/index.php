@@ -59,7 +59,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
         <svg class="barcode-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="2" height="16" fill="#D1D5DB"/><rect x="6" y="4" width="1" height="16" fill="#D1D5DB"/><rect x="9" y="4" width="2" height="16" fill="#D1D5DB"/><rect x="13" y="4" width="1" height="16" fill="#D1D5DB"/><rect x="16" y="4" width="2" height="16" fill="#D1D5DB"/><rect x="20" y="4" width="2" height="16" fill="#D1D5DB"/></svg>
       </div>
       <div class="item-count" id="itemCount">— items</div>
-      <button class="btn-add-product" onclick="openAddProduct()">+ Add Product</button>
     </div>
 
     <div class="category-tabs" id="categoryTabs">
@@ -245,87 +244,14 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
   </div>
 </div>
 
-<!-- ═══ PRODUCT FORM MODAL ═══ -->
-<div class="modal-overlay" id="productModal" style="display:none">
-  <div class="modal" style="max-width:460px">
-    <div class="modal-header">
-      <div>
-        <h2 class="modal-title" id="productModalTitle">Add Product</h2>
-        <p class="modal-subtitle">Fill in the product details below</p>
-      </div>
-      <button class="modal-close" onclick="closeProductModal()">✕</button>
-    </div>
-
-    <div id="productFormError" class="pf-error" style="display:none"></div>
-
-    <div class="form-group">
-      <label>SKU</label>
-      <input type="text" id="pSku" placeholder="e.g. HH-R2AT-038-050" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label>Product Name</label>
-      <input type="text" id="pName" placeholder="Full product name" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label>Category</label>
-      <div class="cat-drop" id="catDrop">
-        <button type="button" class="cat-drop__btn" id="catDropBtn">
-          <span class="cat-drop__icon"><i class="fa-solid fa-tag" id="catDropIco"></i></span>
-          <span class="cat-drop__text" id="catDropText">— Select category —</span>
-          <i class="fa-solid fa-chevron-down cat-drop__arrow" id="catDropArrow"></i>
-        </button>
-        <div class="cat-drop__menu" id="catDropMenu">
-          <div class="cat-drop__item" data-val="Hoses"       data-ico="fa-droplet">
-            <span class="cat-drop__item-icon"><i class="fa-solid fa-droplet"></i></span>Hoses
-          </div>
-          <div class="cat-drop__item" data-val="Fittings"    data-ico="fa-wrench">
-            <span class="cat-drop__item-icon"><i class="fa-solid fa-wrench"></i></span>Fittings
-          </div>
-          <div class="cat-drop__item" data-val="Couplers"    data-ico="fa-link">
-            <span class="cat-drop__item-icon"><i class="fa-solid fa-link"></i></span>Couplers
-          </div>
-          <div class="cat-drop__item" data-val="Adapters"    data-ico="fa-plug">
-            <span class="cat-drop__item-icon"><i class="fa-solid fa-plug"></i></span>Adapters
-          </div>
-          <div class="cat-drop__item" data-val="Accessories" data-ico="fa-toolbox">
-            <span class="cat-drop__item-icon"><i class="fa-solid fa-toolbox"></i></span>Accessories
-          </div>
-        </div>
-        <select id="pCategory" style="display:none">
-          <option value="">— Select category —</option>
-          <option value="Hoses">Hoses</option>
-          <option value="Fittings">Fittings</option>
-          <option value="Couplers">Couplers</option>
-          <option value="Adapters">Adapters</option>
-          <option value="Accessories">Accessories</option>
-        </select>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="form-group">
-        <label>Price (₱)</label>
-        <input type="number" id="pPrice" step="0.01" min="0.01" placeholder="0.00">
-      </div>
-      <div class="form-group">
-        <label>Stock (qty)</label>
-        <input type="number" id="pStock" min="0" placeholder="0">
-      </div>
-    </div>
-    <input type="hidden" id="pId">
-
-    <div class="modal-footer" style="margin-top:8px">
-      <button class="btn-cancel" id="btnDeleteProduct" onclick="confirmDeleteProduct()" style="display:none;border-color:#FCA5A5;color:#DC2626">
-        🗑 DELETE
-      </button>
-      <button class="btn-cancel" onclick="closeProductModal()">CANCEL</button>
-      <button class="btn-complete" id="btnSaveProduct" onclick="saveProduct()">
-        SAVE PRODUCT
-      </button>
-    </div>
-  </div>
-</div>
-
 <script>const CASHIER = <?= json_encode($cashier) ?>;</script>
+
 <script src="../src/pos.js"></script>
+<script src="../src/checkout.js"></script>
+<script src="../src/complete-sale.js"></script>
+<script src="../src/receipt.js"></script>
+<script src="../src/cart.js"></script>
+<script src="../src/products.js"></script>
+
 </body>
 </html>
