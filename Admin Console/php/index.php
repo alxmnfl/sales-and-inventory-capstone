@@ -448,7 +448,16 @@ $month_label = date('F Y');
             }
         };
     </script>
+
     <script src="../src/admin.js"></script>
+    <script src="../src/abc-donut.js"></script>
+    <script src="../src/audit.js"></script>
+    <script src="../src/branchint-sec.js"></script>
+    <script src="../src/critical-stock.js"></script>
+    <script src="../src/fast-moving.js"></script>
+    <script src="../src/predictive.js"></script>
+    <script src="../src/sales-trend-line.js"></script>
+    <script src="../src/users.js"></script>
 
 </body>
 

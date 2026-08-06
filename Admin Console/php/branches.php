@@ -13,8 +13,8 @@ $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1]
 /* ── Branch data ── */
 $branch_data = [];
 
-// Distinct branches from products
-$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM pos_products WHERE branch!='' ORDER BY b");
+// Distinct branches from users (authoritative source)
+$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
 while ($row = $r->fetch_row()) {
     $branch_data[$row[0]] = ['name'=>$row[0],'products'=>0,'stock'=>0,'low_stock'=>0,'staff'=>0,'revenue'=>0,'revenue_prev'=>0];
 }

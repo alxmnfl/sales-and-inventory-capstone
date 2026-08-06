@@ -117,6 +117,7 @@ ob_start(); ?>
 <?php $_user_inner = ob_get_clean(); ?>
 </aside>
 <script>
+    
 (function(){
     /* ── Sidebar burger toggle ── */
     var b=document.getElementById('sidebarBurger'),s=document.querySelector('.sidebar');
@@ -182,4 +183,5 @@ ob_start(); ?>
         });
     });
 }());
+
 </script>
