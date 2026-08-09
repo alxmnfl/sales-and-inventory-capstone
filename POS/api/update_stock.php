@@ -22,6 +22,8 @@ if ($productId <= 0 || !is_numeric($newStock) || (int)$newStock < 0) {
 }
 $newStock = (int)$newStock;
 
+$cashierBranch = strtoupper(trim($_SESSION['pos_cashier_branch'] ?? ''));
+
 $stmt = $conn->prepare('SELECT name, sku, branch, stock FROM pos_products WHERE id = ?');
 $stmt->bind_param('i', $productId);
 $stmt->execute();
@@ -35,14 +37,20 @@ if (!$found) {
     exit;
 }
 
-$stmt = $conn->prepare('UPDATE pos_products SET stock = ? WHERE id = ?');
-$stmt->bind_param('ii', $newStock, $productId);
+if ($branch !== $cashierBranch) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'You can only adjust stock for your own branch.']);
+    exit;
+}
+
+$stmt = $conn->prepare('UPDATE pos_products SET stock = ? WHERE id = ? AND branch = ?');
+$stmt->bind_param('iis', $newStock, $productId, $cashierBranch);
 $stmt->execute();
 $stmt->close();
 
 $userId      = (int)($_SESSION['user_id'] ?? 0);
 $userName    = $_SESSION['pos_cashier'] ?? 'Staff';
-$auditBranch = $branch !== '' ? $branch : ($_SESSION['pos_cashier_branch'] ?? '');
+$auditBranch = $branch;
 $delta       = $newStock - (int)$oldStock;
 $sign        = $delta >= 0 ? '+' : '';
 $detail      = "SKU: $sku | Stock: $oldStock \xE2\x86\x92 $newStock ($sign$delta)";

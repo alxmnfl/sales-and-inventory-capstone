@@ -25,10 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cat   = trim($_POST['category'] ?? '');
         $price = (float)($_POST['price'] ?? 0);
         $stock = (int)($_POST['stock']   ?? 0);
-        $branch= '';
+        $branch= strtoupper(trim($_POST['branch'] ?? ''));
         $stmt  = $conn->prepare("INSERT INTO pos_products (sku,name,category,price,stock,branch,added_by) VALUES (?,?,?,?,?,?,?)");
         $stmt->bind_param('sssdisi',$sku,$name,$cat,$price,$stock,$branch,$_SESSION['user_id']);
-        if ($stmt->execute()) {
+        if ($branch === '') {
+            $flash = 'err:Select a branch for this product.';
+        } elseif ($stmt->execute()) {
             $flash    = 'added';
             $newId    = $stmt->insert_id;
             $detail   = "SKU: $sku | Category: $cat | Price: ₱".number_format($price,2)." | Stock: $stock";
@@ -51,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cat   = trim($_POST['category']  ?? '');
         $price = (float)($_POST['price']  ?? 0);
         $stock = (int)($_POST['stock']    ?? 0);
-        $branch= trim($_POST['branch']    ?? '');
+        $branch= strtoupper(trim($_POST['branch'] ?? ''));
         $stmt  = $conn->prepare("UPDATE pos_products SET name=?,category=?,price=?,stock=?,branch=? WHERE id=?");
         $stmt->bind_param('ssdisi',$name,$cat,$price,$stock,$branch,$id);
         $stmt->execute();
@@ -281,7 +283,10 @@ $conn->close();
                 <div class="form-group"><label>SKU</label><input name="sku" required placeholder="e.g. PVC-001"></div>
                 <div class="form-group"><label>Category</label><input name="category" required list="catList" placeholder="e.g. Hoses"></div>
             </div>
-            <div class="form-group"><label>Product Name</label><input name="name" required placeholder="Full product name"></div>
+            <div class="form-row">
+                <div class="form-group"><label>Product Name</label><input name="name" required placeholder="Full product name"></div>
+                <div class="form-group"><label>Branch</label><input name="branch" required list="branchList" placeholder="e.g. CROWN FLEX — MOLINO"></div>
+            </div>
             <div class="form-row">
                 <div class="form-group"><label>Price (₱)</label><input name="price" type="number" step="0.01" min="0" required placeholder="0.00"></div>
                 <div class="form-group"><label>Stock</label><input name="stock" type="number" min="0" required placeholder="0"></div>

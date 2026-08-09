@@ -69,13 +69,15 @@ try {
         $productName = trim($item['product_name']);
         $sku         = trim($item['sku']);
 
-        $stockRes = $conn->query(
-            "SELECT stock FROM pos_products WHERE id = $productId FOR UPDATE"
+        $stockStmt = $conn->prepare(
+            "SELECT stock FROM pos_products WHERE id = ? AND branch = ? FOR UPDATE"
         );
-        if (!$stockRes) throw new Exception("Stock check failed for product $productId.");
+        $stockStmt->bind_param('is', $productId, $branch);
+        $stockStmt->execute();
+        $stockRow = $stockStmt->get_result()->fetch_assoc();
+        $stockStmt->close();
 
-        $stockRow = $stockRes->fetch_assoc();
-        if (!$stockRow)                   throw new Exception("Product $productId not found.");
+        if (!$stockRow)                     throw new Exception("Product $productId is not stocked at $branch.");
         if ((int)$stockRow['stock'] < $qty) throw new Exception("Insufficient stock for \"$productName\".");
 
         $stmtItem = $conn->prepare(
@@ -87,7 +89,12 @@ try {
         $stmtItem->execute();
         $stmtItem->close();
 
-        $conn->query("UPDATE pos_products SET stock = stock - $qty WHERE id = $productId");
+        $updateStmt = $conn->prepare(
+            "UPDATE pos_products SET stock = stock - ? WHERE id = ? AND branch = ?"
+        );
+        $updateStmt->bind_param('iis', $qty, $productId, $branch);
+        $updateStmt->execute();
+        $updateStmt->close();
 
         $responseItems[] = [
             'product_name' => $productName,
