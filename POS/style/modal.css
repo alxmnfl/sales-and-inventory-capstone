@@ -1,0 +1,265 @@
+/* Lucky 8 POS — Shared modal shell + checkout modal
+   (.modal-overlay/.modal/.modal-header/.cash-input-wrap/.btn-cancel/.btn-complete
+   are reused by the checkout modal and the "Adjust Stock" modal.) */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: var(--white);
+  border-radius: 16px;
+  width: 540px;
+  max-width: 95vw;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-top: 3px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--gray-500);
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+
+.modal-close:hover {
+  background: var(--gray-100);
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.payment-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  border: 2px solid var(--gray-200);
+  background: var(--white);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  color: var(--gray-700);
+  transition: all .15s;
+}
+
+.payment-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.payment-btn.active {
+  border-color: var(--orange);
+  background: var(--orange-light);
+  color: var(--orange);
+}
+
+.cash-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  color: var(--gray-500);
+  margin-bottom: 8px;
+}
+
+.cash-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--orange);
+  border-radius: var(--radius);
+  background: var(--orange-light);
+  padding: 0 14px;
+  height: 52px;
+  margin-bottom: 12px;
+}
+
+.peso-sign {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-500);
+  margin-right: 6px;
+}
+
+.cash-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.quick-btn {
+  padding: 10px 4px;
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--dark);
+  text-align: center;
+  transition: all .15s;
+}
+
+.quick-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.change-display {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--green-bg);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #15803D;
+  margin-bottom: 4px;
+}
+
+.order-summary {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.summary-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  color: var(--gray-500);
+  margin-bottom: 12px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.summary-item-name {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.summary-item-qty {
+  color: var(--gray-500);
+  font-size: 11px;
+}
+
+.summary-item-price {
+  font-weight: 600;
+}
+
+.summary-total-due {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 1.5px solid var(--gray-200);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.total-amount {
+  font-size: 22px;
+  color: var(--orange);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-cancel {
+  padding: 14px 24px;
+  border: 2px solid var(--gray-200);
+  background: var(--white);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: all .15s;
+}
+
+.btn-cancel:hover {
+  border-color: var(--dark);
+  color: var(--dark);
+}
+
+.btn-complete {
+  flex: 1;
+  padding: 14px;
+  background: var(--orange);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.btn-complete:hover:not(:disabled) {
+  background: var(--orange-hover);
+}
+
+.btn-complete:disabled {
+  background: #D1D5DB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}

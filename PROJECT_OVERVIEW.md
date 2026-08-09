@@ -36,7 +36,7 @@ or derived from an admin's own session if they land here directly).
 |---|---|
 | `index.php` | The POS screen itself: product grid with category tabs/search, a running cart, a checkout modal (Cash / Credit Card / Corporate Account with change calculation), a sale-complete receipt overlay, and an "Add Product" modal for branch staff to manage their own branch's catalog. |
 | `pos.js` | All front-end logic: loading/filtering/rendering products, cart math (12% VAT), checkout flow, calling the API endpoints below via `fetch`, and rendering the receipt. |
-| `pos.css` | Styling for the POS layout, product cards, cart, and modals. |
+| `style/base.css`, `header.css`, `products.css`, `cart.css`, `modal.css`, `sale-complete.css` | Styling for the POS layout, split by section: base/variables, header, product grid/cards, cart sidebar, modals (checkout + adjust-stock), and the sale-complete receipt screen. |
 | `logout.php` | Destroys the session and redirects to the login page. |
 | `api/products.php` | Returns (JSON) all products for the logged-in cashier's **own branch only** — POS is branch-scoped. |
 | `api/save_product.php` | Add or edit a product. Enforces that edits can only target a product belonging to the cashier's branch. Writes an `ADD_PRODUCT`/`EDIT_PRODUCT` row to `audit_trail`. |
