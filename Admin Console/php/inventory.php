@@ -15,6 +15,10 @@ $flash = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
+    $auditUserId   = (int)($_SESSION['user_id']   ?? 0);
+    $auditUserName = $_SESSION['user_name']   ?? 'Admin';
+    $auditBranch   = $_SESSION['user_branch'] ?? '';
+
     if ($action === 'add') {
         $sku   = trim($_POST['sku']      ?? '');
         $name  = trim($_POST['name']     ?? '');
@@ -24,7 +28,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $branch= '';
         $stmt  = $conn->prepare("INSERT INTO pos_products (sku,name,category,price,stock,branch,added_by) VALUES (?,?,?,?,?,?,?)");
         $stmt->bind_param('sssdisi',$sku,$name,$cat,$price,$stock,$branch,$_SESSION['user_id']);
-        $stmt->execute() ? $flash='added' : $flash='err:'.$conn->error;
+        if ($stmt->execute()) {
+            $flash    = 'added';
+            $newId    = $stmt->insert_id;
+            $detail   = "SKU: $sku | Category: $cat | Price: ₱".number_format($price,2)." | Stock: $stock";
+            $auditStmt = $conn->prepare(
+                "INSERT INTO audit_trail (user_id, user_name, branch, action, entity_type, entity_id, entity_name, details)
+                 VALUES (?, ?, ?, 'ADD_PRODUCT', 'product', ?, ?, ?)"
+            );
+            $auditStmt->bind_param('ississ', $auditUserId, $auditUserName, $auditBranch, $newId, $name, $detail);
+            $auditStmt->execute();
+            $auditStmt->close();
+        } else {
+            $flash = 'err:'.$conn->error;
+        }
         $stmt->close();
     }
 
@@ -40,15 +57,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
         $flash = 'edited';
+
+        $detail    = "Category: $cat | Price: ₱".number_format($price,2)." | Stock: $stock | Branch: ".($branch?:'—');
+        $auditStmt = $conn->prepare(
+            "INSERT INTO audit_trail (user_id, user_name, branch, action, entity_type, entity_id, entity_name, details)
+             VALUES (?, ?, ?, 'EDIT_PRODUCT', 'product', ?, ?, ?)"
+        );
+        $editAuditBranch = $branch ?: $auditBranch;
+        $auditStmt->bind_param('ississ', $auditUserId, $auditUserName, $editAuditBranch, $id, $name, $detail);
+        $auditStmt->execute();
+        $auditStmt->close();
     }
 
     if ($action === 'delete') {
         $id   = (int)($_POST['id'] ?? 0);
+
+        $nameStmt = $conn->prepare("SELECT name, sku, branch FROM pos_products WHERE id=?");
+        $nameStmt->bind_param('i',$id);
+        $nameStmt->execute();
+        $nameStmt->bind_result($delName, $delSku, $delBranch);
+        $nameStmt->fetch();
+        $nameStmt->close();
+
         $stmt = $conn->prepare("DELETE FROM pos_products WHERE id=?");
         $stmt->bind_param('i',$id);
         $stmt->execute();
         $stmt->close();
         $flash = 'deleted';
+
+        $detail    = "SKU: ".($delSku ?? '—');
+        $delAuditBranch = $delBranch ?: $auditBranch;
+        $auditStmt = $conn->prepare(
+            "INSERT INTO audit_trail (user_id, user_name, branch, action, entity_type, entity_id, entity_name, details)
+             VALUES (?, ?, ?, 'DELETE_PRODUCT', 'product', ?, ?, ?)"
+        );
+        $entityName = $delName ?? "Product #$id";
+        $auditStmt->bind_param('ississ', $auditUserId, $auditUserName, $delAuditBranch, $id, $entityName, $detail);
+        $auditStmt->execute();
+        $auditStmt->close();
     }
 
     header('Location: inventory.php'.($flash?'?flash='.$flash:'')); exit;
@@ -71,7 +117,7 @@ while ($row = $r->fetch_assoc()) $products[] = $row;
 
 /* ── Branch & category lists for dropdowns ── */
 $branches = [];
-$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM pos_products WHERE branch!='' ORDER BY b");
+$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
 while ($row = $r->fetch_row()) $branches[] = $row[0];
 
 $categories = [];
@@ -148,14 +194,50 @@ $conn->close();
 
             <div class="inv-filters">
                 <input type="text" id="searchInp" placeholder="Search name or SKU…" oninput="filterTable()">
-                <select id="branchSel" onchange="filterTable()">
-                    <option value="">All Branches</option>
-                    <?php foreach($branches as $b):?><option><?=htmlspecialchars($b)?></option><?php endforeach;?>
-                </select>
-                <select id="catSel" onchange="filterTable()">
-                    <option value="">All Categories</option>
-                    <?php foreach($categories as $c):?><option><?=htmlspecialchars($c)?></option><?php endforeach;?>
-                </select>
+
+                <div class="branch-filter" title="Filter by branch">
+                    <i class="fa-solid fa-location-dot branch-filter-icon"></i>
+                    <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="branch-selected-label">All Branches</span>
+                        <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                    </button>
+                    <div class="branch-dropdown-panel" role="listbox" aria-label="Filter by branch">
+                        <div class="branch-option branch-option--selected" data-value="" role="option" aria-selected="true">
+                            <i class="fa-solid fa-globe"></i><span>All Branches</span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php foreach($branches as $b):?>
+                        <div class="branch-option" data-value="<?=htmlspecialchars($b)?>" role="option" aria-selected="false">
+                            <i class="fa-solid fa-store"></i><span><?=htmlspecialchars($b)?></span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php endforeach;?>
+                    </div>
+                    <select id="branchSel" class="branch-filter-hidden-select" style="display:none" onchange="filterTable()">
+                        <option value="">All Branches</option>
+                        <?php foreach($branches as $b):?><option><?=htmlspecialchars($b)?></option><?php endforeach;?>
+                    </select>
+                </div>
+
+                <div class="branch-filter" title="Filter by category">
+                    <i class="fa-solid fa-tag branch-filter-icon"></i>
+                    <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="branch-selected-label">All Categories</span>
+                        <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                    </button>
+                    <div class="branch-dropdown-panel" role="listbox" aria-label="Filter by category">
+                        <div class="branch-option branch-option--selected" data-value="" role="option" aria-selected="true">
+                            <i class="fa-solid fa-layer-group"></i><span>All Categories</span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php foreach($categories as $c):?>
+                        <div class="branch-option" data-value="<?=htmlspecialchars($c)?>" role="option" aria-selected="false">
+                            <i class="fa-solid fa-box"></i><span><?=htmlspecialchars($c)?></span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php endforeach;?>
+                    </div>
+                    <select id="catSel" class="branch-filter-hidden-select" style="display:none" onchange="filterTable()">
+                        <option value="">All Categories</option>
+                        <?php foreach($categories as $c):?><option><?=htmlspecialchars($c)?></option><?php endforeach;?>
+                    </select>
+                </div>
             </div>
 
             <table class="intel-table" id="invTable">
@@ -245,6 +327,7 @@ $conn->close();
     <input type="hidden" name="id" id="deleteId">
 </form>
 
+<script src="../src/branch-filter-widget.js"></script>
 <script src="../src/inventory.js"></script>
 </body>
 </html>

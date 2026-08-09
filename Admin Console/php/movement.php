@@ -57,7 +57,7 @@ while ($row = $r->fetch_assoc()) $audit_items[] = $row;
 
 /* ── Branch list ── */
 $branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM pos_products WHERE branch!='' ORDER BY b");
+$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
 while($row=$r->fetch_row()) $branches[]=$row[0];
 
 $conn->close();
@@ -117,10 +117,27 @@ $conn->close();
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
                 <div><div class="chart-title">Stock Velocity — Week-over-Week</div><div class="chart-subtitle">Units sold: last 7 days vs. prior 7 days</div></div>
                 <form method="GET" class="filter-bar" style="margin:0;">
-                    <select name="branch" onchange="this.form.submit()">
-                        <option value="">All Branches</option>
-                        <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
-                    </select>
+                    <div class="branch-filter" title="Filter by branch">
+                        <i class="fa-solid fa-location-dot branch-filter-icon"></i>
+                        <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="branch-selected-label"><?=$branch?htmlspecialchars($branch):'All Branches'?></span>
+                            <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                        </button>
+                        <div class="branch-dropdown-panel" role="listbox" aria-label="Select branch">
+                            <div class="branch-option<?=$branch===''?' branch-option--selected':''?>" data-value="" role="option" aria-selected="<?=$branch===''?'true':'false'?>">
+                                <i class="fa-solid fa-globe"></i><span>All Branches</span><i class="fa-solid fa-check branch-option-check"></i>
+                            </div>
+                            <?php foreach($branches as $b):?>
+                            <div class="branch-option<?=$b===$branch?' branch-option--selected':''?>" data-value="<?=htmlspecialchars($b)?>" role="option" aria-selected="<?=$b===$branch?'true':'false'?>">
+                                <i class="fa-solid fa-store"></i><span><?=htmlspecialchars($b)?></span><i class="fa-solid fa-check branch-option-check"></i>
+                            </div>
+                            <?php endforeach;?>
+                        </div>
+                        <select name="branch" class="branch-filter-hidden-select" style="display:none" onchange="this.form.submit()">
+                            <option value="">All Branches</option>
+                            <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
+                        </select>
+                    </div>
                 </form>
             </div>
             <table class="intel-table">
@@ -182,5 +199,6 @@ $conn->close();
         </div>
     </div>
 </div>
+<script src="../src/branch-filter-widget.js"></script>
 </body>
 </html>

@@ -184,6 +184,16 @@ button, a { font-family: inherit; }
 .btn-add:hover:not(:disabled) { background: var(--orange-hover); }
 .btn-add:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; }
 
+.product-footer-actions { display: flex; align-items: center; gap: 6px; }
+.btn-stock {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--white); color: var(--gray-500);
+  border: 1.5px solid var(--gray-200);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.btn-stock:hover { border-color: var(--orange); color: var(--orange); }
+
 /* ─── CART SIDEBAR ───────────────────────── */
 .pos-cart {
   width: 340px; flex-shrink: 0;

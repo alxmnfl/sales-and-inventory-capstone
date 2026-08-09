@@ -16,7 +16,7 @@ $date_from= trim($_GET['from']     ?? date('Y-m-01'));
 $date_to  = trim($_GET['to']       ?? date('Y-m-d'));
 
 $where_parts = ["DATE(s.created_at) BETWEEN '$date_from' AND '$date_to'"];
-if ($branch) { $where_parts[] = "s.branch = ?"; }
+if ($branch) { $where_parts[] = "s.branch = '".addslashes($branch)."'"; }
 $where = 'WHERE '.implode(' AND ', $where_parts);
 
 /* ── KPIs ── */
@@ -115,11 +115,27 @@ $conn->close();
                 <div><div class="chart-title">Transactions</div><div class="chart-subtitle">Filtered results</div></div>
             </div>
             <form method="GET" class="filter-bar">
-                <label>Branch</label>
-                <select name="branch">
-                    <option value="">All Branches</option>
-                    <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
-                </select>
+                <div class="branch-filter" title="Filter by branch">
+                    <i class="fa-solid fa-location-dot branch-filter-icon"></i>
+                    <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="branch-selected-label"><?=$branch?htmlspecialchars($branch):'All Branches'?></span>
+                        <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                    </button>
+                    <div class="branch-dropdown-panel" role="listbox" aria-label="Select branch">
+                        <div class="branch-option<?=$branch===''?' branch-option--selected':''?>" data-value="" role="option" aria-selected="<?=$branch===''?'true':'false'?>">
+                            <i class="fa-solid fa-globe"></i><span>All Branches</span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php foreach($branches as $b):?>
+                        <div class="branch-option<?=$b===$branch?' branch-option--selected':''?>" data-value="<?=htmlspecialchars($b)?>" role="option" aria-selected="<?=$b===$branch?'true':'false'?>">
+                            <i class="fa-solid fa-store"></i><span><?=htmlspecialchars($b)?></span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php endforeach;?>
+                    </div>
+                    <select name="branch" class="branch-filter-hidden-select" style="display:none">
+                        <option value="">All Branches</option>
+                        <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
+                    </select>
+                </div>
                 <label>From</label><input type="date" name="from" value="<?=htmlspecialchars($date_from)?>">
                 <label>To</label><input type="date" name="to" value="<?=htmlspecialchars($date_to)?>">
                 <button type="submit" class="btn-orange"><i class="fa-solid fa-filter"></i> Filter</button>
@@ -154,6 +170,7 @@ $conn->close();
     </div>
 </div>
 
+<script src="../src/branch-filter-widget.js"></script>
 <script>
 Chart.defaults.font.family="'Inter',-apple-system,sans-serif";
 Chart.defaults.font.size=11;

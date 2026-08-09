@@ -73,7 +73,7 @@ if ($report_type === 'sales') {
 
 /* ── Branch list ── */
 $branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM pos_products WHERE branch!='' ORDER BY b");
+$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
 while($row=$r->fetch_row()) $branches[]=$row[0];
 
 $conn->close();
@@ -143,11 +143,27 @@ $conn->close();
 
             <form method="GET" class="filter-bar">
                 <input type="hidden" name="type" value="<?=$report_type?>">
-                <label>Branch</label>
-                <select name="branch">
-                    <option value="">All Branches</option>
-                    <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
-                </select>
+                <div class="branch-filter" title="Filter by branch">
+                    <i class="fa-solid fa-location-dot branch-filter-icon"></i>
+                    <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="branch-selected-label"><?=$branch?htmlspecialchars($branch):'All Branches'?></span>
+                        <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                    </button>
+                    <div class="branch-dropdown-panel" role="listbox" aria-label="Select branch">
+                        <div class="branch-option<?=$branch===''?' branch-option--selected':''?>" data-value="" role="option" aria-selected="<?=$branch===''?'true':'false'?>">
+                            <i class="fa-solid fa-globe"></i><span>All Branches</span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php foreach($branches as $b):?>
+                        <div class="branch-option<?=$b===$branch?' branch-option--selected':''?>" data-value="<?=htmlspecialchars($b)?>" role="option" aria-selected="<?=$b===$branch?'true':'false'?>">
+                            <i class="fa-solid fa-store"></i><span><?=htmlspecialchars($b)?></span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php endforeach;?>
+                    </div>
+                    <select name="branch" class="branch-filter-hidden-select" style="display:none">
+                        <option value="">All Branches</option>
+                        <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
+                    </select>
+                </div>
                 <?php if($report_type!=='inventory'):?>
                 <label>From</label><input type="date" name="from" value="<?=htmlspecialchars($from)?>">
                 <label>To</label><input type="date" name="to" value="<?=htmlspecialchars($to)?>">
@@ -178,5 +194,6 @@ $conn->close();
         </div>
     </div>
 </div>
+<script src="../src/branch-filter-widget.js"></script>
 </body>
 </html>

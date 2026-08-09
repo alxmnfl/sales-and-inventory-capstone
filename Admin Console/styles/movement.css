@@ -12,27 +12,6 @@
     font-weight: 500;
 }
 
-/* ── Filter Bar ── */
-.filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-}
-.filter-bar select {
-    padding: 7px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #374151;
-    background: #fff;
-    outline: none;
-}
-.filter-bar select:focus {
-    border-color: #e8611a;
-}
-
 /* ── Buttons ── */
 .btn-orange {
     background: #e8611a;

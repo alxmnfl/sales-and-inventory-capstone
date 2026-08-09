@@ -6,8 +6,7 @@
     margin-bottom: 16px;
     flex-wrap: wrap;
 }
-.inv-filters input,
-.inv-filters select {
+.inv-filters input {
     padding: 7px 12px;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -15,14 +14,11 @@
     color: #374151;
     background: #fff;
     outline: none;
-}
-.inv-filters input:focus,
-.inv-filters select:focus {
-    border-color: #e8611a;
-}
-.inv-filters input {
     flex: 1;
     min-width: 180px;
+}
+.inv-filters input:focus {
+    border-color: #e8611a;
 }
 
 /* ── Buttons ── */

@@ -244,6 +244,29 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
   </div>
 </div>
 
+<div class="modal-overlay" id="stockModal" style="display:none">
+  <div class="modal" style="width:380px;">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title" style="font-size:18px;">Adjust Stock</h2>
+        <p class="modal-subtitle" id="stockModalSubtitle"></p>
+      </div>
+      <button class="modal-close" onclick="closeStockModal()">✕</button>
+    </div>
+
+    <label class="cash-label">NEW STOCK QUANTITY</label>
+    <div class="cash-input-wrap">
+      <input type="number" id="stockNewValue" class="cash-input" placeholder="0" min="0" step="1">
+    </div>
+    <p class="modal-subtitle" id="stockCurrentLabel"></p>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeStockModal()">CANCEL</button>
+      <button class="btn-complete" id="btnSaveStock" onclick="saveStock()">SAVE</button>
+    </div>
+  </div>
+</div>
+
 <script>const CASHIER = <?= json_encode($cashier) ?>; const BRANCH = <?= json_encode($branch) ?>;</script>
 
 <script src="../src/pos.js"></script>
@@ -252,6 +275,7 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <script src="../src/receipt.js"></script>
 <script src="../src/cart.js"></script>
 <script src="../src/products.js"></script>
+<script src="../src/stock.js"></script>
 
 </body>
 </html>
