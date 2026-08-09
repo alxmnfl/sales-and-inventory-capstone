@@ -3,7 +3,7 @@ function openEditModal(u){
     document.getElementById('editId').value=u.id;
     document.getElementById('editName').value=u.full_name;
     document.getElementById('editRole').value=u.role;
-    document.getElementById('editStatus').value=u.status||'approved';
+    document.getElementById('editStatus').value=(u.status||'offline')==='online'?'Online':'Offline';
     var bSel=document.getElementById('editBranch');
     var ub=(u.branch||'').toUpperCase();
     Array.from(bSel.options).forEach(function(o){if(o.value.toUpperCase()===ub||o.text.toUpperCase()===ub)o.selected=true;});

@@ -76,7 +76,7 @@ $_nav = [
             <div class="user-name"><?=htmlspecialchars($_sb_user_name)?></div>
             <div class="user-role">Administrator</div>
         </div>
-        <a href="../../Landing Page/php/login.php" class="logout-btn" title="Sign out">
+        <a href="logout.php" class="logout-btn" title="Sign out">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
         </a>
     </div>

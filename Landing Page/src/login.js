@@ -116,32 +116,6 @@ function toggleRegPassword(inputId, icon) {
     }
 }
 
-function selectRole(card, roleValue) {
-    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-
-    const hiddenInput = document.getElementById('roleInput');
-    if (hiddenInput) hiddenInput.value = roleValue;
-
-    const trigger     = document.getElementById('branchSelect')?.querySelector('.custom-select-trigger');
-    const display     = document.getElementById('branchDisplay');
-    const branchInput = document.getElementById('branchInput');
-
-    if (roleValue === 'administrator') {
-        if (trigger) trigger.classList.add('disabled');
-        if (display) { display.textContent = 'All Branches — not applicable'; display.classList.add('selected'); }
-        if (branchInput) branchInput.value = '';
-
-        document.getElementById('branchDropdown')?.classList.remove('open');
-        document.getElementById('branchArrow')?.classList.remove('open');
-    } else {
-
-        if (trigger) trigger.classList.remove('disabled');
-        if (display) { display.textContent = 'Select one of 19 branches...'; display.classList.remove('selected'); }
-        if (branchInput) branchInput.value = '';
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     renderBranches(branches);
 

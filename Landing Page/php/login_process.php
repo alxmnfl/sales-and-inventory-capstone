@@ -17,26 +17,26 @@ if (!$email || !$password) {
 }
 
 $stmt = $conn->prepare(
-    "SELECT id, full_name, password, role, status, branch FROM users WHERE email = ?"
+    "SELECT id, full_name, password, role, branch FROM users WHERE email = ?"
 );
 $stmt->bind_param('s', $email);
 $stmt->execute();
-$stmt->bind_result($id, $full_name, $hashed_password, $role, $status, $branch);
+$stmt->bind_result($id, $full_name, $hashed_password, $role, $branch);
 $stmt->fetch();
 $stmt->close();
-$conn->close();
 
 if (!$id || !password_verify($password, $hashed_password ?? '')) {
+    $conn->close();
     $_SESSION['login_error'] = 'Invalid email or password.';
     header('Location: login.php?tab=signin');
     exit;
 }
 
-if ($status === 'rejected') {
-    $_SESSION['login_error'] = 'Your account access has been rejected. Contact IT Support.';
-    header('Location: login.php?tab=signin');
-    exit;
-}
+$stmt = $conn->prepare("UPDATE users SET status = 'online' WHERE id = ?");
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$stmt->close();
+$conn->close();
 
 // --- Success: start session ---
 session_regenerate_id(true);

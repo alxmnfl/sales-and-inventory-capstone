@@ -1,12 +1,16 @@
 <?php
 session_start();
+require_once 'db.php';
+require_once 'employee_id_helper.php';
 
 $login_error   = $_SESSION['login_error']  ?? '';
 $reg_error     = $_SESSION['reg_error']    ?? '';
 $reg_success   = $_SESSION['reg_success']  ?? '';
 unset($_SESSION['login_error'], $_SESSION['reg_error'], $_SESSION['reg_success']);
 
-$active_tab = $_GET['tab'] ?? 'signin';
+$active_tab       = $_GET['tab'] ?? 'signin';
+$next_employee_id = next_employee_id($conn);
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -154,28 +158,28 @@ $active_tab = $_GET['tab'] ?? 'signin';
                 </div>
                 <?php endif; ?>
 
-                <h2 class="welcome-heading">JOIN THE OPERATIONS CREW.</h2>
-                <p class="welcome-sub">Submit your details — an Admin will verify and approve your access shortly.</p>
+                <h2 class="welcome-heading">Join The Operations Crew.</h2>
+                <p class="welcome-sub">Fill in your details below to set up your account</p>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>FULL NAME</label>
+                        <label>Full Name</label>
                         <div class="input-wrapper">
                             <i class="fa-regular fa-user"></i>
                             <input type="text" name="full_name" placeholder="Juan Dela Cruz" required>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>EMPLOYEE ID</label>
+                        <label>Employee ID <span style="font-weight:400;opacity:.7;">(auto-generated)</span></label>
                         <div class="input-wrapper">
                             <i class="fa-regular fa-id-card"></i>
-                            <input type="text" name="employee_id" placeholder="L8-2026-0042" required>
+                            <input type="text" value="<?= htmlspecialchars($next_employee_id) ?>" disabled>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>WORK EMAIL</label>
+                    <label>Work Email</label>
                     <div class="input-wrapper">
                         <i class="fa-regular fa-envelope"></i>
                         <input type="email" name="email" placeholder="you@lucky8hydraulics.com" required>
@@ -183,7 +187,7 @@ $active_tab = $_GET['tab'] ?? 'signin';
                 </div>
 
                 <div class="form-group">
-                    <label>REQUESTED BRANCH</label>
+                    <label>Select Branch</label>
                     <div class="custom-select" id="branchSelect">
                         <div class="custom-select-trigger" onclick="toggleBranchDropdown(event)">
                             <i class="fa-solid fa-location-dot"></i>
@@ -200,27 +204,9 @@ $active_tab = $_GET['tab'] ?? 'signin';
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>REQUESTED ROLE</label>
-                    <div class="role-grid">
-                        <div class="role-card active" onclick="selectRole(this, 'branch_staff')">
-                            <div class="role-check"><i class="fa-solid fa-check"></i></div>
-                            <div class="role-icon"><i class="fa-solid fa-store"></i></div>
-                            <div class="role-title">BRANCH STAFF</div>
-                            <div class="role-desc">Process local sales, view branch inventory, manage daily POS operations.</div>
-                        </div>
-                        <div class="role-card" onclick="selectRole(this, 'administrator')">
-                            <div class="role-check"><i class="fa-solid fa-check"></i></div>
-                            <div class="role-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                            <div class="role-title">ADMINISTRATOR</div>
-                            <div class="role-desc">Full system access, cross-branch analytics, user approvals &amp; audit trail.</div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="form-row">
                     <div class="form-group">
-                        <label>PASSWORD</label>
+                        <label>Password</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-lock"></i>
                             <input type="password" name="password" id="regPassword" placeholder="Min. 8 characters" required>
@@ -228,7 +214,7 @@ $active_tab = $_GET['tab'] ?? 'signin';
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>CONFIRM</label>
+                        <label>Confirm</label>
                         <div class="input-wrapper">
                             <i class="fa-solid fa-shield-halved"></i>
                             <input type="password" name="confirm_password" id="regConfirm" placeholder="Re-enter password" required>
@@ -237,7 +223,7 @@ $active_tab = $_GET['tab'] ?? 'signin';
                     </div>
                 </div>
 
-                <button type="submit" class="signin-btn">REGISTER</button>
+                <button type="submit" class="signin-btn">Register</button>
 
                 <p class="bottom-link">Already have an account? <a href="#" onclick="switchTab('signin'); return false;">Sign in here</a></p>
             </form>

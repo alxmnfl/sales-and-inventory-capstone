@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"/c/xampp/mysql/bin/mysql.exe\" -u root lucky8_db -e \"UPDATE users SET status='online' WHERE id=3; SELECT id, full_name, status FROM users;\")",
+      "Bash(\"/c/xampp/mysql/bin/mysql.exe\" -u root lucky8_db -e \"UPDATE users SET status='offline' WHERE id=3;\")",
+      "Bash(\"/c/xampp/mysql/bin/mysql.exe\" -u root lucky8_db -e \"SELECT id, full_name, email, status FROM users;\")",
+      "Read(//c/xampp/php/logs/**)",
+      "Read(//c/xampp/apache/logs/**)",
+      "Bash(\"/c/xampp/mysql/bin/mysql.exe\" -u root lucky8_db -e \"SELECT id, full_name, status FROM users WHERE id=3;\")",
+      "Bash(\"/c/xampp/php/php.exe\" -i)",
+      "Read(//c/xampp/php/**)",
+      "Bash(/c/xampp/php/php.exe -r ' *)",
+      "Bash(\"/c/xampp/mysql/bin/mysql.exe\" -u root lucky8_db -e \"DELETE FROM users WHERE id=11; UPDATE users SET status='online' WHERE id=3; SELECT id, full_name, email, role, status FROM users;\")"
+    ]
+  }
+}

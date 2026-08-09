@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $role        = in_array($_POST['role']??'',['branch_staff','administrator'])?$_POST['role']:'branch_staff';
         $branch      = trim($_POST['branch'] ?? '');
         $password    = password_hash(trim($_POST['password']??'password123'), PASSWORD_BCRYPT);
-        $status      = 'approved';
+        $status      = 'offline';
         $stmt = $conn->prepare("INSERT INTO users (full_name,employee_id,email,password,branch,role,status) VALUES (?,?,?,?,?,?,?)");
         $stmt->bind_param('sssssss',$full_name,$employee_id,$email,$password,$branch,$role,$status);
         $stmt->execute(); $stmt->close();
@@ -31,10 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'edit') {
         $id     = (int)($_POST['id']??0);
         $role   = in_array($_POST['role']??'',['branch_staff','administrator'])?$_POST['role']:'branch_staff';
-        $status = in_array($_POST['status']??'',['approved','rejected'])?$_POST['status']:'approved';
         $branch = trim($_POST['branch']??'');
-        $stmt   = $conn->prepare("UPDATE users SET role=?,status=?,branch=? WHERE id=?");
-        $stmt->bind_param('sssi',$role,$status,$branch,$id);
+        $stmt   = $conn->prepare("UPDATE users SET role=?,branch=? WHERE id=?");
+        $stmt->bind_param('ssi',$role,$branch,$id);
         $stmt->execute(); $stmt->close();
         header('Location: users.php?flash=edited'); exit;
     }
@@ -58,7 +57,7 @@ while ($row = $r->fetch_assoc()) $users[] = $row;
 $total    = count($users);
 $admins   = count(array_filter($users,fn($u)=>$u['role']==='administrator'));
 $staff    = $total - $admins;
-$approved = count(array_filter($users,fn($u)=>$u['status']==='approved'));
+$online   = count(array_filter($users,fn($u)=>$u['status']==='online'));
 
 /* ── Branch list ── */
 $branches=[];
@@ -115,9 +114,9 @@ $conn->close();
                 <div class="kpi-meta">staff accounts</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-top"><span class="kpi-label">Active</span><div class="kpi-icon" style="background:rgba(16,185,129,0.1);color:#10b981;"><i class="fa-solid fa-circle-check"></i></div></div>
-                <div class="kpi-value"><?=(int)$approved?></div>
-                <div class="kpi-meta">approved accounts</div>
+                <div class="kpi-top"><span class="kpi-label">Online</span><div class="kpi-icon" style="background:rgba(16,185,129,0.1);color:#10b981;"><i class="fa-solid fa-circle-check"></i></div></div>
+                <div class="kpi-value"><?=(int)$online?></div>
+                <div class="kpi-meta">currently online</div>
             </div>
         </div>
 
@@ -137,7 +136,7 @@ $conn->close();
                     $w=explode(' ',trim($u['full_name']));
                     $ini=strtoupper(substr($w[0],0,1).(isset($w[1])?substr($w[1],0,1):''));
                     $rc=$u['role']==='administrator'?'role-admin':'role-staff';
-                    $sc=$u['status']==='approved'?'status-ok':($u['status']==='rejected'?'status-rej':'status-pend');
+                    $sc=$u['status']==='online'?'status-ok':'status-rej';
                 ?>
                 <tr>
                     <td><div style="display:flex;align-items:center;gap:10px;">
@@ -148,7 +147,7 @@ $conn->close();
                     <td><?=htmlspecialchars($u['email'])?></td>
                     <td><?=htmlspecialchars(strtoupper($u['branch']))?></td>
                     <td><span class="role-badge <?=$rc?>"><?=$u['role']==='administrator'?'Admin':'Staff'?></span></td>
-                    <td><span class="status-badge <?=$sc?>"><?=ucfirst($u['status']??'approved')?></span></td>
+                    <td><span class="status-badge <?=$sc?>"><?=ucfirst($u['status']??'offline')?></span></td>
                     <td class="col-r" style="white-space:nowrap;">
                         <button class="btn-ghost" onclick='openEditModal(<?=json_encode($u)?>)'>Edit</button>
                         <?php if((int)$u['id']!==(int)$_SESSION['user_id']):?>
@@ -212,11 +211,8 @@ $conn->close();
                         <option value="administrator">Administrator</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Status</label>
-                    <select name="status" id="editStatus">
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
+                <div class="form-group"><label>Status (live)</label>
+                    <input id="editStatus" disabled style="background:#f9fafb;color:#9ca3af;">
                 </div>
             </div>
             <div class="form-group"><label>Branch</label>
