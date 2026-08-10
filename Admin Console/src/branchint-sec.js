@@ -17,6 +17,5 @@ function loadAllSections() {
     loadFastMoving(branch);
     loadCriticalStock(branch);
     loadPredictiveAlerts(branch);
-    auditPage = 1;
-    loadAuditTrail(branch, true);
+    loadAuditTrail(branch, 1);
 }

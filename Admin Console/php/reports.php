@@ -52,23 +52,44 @@ $report_type = trim($_GET['type'] ?? 'sales');
 $preview = [];
 $preview_cols = [];
 $preview_total_rev = 0;
+$preview_total = 0;
+$page_num = max(1, (int)($_GET['pg'] ?? 1));
+$per_page = 15;
+$offset   = ($page_num - 1) * $per_page;
 
 if ($report_type === 'sales') {
     $preview_cols = ['Transaction ID','Cashier','Branch','Payment','Total','Date'];
-    $r = $conn->query("SELECT transaction_id,cashier,branch,payment_method,CONCAT('₱',FORMAT(total,2)),created_at FROM pos_sales WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere ORDER BY created_at DESC LIMIT 50");
-    while ($row = $r->fetch_row()) $preview[] = $row;
     $r2 = $conn->query("SELECT COALESCE(SUM(total),0),COUNT(*) FROM pos_sales WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere");
     [$preview_total_rev,$preview_count] = $r2->fetch_row();
+    $preview_total = (int)$preview_count;
+    $pages    = max(1, (int)ceil($preview_total / $per_page));
+    $page_num = min($page_num, $pages);
+    $offset   = ($page_num - 1) * $per_page;
+    $r = $conn->query("SELECT transaction_id,cashier,branch,payment_method,CONCAT('₱',FORMAT(total,2)),created_at FROM pos_sales WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere ORDER BY created_at DESC LIMIT $per_page OFFSET $offset");
+    while ($row = $r->fetch_row()) $preview[] = $row;
 } elseif ($report_type === 'inventory') {
     $preview_cols = ['SKU','Name','Category','Branch','Price','Stock','Value'];
-    $r = $conn->query("SELECT sku,name,category,branch,CONCAT('₱',FORMAT(price,2)),stock,CONCAT('₱',FORMAT(price*stock,2)) FROM pos_products ".($branch?"WHERE UPPER(branch)='".strtoupper(addslashes($branch))."'":'')." ORDER BY branch,name LIMIT 50");
+    $inv_where = $branch ? "WHERE UPPER(branch)='".strtoupper(addslashes($branch))."'" : '';
+    $rc = $conn->query("SELECT COUNT(*) FROM pos_products $inv_where");
+    $preview_total = (int)$rc->fetch_row()[0];
+    $pages    = max(1, (int)ceil($preview_total / $per_page));
+    $page_num = min($page_num, $pages);
+    $offset   = ($page_num - 1) * $per_page;
+    $r = $conn->query("SELECT sku,name,category,branch,CONCAT('₱',FORMAT(price,2)),stock,CONCAT('₱',FORMAT(price*stock,2)) FROM pos_products $inv_where ORDER BY branch,name LIMIT $per_page OFFSET $offset");
     while ($row = $r->fetch_row()) $preview[] = $row;
-    $preview_count = count($preview);
+    $preview_count = $preview_total;
 } elseif ($report_type === 'audit') {
     $preview_cols = ['Time','User','Branch','Action','Item','Details'];
-    $r = $conn->query("SELECT created_at,user_name,branch,action,COALESCE(entity_name,'—'),COALESCE(details,'') FROM audit_trail WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere ORDER BY created_at DESC LIMIT 50");
+    $rc = $conn->query("SELECT COUNT(*) FROM audit_trail WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere");
+    $preview_total = (int)$rc->fetch_row()[0];
+    $pages    = max(1, (int)ceil($preview_total / $per_page));
+    $page_num = min($page_num, $pages);
+    $offset   = ($page_num - 1) * $per_page;
+    $r = $conn->query("SELECT created_at,user_name,branch,action,COALESCE(entity_name,'—'),COALESCE(details,'') FROM audit_trail WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere ORDER BY created_at DESC LIMIT $per_page OFFSET $offset");
     while ($row = $r->fetch_row()) $preview[] = $row;
-    $preview_count = count($preview);
+    $preview_count = $preview_total;
+} else {
+    $pages = 1;
 }
 
 /* ── Branch list ── */
@@ -179,7 +200,7 @@ $conn->close();
             </div>
             <?php endif;?>
 
-            <p class="preview-note">Showing up to 50 rows preview. Export CSV to get all records.</p>
+            <p class="preview-note">Showing <?=number_format(count($preview))?> of <?=number_format($preview_total)?> rows — page <?=$page_num?>/<?=$pages?>. Export CSV to get all records.</p>
             <table class="intel-table">
                 <thead><tr><?php foreach($preview_cols as $col):?><th><?=htmlspecialchars($col)?></th><?php endforeach;?></tr></thead>
                 <tbody>
@@ -191,6 +212,18 @@ $conn->close();
                 <?php endif;?>
                 </tbody>
             </table>
+
+            <?php if($pages>1):
+                $qp=http_build_query(array_filter(['type'=>$report_type,'branch'=>$branch,'from'=>$from,'to'=>$to]));
+            ?>
+            <div class="pagination">
+                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <?php for($pg=max(1,$page_num-2);$pg<=min($pages,$page_num+2);$pg++):?>
+                <a href="?<?=$qp?>&pg=<?=$pg?>" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
+                <?php endfor;?>
+                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            <?php endif;?>
         </div>
     </div>
 </div>

@@ -912,6 +912,55 @@ body {
 
 .audit-load-more button:hover { background: #e5e7eb; }
 
+/* ── Pagination (shared across Sales, Movement, Audit Trail, Reports, Dashboard) ── */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 10px;
+    padding-top: 14px;
+    border-top: 1px solid #f3f4f6;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.pg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 4px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    font-size: 11px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.pg-btn:hover {
+    border-color: #e8611a;
+    color: #e8611a;
+    background: #fff7ed;
+}
+.pg-btn.active {
+    background: #e8611a;
+    color: #fff;
+    border-color: #e8611a;
+    box-shadow: 0 1px 4px rgba(232,97,26,0.3);
+}
+.pg-btn.active:hover {
+    background: #e8611a;
+    color: #fff;
+}
+.pg-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
 .stat-info { flex: 1; }
 .stat-label { font-size: 10px; font-weight: 600; color: #9ca3af; letter-spacing: 0.06em; text-transform: uppercase; }
 .stat-value { font-size: 17px; font-weight: 700; color: #111827; line-height: 1.3; }

@@ -426,9 +426,7 @@ $month_label = date('F Y');
                 <div id="audit-trail-body">
                     <div class="intel-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
                 </div>
-                <div class="audit-load-more" id="audit-load-more" style="display:none">
-                    <button onclick="loadMoreAudit()">Load More</button>
-                </div>
+                <div class="pagination" id="audit-pagination"></div>
             </div>
 
         </div><!-- /page-content -->

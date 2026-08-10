@@ -17,7 +17,7 @@ $user_f     = trim($_GET['user']       ?? '');
 $date_from  = trim($_GET['from']       ?? date('Y-m-01'));
 $date_to    = trim($_GET['to']         ?? date('Y-m-d'));
 $page_num   = max(1,(int)($_GET['pg']  ?? 1));
-$per_page   = 25;
+$per_page   = 15;
 $offset     = ($page_num - 1) * $per_page;
 
 $where_parts = ["DATE(created_at) BETWEEN '$date_from' AND '$date_to'"];

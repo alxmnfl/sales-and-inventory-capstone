@@ -46,12 +46,21 @@ $stable   = count($movers) - $gaining - $declining;
 
 /* ── Recent audit movements ── */
 $audit_items = [];
-$bwhere2 = $branch ? "AND branch='".addslashes($branch)."'" : '';
+$bwhere2  = $branch ? "AND branch='".addslashes($branch)."'" : '';
+$act_page = max(1, (int)($_GET['pg'] ?? 1));
+$act_per_page = 15;
+
+$rc = $conn->query("SELECT COUNT(*) FROM audit_trail WHERE 1 $bwhere2");
+$act_total = (int)$rc->fetch_row()[0];
+$act_pages = max(1, (int)ceil($act_total / $act_per_page));
+$act_page  = min($act_page, $act_pages);
+$act_offset = ($act_page - 1) * $act_per_page;
+
 $r = $conn->query("
     SELECT user_name, branch, action, entity_name, details, created_at
     FROM audit_trail
     WHERE 1 $bwhere2
-    ORDER BY created_at DESC LIMIT 30
+    ORDER BY created_at DESC LIMIT $act_per_page OFFSET $act_offset
 ");
 while ($row = $r->fetch_assoc()) $audit_items[] = $row;
 
@@ -172,7 +181,7 @@ $conn->close();
         <!-- Recent audit activity -->
         <div class="chart-card">
             <div class="chart-card-header">
-                <div><div class="chart-title">Recent Stock Activity</div><div class="chart-subtitle">Latest 30 audit trail entries</div></div>
+                <div><div class="chart-title">Recent Stock Activity</div><div class="chart-subtitle"><?=number_format($act_total)?> audit trail entries · page <?=$act_page?>/<?=$act_pages?></div></div>
             </div>
             <table class="intel-table audit-table">
                 <thead><tr>
@@ -196,6 +205,18 @@ $conn->close();
                 <?php endif;?>
                 </tbody>
             </table>
+
+            <?php if($act_pages>1):
+                $qp=http_build_query(array_filter(['branch'=>$branch]));
+            ?>
+            <div class="pagination">
+                <a href="?<?=$qp?>&pg=<?=max(1,$act_page-1)?>" class="pg-btn<?=$act_page<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <?php for($pg=max(1,$act_page-2);$pg<=min($act_pages,$act_page+2);$pg++):?>
+                <a href="?<?=$qp?>&pg=<?=$pg?>" class="pg-btn<?=$pg===$act_page?' active':''?>"><?=$pg?></a>
+                <?php endfor;?>
+                <a href="?<?=$qp?>&pg=<?=min($act_pages,$act_page+1)?>" class="pg-btn<?=$act_page>=$act_pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            <?php endif;?>
         </div>
     </div>
 </div>

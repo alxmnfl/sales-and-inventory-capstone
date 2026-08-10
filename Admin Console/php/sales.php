@@ -14,6 +14,8 @@ $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1]
 $branch   = trim($_GET['branch']   ?? '');
 $date_from= trim($_GET['from']     ?? date('Y-m-01'));
 $date_to  = trim($_GET['to']       ?? date('Y-m-d'));
+$page_num = max(1, (int)($_GET['pg'] ?? 1));
+$per_page = 15;
 
 $where_parts = ["DATE(s.created_at) BETWEEN '$date_from' AND '$date_to'"];
 if ($branch) { $where_parts[] = "s.branch = '".addslashes($branch)."'"; }
@@ -36,10 +38,16 @@ $r = $conn->query("SELECT DATE(created_at) d, SUM(total) t FROM pos_sales WHERE 
 while($row=$r->fetch_row()){$chart_labels[]=$row[0];$chart_values[]=(float)$row[1];}
 
 /* ── Transactions ── */
+$rc = $conn->query("SELECT COUNT(*) FROM pos_sales s $where");
+$total_txns = (int)$rc->fetch_row()[0];
+$pages      = max(1, (int)ceil($total_txns / $per_page));
+$page_num   = min($page_num, $pages);
+$offset     = ($page_num - 1) * $per_page;
+
 $sales = [];
 $sql = "SELECT s.transaction_id, s.cashier, s.branch, s.payment_method, s.total, s.created_at, COUNT(si.id) items
         FROM pos_sales s LEFT JOIN pos_sale_items si ON si.sale_id=s.id
-        $where GROUP BY s.id ORDER BY s.created_at DESC LIMIT 200";
+        $where GROUP BY s.id ORDER BY s.created_at DESC LIMIT $per_page OFFSET $offset";
 $r = $conn->query($sql);
 while($row=$r->fetch_assoc()) $sales[]=$row;
 
@@ -96,8 +104,8 @@ $conn->close();
             </div>
             <div class="kpi-card">
                 <div class="kpi-top"><span class="kpi-label">Showing</span><div class="kpi-icon" style="background:rgba(16,185,129,0.1);color:#10b981;"><i class="fa-solid fa-list"></i></div></div>
-                <div class="kpi-value"><?=count($sales)?></div>
-                <div class="kpi-meta">transactions in range</div>
+                <div class="kpi-value"><?=number_format($total_txns)?></div>
+                <div class="kpi-meta">transactions in range · page <?=$page_num?>/<?=$pages?></div>
             </div>
         </div>
 
@@ -166,6 +174,18 @@ $conn->close();
                 <?php endif;?>
                 </tbody>
             </table>
+
+            <?php if($pages>1):
+                $qp=http_build_query(array_filter(['branch'=>$branch,'from'=>$date_from,'to'=>$date_to]));
+            ?>
+            <div class="pagination">
+                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <?php for($pg=max(1,$page_num-2);$pg<=min($pages,$page_num+2);$pg++):?>
+                <a href="?<?=$qp?>&pg=<?=$pg?>" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
+                <?php endfor;?>
+                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            <?php endif;?>
         </div>
     </div>
 </div>
