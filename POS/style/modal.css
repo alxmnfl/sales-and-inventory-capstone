@@ -1,6 +1,6 @@
 /* Lucky 8 POS — Shared modal shell + checkout modal
    (.modal-overlay/.modal/.modal-header/.cash-input-wrap/.btn-cancel/.btn-complete
-   are reused by the checkout modal and the "Adjust Stock" modal.) */
+   are reused by the checkout modal and the batch-stock confirmation modal.) */
 
 .modal-overlay {
   position: fixed;
@@ -224,11 +224,11 @@
 }
 
 .btn-cancel {
-  padding: 14px 24px;
-  border: 2px solid var(--gray-200);
+  padding: 10px 18px;
+  border: 1.5px solid var(--gray-200);
   background: var(--white);
   border-radius: var(--radius);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   color: var(--gray-700);
@@ -242,12 +242,12 @@
 
 .btn-complete {
   flex: 1;
-  padding: 14px;
+  padding: 10px;
   background: var(--orange);
   color: white;
   border: none;
   border-radius: var(--radius);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: .4px;
   cursor: pointer;

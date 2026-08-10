@@ -117,12 +117,12 @@
 
 .btn-new-sale {
   flex: 1;
-  padding: 16px;
+  padding: 11px;
   background: var(--orange);
   color: white;
   border: none;
   border-radius: var(--radius);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: background .15s;
@@ -134,12 +134,12 @@
 
 .btn-dashboard {
   flex: 1;
-  padding: 16px;
+  padding: 11px;
   background: white;
   color: var(--dark);
-  border: 2px solid var(--gray-200);
+  border: 1.5px solid var(--gray-200);
   border-radius: var(--radius);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   display: flex;

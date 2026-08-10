@@ -48,6 +48,10 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
     </div>
   </div>
   <div class="header-right">
+    <a href="batch-stock.php" class="btn-header">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      BATCH STOCK
+    </a>
     <a href="logout.php" class="btn-header btn-exit">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       EXIT
@@ -251,29 +255,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
   </div>
 </div>
 
-<div class="modal-overlay" id="stockModal" style="display:none">
-  <div class="modal" style="width:380px;">
-    <div class="modal-header">
-      <div>
-        <h2 class="modal-title" style="font-size:18px;">Adjust Stock</h2>
-        <p class="modal-subtitle" id="stockModalSubtitle"></p>
-      </div>
-      <button class="modal-close" onclick="closeStockModal()">✕</button>
-    </div>
-
-    <label class="cash-label">NEW STOCK QUANTITY</label>
-    <div class="cash-input-wrap">
-      <input type="number" id="stockNewValue" class="cash-input" placeholder="0" min="0" step="1">
-    </div>
-    <p class="modal-subtitle" id="stockCurrentLabel"></p>
-
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeStockModal()">CANCEL</button>
-      <button class="btn-complete" id="btnSaveStock" onclick="saveStock()">SAVE</button>
-    </div>
-  </div>
-</div>
-
 <script>const CASHIER = <?= json_encode($cashier) ?>; const BRANCH = <?= json_encode($branch) ?>;</script>
 
 <script src="../src/pos.js"></script>
@@ -282,7 +263,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <script src="../src/receipt.js"></script>
 <script src="../src/cart.js"></script>
 <script src="../src/products.js"></script>
-<script src="../src/stock.js"></script>
 
 </body>
 </html>

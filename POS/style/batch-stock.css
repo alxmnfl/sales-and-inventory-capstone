@@ -1,0 +1,276 @@
+/* Lucky 8 POS — Batch Stock Adjustment page */
+
+.batch-layout {
+  padding: 20px 24px 100px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.batch-toolbar {
+  margin-bottom: 4px;
+}
+
+/* ─── Success banner ─── */
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--green-bg);
+  color: #15803D;
+  border: 1.5px solid #86EFAC;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.success-banner i {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.success-banner-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.success-banner-sub {
+  font-size: 12px;
+  opacity: .85;
+  margin-top: 2px;
+}
+
+.success-banner-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #15803D;
+  font-size: 14px;
+  padding: 4px 6px;
+}
+
+/* ─── Table ─── */
+.batch-table-wrap {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.batch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.batch-table thead th {
+  text-align: left;
+  padding: 12px 14px;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.batch-table th.col-r,
+.batch-table td.col-r {
+  text-align: right;
+}
+
+.batch-table tbody td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--gray-200);
+  vertical-align: middle;
+}
+
+.batch-table tbody tr.row-modified {
+  background: var(--orange-light);
+}
+
+.batch-loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray-500);
+}
+
+.batch-prod-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.batch-prod-cat {
+  font-size: 11px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.col-mono {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--gray-700);
+}
+
+.batch-type-toggle {
+  display: inline-flex;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.batch-type-btn {
+  padding: 7px 12px;
+  border: none;
+  background: var(--white);
+  color: var(--gray-500);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.batch-type-btn + .batch-type-btn {
+  border-left: 1.5px solid var(--gray-200);
+}
+
+.batch-type-btn:hover {
+  background: var(--gray-100);
+}
+
+.batch-type-btn.type-add.active {
+  background: var(--green-bg);
+  color: #16A34A;
+}
+
+.batch-type-btn.type-remove.active {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.batch-qty-input {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.batch-qty-input:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.batch-new-stock {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--dark);
+}
+
+.batch-new-negative {
+  color: #EF4444;
+}
+
+.batch-reason-input {
+  width: 100%;
+  min-width: 160px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.batch-reason-input:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.batch-reason-hint {
+  font-size: 10.5px;
+  color: var(--gray-500);
+  margin-top: 3px;
+}
+
+/* ─── Summary / action bar ─── */
+.batch-summary-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 24px;
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  box-shadow: 0 -4px 20px rgba(0,0,0,.06);
+}
+
+.batch-summary-stats {
+  display: flex;
+  gap: 28px;
+}
+
+.batch-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.batch-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--dark);
+}
+
+.batch-stat-pos { color: #16A34A; }
+.batch-stat-neg { color: #EF4444; }
+
+.batch-stat-label {
+  font-size: 11px;
+  color: var(--gray-500);
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+
+.batch-summary-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.batch-summary-actions .btn-cancel,
+.batch-summary-actions .btn-complete {
+  padding: 9px 16px;
+  border-width: 1.5px;
+  font-size: 12.5px;
+  flex: none;
+}
+
+/* ─── Confirmation modal extras ─── */
+.batch-confirm-reason {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+#confirmModal .btn-cancel,
+#confirmModal .btn-complete {
+  padding: 10px 18px;
+  border-width: 1.5px;
+  font-size: 13px;
+}
+
+.batch-error {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 12px;
+}
