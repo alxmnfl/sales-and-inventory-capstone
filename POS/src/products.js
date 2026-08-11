@@ -33,7 +33,7 @@ function stockBadge(stock) {
 }
 
 function catIcon(cat) {
-  const icons = { Hoses: '🪢', Fittings: '🔧', Couplers: '🔗', Adapters: '⚙️', Accessories: '🔩' };
+  const icons = { 'Hydraulic Hose': '🚰', 'Other Hose': '➰', Fittings: '🔧', Ferrule: '🔩' };
   return icons[cat] || '📦';
 }
 
@@ -54,7 +54,10 @@ function renderProducts() {
         ${inCart ? `<div class="cart-qty-badge">${inCart}</div>` : ''}
       </div>
       <div class="product-info">
-        <div class="product-sku">${escHtml(p.sku)}</div>
+        <div class="product-meta">
+          <span class="product-sku">${escHtml(p.sku)}</span>
+          <span class="product-category">${escHtml(p.category)}</span>
+        </div>
         <div class="product-name">${escHtml(p.name)}</div>
         <div class="product-footer">
           <span class="product-price">${fmt(p.price)}</span>

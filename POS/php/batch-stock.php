@@ -78,11 +78,10 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
     </div>
     <div class="category-tabs" id="categoryTabs">
       <button class="tab active" data-cat="All Products">All Products</button>
-      <button class="tab" data-cat="Hoses">Hoses</button>
+      <button class="tab" data-cat="Hydraulic Hose">Hydraulic Hose</button>
+      <button class="tab" data-cat="Other Hose">Other Hose</button>
       <button class="tab" data-cat="Fittings">Fittings</button>
-      <button class="tab" data-cat="Couplers">Couplers</button>
-      <button class="tab" data-cat="Adapters">Adapters</button>
-      <button class="tab" data-cat="Accessories">Accessories</button>
+      <button class="tab" data-cat="Ferrule">Ferrule</button>
     </div>
   </div>
 

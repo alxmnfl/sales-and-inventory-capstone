@@ -77,25 +77,21 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor"/></svg>
         All Products
       </button>
-      <button class="tab" data-cat="Hoses">
+      <button class="tab" data-cat="Hydraulic Hose">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 8c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
-        Hoses
+        Hydraulic Hose
+      </button>
+      <button class="tab" data-cat="Other Hose">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="11" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>
+        Other Hose
       </button>
       <button class="tab" data-cat="Fittings">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 2l12 12M2 14L14 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Fittings
       </button>
-      <button class="tab" data-cat="Couplers">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="11" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>
-        Couplers
-      </button>
-      <button class="tab" data-cat="Adapters">
+      <button class="tab" data-cat="Ferrule">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M4 6h8M4 10h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        Adapters
-      </button>
-      <button class="tab" data-cat="Accessories">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Accessories
+        Ferrule
       </button>
     </div>
 
