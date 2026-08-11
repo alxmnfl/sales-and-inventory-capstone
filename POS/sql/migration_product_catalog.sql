@@ -1,0 +1,6 @@
+
+ALTER TABLE pos_products
+  ADD COLUMN brand       VARCHAR(100) DEFAULT NULL AFTER category,
+  ADD COLUMN part_no     VARCHAR(100) DEFAULT NULL AFTER brand,
+  ADD COLUMN uom         VARCHAR(20)  DEFAULT NULL AFTER part_no,
+  ADD COLUMN description TEXT         DEFAULT NULL AFTER uom;
