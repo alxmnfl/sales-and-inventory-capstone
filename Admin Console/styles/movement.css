@@ -1,3 +1,8 @@
+/* ── 5-card KPI row (this page has an extra "No Activity" card) ── */
+.kpi-grid-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 /* ── Delta Indicators ── */
 .delta-up {
     color: #10b981;

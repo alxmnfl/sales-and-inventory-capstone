@@ -11,38 +11,74 @@ $words     = explode(' ', trim($user_name));
 $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
 
 $branch = trim($_GET['branch'] ?? '');
-$bwhere = $branch ? "AND s.branch='".addslashes($branch)."'" : '';
 
-/* ── Velocity: last 7 days vs previous 7 days per product ── */
-$movers = [];
-$r = $conn->query("
-    SELECT si.product_id, si.product_name, si.sku,
-           SUM(CASE WHEN s.created_at >= DATE_SUB(NOW(),INTERVAL 7 DAY) THEN si.quantity ELSE 0 END) AS cur,
-           SUM(CASE WHEN s.created_at >= DATE_SUB(NOW(),INTERVAL 14 DAY)
-                     AND s.created_at <  DATE_SUB(NOW(),INTERVAL 7 DAY) THEN si.quantity ELSE 0 END) AS prev,
-           p.stock, p.branch
-    FROM pos_sale_items si
-    JOIN pos_sales s ON si.sale_id = s.id
-    LEFT JOIN pos_products p ON p.id = si.product_id
-    WHERE s.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY) $bwhere
-    GROUP BY si.product_id, si.product_name, si.sku, p.stock, p.branch
-    HAVING (cur + prev) > 0
-    ORDER BY cur DESC
-    LIMIT 100
-");
-while ($row = $r->fetch_assoc()) {
-    $cur  = (int)$row['cur'];
-    $prev = (int)$row['prev'];
-    $delta = $cur - $prev;
-    $pct   = $prev > 0 ? round($delta / $prev * 100, 1) : ($cur > 0 ? 100 : 0);
-    $row['cur']=$cur; $row['prev']=$prev; $row['delta']=$delta; $row['pct']=$pct;
-    $movers[] = $row;
+/* ── Velocity: last 7 days vs previous 7 days, for EVERY product in scope
+   (not just ones with recent sales — a product LEFT JOINed against zero
+   matching sale rows correctly comes back as cur=0/prev=0 instead of
+   vanishing from the report). ── */
+$velSql = "
+    SELECT p.id, p.name AS product_name, p.sku, p.stock, p.branch,
+           COALESCE(v.cur, 0)  AS cur,
+           COALESCE(v.prev, 0) AS prev
+    FROM pos_products p
+    LEFT JOIN (
+        SELECT si.product_id,
+               SUM(CASE WHEN s.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN si.quantity ELSE 0 END) AS cur,
+               SUM(CASE WHEN s.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+                         AND s.created_at <  DATE_SUB(NOW(), INTERVAL 7 DAY) THEN si.quantity ELSE 0 END) AS prev
+        FROM pos_sale_items si
+        JOIN pos_sales s ON s.id = si.sale_id
+        WHERE s.created_at >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+        GROUP BY si.product_id
+    ) v ON v.product_id = p.id
+";
+if ($branch !== '') {
+    $stmt = $conn->prepare($velSql . " WHERE UPPER(p.branch) = ?");
+    $stmt->bind_param('s', $branch);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $result = $conn->query($velSql);
 }
 
-/* ── Summary KPIs ── */
-$gaining  = count(array_filter($movers, fn($m)=>$m['delta']>0));
-$declining = count(array_filter($movers, fn($m)=>$m['delta']<0));
-$stable   = count($movers) - $gaining - $declining;
+$all_products = [];
+while ($row = $result->fetch_assoc()) {
+    $cur   = (int)$row['cur'];
+    $prev  = (int)$row['prev'];
+    $delta = $cur - $prev;
+    $row['cur']   = $cur;
+    $row['prev']  = $prev;
+    $row['delta'] = $delta;
+    $row['pct']   = $prev > 0 ? round($delta / $prev * 100, 1) : ($cur > 0 ? 100 : 0);
+    $all_products[] = $row;
+}
+
+/* ── Summary KPIs (computed across ALL products in scope, not just one page) ── */
+$gaining     = 0;
+$declining   = 0;
+$stable      = 0;
+$no_activity = 0;
+$movers      = []; // products with recent activity — feeds the table below
+foreach ($all_products as $row) {
+    if ($row['cur'] === 0 && $row['prev'] === 0) {
+        $no_activity++;
+        continue;
+    }
+    if ($row['delta'] > 0)      $gaining++;
+    elseif ($row['delta'] < 0)  $declining++;
+    else                        $stable++;
+    $movers[] = $row;
+}
+usort($movers, fn($a, $b) => $b['cur'] <=> $a['cur']);
+
+/* ── Paginate the movers table (no more hard LIMIT dropping low-velocity/declining products) ── */
+$vel_page     = max(1, (int)($_GET['vpg'] ?? 1));
+$vel_per_page = 15;
+$vel_total    = count($movers);
+$vel_pages    = max(1, (int)ceil($vel_total / $vel_per_page));
+$vel_page     = min($vel_page, $vel_pages);
+$movers_page  = array_slice($movers, ($vel_page - 1) * $vel_per_page, $vel_per_page);
+$vel_qbranch  = $branch !== '' ? 'branch=' . urlencode($branch) . '&' : '';
 
 /* ── Recent audit movements ── */
 $audit_items = [];
@@ -98,7 +134,7 @@ $conn->close();
     <div class="page-content">
 
         <!-- KPIs -->
-        <div class="kpi-grid" style="margin-bottom:20px;">
+        <div class="kpi-grid kpi-grid-5" style="margin-bottom:20px;">
             <div class="kpi-card">
                 <div class="kpi-top"><span class="kpi-label">Gaining Velocity</span><div class="kpi-icon green"><i class="fa-solid fa-arrow-trend-up"></i></div></div>
                 <div class="kpi-value" style="color:#10b981;"><?=(int)$gaining?></div>
@@ -115,8 +151,13 @@ $conn->close();
                 <div class="kpi-meta">no significant change</div>
             </div>
             <div class="kpi-card">
+                <div class="kpi-top"><span class="kpi-label">No Activity</span><div class="kpi-icon" style="background:#f3f4f6;color:#6b7280;"><i class="fa-solid fa-box-archive"></i></div></div>
+                <div class="kpi-value" style="color:#6b7280;"><?=(int)$no_activity?></div>
+                <div class="kpi-meta">no sales in 14 days</div>
+            </div>
+            <div class="kpi-card">
                 <div class="kpi-top"><span class="kpi-label">Tracked Products</span><div class="kpi-icon orange"><i class="fa-solid fa-boxes-stacked"></i></div></div>
-                <div class="kpi-value"><?=count($movers)?></div>
+                <div class="kpi-value"><?=(int)$vel_total?></div>
                 <div class="kpi-meta">with sales last 14 days</div>
             </div>
         </div>
@@ -124,7 +165,7 @@ $conn->close();
         <!-- Velocity table -->
         <div class="chart-card" style="margin-bottom:14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                <div><div class="chart-title">Stock Velocity — Week-over-Week</div><div class="chart-subtitle">Units sold: last 7 days vs. prior 7 days</div></div>
+                <div><div class="chart-title">Stock Velocity — Week-over-Week</div><div class="chart-subtitle">Units sold: last 7 days vs. prior 7 days &middot; <?=number_format($vel_total)?> active products &middot; page <?=$vel_page?>/<?=$vel_pages?></div></div>
                 <form method="GET" class="filter-bar" style="margin:0;">
                     <div class="branch-filter" title="Filter by branch">
                         <i class="fa-solid fa-location-dot branch-filter-icon"></i>
@@ -156,12 +197,12 @@ $conn->close();
                     <th class="col-r">Change</th><th class="col-r">Stock</th>
                 </tr></thead>
                 <tbody>
-                <?php foreach($movers as $i=>$m):
+                <?php foreach($movers_page as $i=>$m):
                     $dc = $m['delta']>0?'delta-up':($m['delta']<0?'delta-dn':'delta-flat');
                     $arrow = $m['delta']>0?'↑':($m['delta']<0?'↓':'→');
                 ?>
                 <tr>
-                    <td class="col-rank"><?=$i+1?></td>
+                    <td class="col-rank"><?=$i+1+($vel_page-1)*$vel_per_page?></td>
                     <td><div class="prod-name"><?=htmlspecialchars($m['product_name'])?></div></td>
                     <td class="col-mono"><?=htmlspecialchars($m['sku'])?></td>
                     <td><?=htmlspecialchars(strtoupper($m['branch']??''))?></td>
@@ -171,11 +212,20 @@ $conn->close();
                     <td class="col-r col-num"><?=(int)($m['stock']??0)?></td>
                 </tr>
                 <?php endforeach;?>
-                <?php if(empty($movers)):?>
+                <?php if(empty($movers_page)):?>
                 <tr><td colspan="8" style="text-align:center;padding:32px;color:#9ca3af;">No sales data in the last 14 days.</td></tr>
                 <?php endif;?>
                 </tbody>
             </table>
+            <?php if($vel_pages>1):?>
+            <div class="pagination">
+                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=max(1,$vel_page-1)?>" class="pg-btn<?=$vel_page<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <?php for($vp=max(1,$vel_page-2);$vp<=min($vel_pages,$vel_page+2);$vp++):?>
+                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=$vp?>" class="pg-btn<?=$vp===$vel_page?' active':''?>"><?=$vp?></a>
+                <?php endfor;?>
+                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=min($vel_pages,$vel_page+1)?>" class="pg-btn<?=$vel_page>=$vel_pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            <?php endif;?>
         </div>
 
         <!-- Recent audit activity -->
@@ -207,7 +257,7 @@ $conn->close();
             </table>
 
             <?php if($act_pages>1):
-                $qp=http_build_query(array_filter(['branch'=>$branch]));
+                $qp=http_build_query(array_filter(['branch'=>$branch,'vpg'=>$vel_page>1?$vel_page:null]));
             ?>
             <div class="pagination">
                 <a href="?<?=$qp?>&pg=<?=max(1,$act_page-1)?>" class="pg-btn<?=$act_page<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
