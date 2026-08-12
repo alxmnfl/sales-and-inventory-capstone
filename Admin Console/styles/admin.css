@@ -846,6 +846,21 @@ body {
 .intel-table tbody tr:last-child td { border-bottom: none; }
 .intel-table tbody tr:hover { background: #fafafa; }
 
+/* ── Fast-Moving / Critical Stock: fixed height, scrolls instead of stretching the page ── */
+#fast-moving-body,
+#critical-stock-body {
+    max-height: 460px;
+    overflow-y: auto;
+}
+
+#fast-moving-body thead th,
+#critical-stock-body thead th {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+}
+
 .prod-name { font-weight: 600; color: #111827; }
 .prod-cat  { font-size: 10px; color: #9ca3af; margin-top: 1px; }
 
