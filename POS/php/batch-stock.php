@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../../Landing Page/php/auth.php';
 
 // Accept session from main login (branch_staff) or POS-direct login
 if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 'branch_staff') {

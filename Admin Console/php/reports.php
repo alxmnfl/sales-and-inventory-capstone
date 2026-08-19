@@ -1,9 +1,9 @@
 <?php
-session_start();
+require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/login.php'); exit;
+    header('Location: ../../Landing Page/php/login.php'); exit;
 }
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';

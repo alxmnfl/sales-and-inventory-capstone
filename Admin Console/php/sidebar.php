@@ -113,7 +113,7 @@ ob_start(); ?>
 </div>
 <a href="index.php" class="topbar-drop-item"><i class="fa-solid fa-gauge-high"></i>Dashboard</a>
 <a href="users.php" class="topbar-drop-item"><i class="fa-solid fa-users"></i>Manage Users</a>
-<a href="../../Landing Page/php/login.php" class="topbar-drop-item danger"><i class="fa-solid fa-arrow-right-from-bracket"></i>Sign Out</a>
+<a href="logout.php" class="topbar-drop-item danger"><i class="fa-solid fa-arrow-right-from-bracket"></i>Sign Out</a>
 <?php $_user_inner = ob_get_clean(); ?>
 </aside>
 <script>

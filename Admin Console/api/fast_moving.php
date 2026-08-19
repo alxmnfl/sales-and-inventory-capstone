@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../../Landing Page/php/auth.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {

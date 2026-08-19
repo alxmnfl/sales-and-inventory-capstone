@@ -1,6 +1,5 @@
 <?php
-session_start();
-require_once 'db.php';
+require_once 'auth.php';
 require_once 'employee_id_helper.php';
 
 $login_error   = $_SESSION['login_error']  ?? '';
@@ -11,6 +10,17 @@ unset($_SESSION['login_error'], $_SESSION['reg_error'], $_SESSION['reg_success']
 $active_tab       = $_GET['tab'] ?? 'signin';
 $next_employee_id = next_employee_id($conn);
 $conn->close();
+
+// A valid persistent-login token is restored by auth.php before any HTML is sent.
+if (isset($_SESSION['user_id'])) {
+    if ($_SESSION['user_role'] === 'administrator') {
+        header('Location: ../../Admin%20Console/php/index.php');
+    } else {
+        header('Location: ../../POS/php/index.php');
+    }
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once 'db.php';
+define('SKIP_REMEMBER_RESTORE', true);
+require_once 'auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: login.php');
@@ -36,7 +38,6 @@ $stmt = $conn->prepare("UPDATE users SET status = 'online' WHERE id = ?");
 $stmt->bind_param('i', $id);
 $stmt->execute();
 $stmt->close();
-$conn->close();
 
 // --- Success: start session ---
 session_regenerate_id(true);
@@ -44,6 +45,13 @@ $_SESSION['user_id']     = $id;
 $_SESSION['user_name']   = $full_name;
 $_SESSION['user_role']   = $role;
 $_SESSION['user_branch'] = $branch;
+
+if (isset($_POST['remember']) && $_POST['remember'] === '1') {
+    create_remember_token($conn, (int) $id);
+} else {
+    forget_remembered_login($conn);
+}
+$conn->close();
 
 if ($role === 'administrator') {
     header('Location: ../../Admin%20Console/php/index.php');
