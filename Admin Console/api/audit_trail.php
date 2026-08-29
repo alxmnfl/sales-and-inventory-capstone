@@ -21,8 +21,10 @@ $branch  = trim($_GET['branch'] ?? '');
 $page    = max(1, (int)($_GET['page']  ?? 1));
 $perPage = min(50, max(5, (int)($_GET['limit'] ?? 15)));
 
+// Plain `=` on the branch column — its utf8mb4_general_ci collation already
+// matches case- and accent-insensitively, so ñ/Ñ casing can't break the filter.
 if ($branch !== '') {
-    $countStmt = $conn->prepare("SELECT COUNT(*) FROM audit_trail WHERE UPPER(branch) = ?");
+    $countStmt = $conn->prepare("SELECT COUNT(*) FROM audit_trail WHERE branch = ?");
     $countStmt->bind_param('s', $branch);
 } else {
     $countStmt = $conn->prepare("SELECT COUNT(*) FROM audit_trail");
@@ -39,7 +41,7 @@ if ($branch !== '') {
     $stmt = $conn->prepare(
         "SELECT id, user_name, branch, action, entity_name, details, created_at
          FROM audit_trail
-         WHERE UPPER(branch) = ?
+         WHERE branch = ?
          ORDER BY created_at DESC
          LIMIT ? OFFSET ?"
     );

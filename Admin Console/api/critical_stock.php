@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') 
 
 require_once '../../Landing Page/php/db.php';
 
-$branch    = trim($_GET['branch'] ?? '');
+$branch    = strtoupper(trim($_GET['branch'] ?? ''));
 $threshold = min(100, max(1, (int)($_GET['threshold'] ?? 10)));
 
 if ($branch !== '') {

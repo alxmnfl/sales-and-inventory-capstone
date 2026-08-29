@@ -21,7 +21,9 @@ $per_page   = 15;
 $offset     = ($page_num - 1) * $per_page;
 
 $where_parts = ["DATE(created_at) BETWEEN '$date_from' AND '$date_to'"];
-if ($branch)   $where_parts[] = "UPPER(branch)='".strtoupper(addslashes($branch))."'";
+// Plain `=` — the branch column's utf8mb4_general_ci collation already compares
+// case- and accent-insensitively, so this matches regardless of ñ/Ñ casing.
+if ($branch)   $where_parts[] = "branch='".addslashes($branch)."'";
 if ($action_f) $where_parts[] = "action LIKE '%".addslashes($action_f)."%'";
 if ($user_f)   $where_parts[] = "user_name LIKE '%".addslashes($user_f)."%'";
 $where = 'WHERE '.implode(' AND ', $where_parts);
@@ -48,7 +50,7 @@ $delete_count = (int)$r2->fetch_row()[0];
 
 /* ── Dropdown lists ── */
 $branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM audit_trail WHERE branch!='' ORDER BY b");
+$r=$conn->query("SELECT DISTINCT branch b FROM audit_trail WHERE branch!='' ORDER BY b");
 while($row=$r->fetch_row()) $branches[]=$row[0];
 
 $actions=[];
@@ -128,7 +130,7 @@ $conn->close();
                     </div>
                     <select name="branch" class="branch-filter-hidden-select" style="display:none">
                         <option value="">All Branches</option>
-                        <?php foreach($branches as $b):?><option<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
+                        <?php foreach($branches as $b):?><option value="<?=htmlspecialchars($b)?>"<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
                     </select>
                 </div>
                 <label>Action</label>

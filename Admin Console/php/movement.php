@@ -82,7 +82,7 @@ $vel_qbranch  = $branch !== '' ? 'branch=' . urlencode($branch) . '&' : '';
 
 /* ── Recent audit movements ── */
 $audit_items = [];
-$bwhere2  = $branch ? "AND branch='".addslashes($branch)."'" : '';
+$bwhere2  = $branch ? "AND UPPER(branch)='".strtoupper(addslashes($branch))."'" : '';
 $act_page = max(1, (int)($_GET['pg'] ?? 1));
 $act_per_page = 15;
 

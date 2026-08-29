@@ -245,7 +245,6 @@ $month_label = date('F Y');
                     <div class="kpi-value"><?= number_format($mtd_units) ?></div>
                     <div class="kpi-meta">
                         <?php if ($avg_units_per_txn > 0): ?>
-                            <span class="badge-up">↑ +<?= $avg_units_per_txn ?>%</span>
                             <?= $avg_units_per_txn ?> units avg per transaction
                         <?php else: ?>
                             No transactions this month

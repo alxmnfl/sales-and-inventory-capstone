@@ -10,20 +10,32 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') 
 
 require_once '../../Landing Page/php/db.php';
 
-$branch = trim($_GET['branch'] ?? '');
+$branch = strtoupper(trim($_GET['branch'] ?? ''));
 $limit  = min(20, max(1, (int)($_GET['limit'] ?? 10)));
 
+// Units/revenue for the last 30 days only. The date filter must live in a
+// subquery so it restricts the summed sale-item rows — putting it on the
+// pos_sales JOIN's ON clause leaves SUM(si.quantity) counting all-time sales.
+$baseQuery = "
+    SELECT p.name, p.sku, p.category, p.branch,
+           COALESCE(SUM(u.qty), 0)   AS total_units,
+           COALESCE(SUM(u.price), 0) AS total_revenue
+    FROM pos_products p
+    LEFT JOIN (
+        SELECT si.product_id,
+               si.quantity    AS qty,
+               si.total_price AS price
+        FROM pos_sale_items si
+        JOIN pos_sales s ON s.id = si.sale_id
+        WHERE s.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    ) u ON u.product_id = p.id
+";
+
 if ($branch !== '') {
-    $stmt = $conn->prepare("
-        SELECT p.name, p.sku, p.category, p.branch,
-               COALESCE(SUM(si.quantity), 0)    AS total_units,
-               COALESCE(SUM(si.total_price), 0) AS total_revenue
-        FROM pos_products p
-        LEFT JOIN pos_sale_items si ON si.product_id = p.id
-        LEFT JOIN pos_sales s       ON si.sale_id = s.id
-                                   AND s.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    $stmt = $conn->prepare($baseQuery . "
         WHERE UPPER(p.branch) = ?
         GROUP BY p.id
+        HAVING total_units > 0
         ORDER BY total_units DESC
         LIMIT $limit
     ");
@@ -31,15 +43,9 @@ if ($branch !== '') {
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $result = $conn->query("
-        SELECT p.name, p.sku, p.category, p.branch,
-               COALESCE(SUM(si.quantity), 0)    AS total_units,
-               COALESCE(SUM(si.total_price), 0) AS total_revenue
-        FROM pos_products p
-        LEFT JOIN pos_sale_items si ON si.product_id = p.id
-        LEFT JOIN pos_sales s       ON si.sale_id = s.id
-                                   AND s.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    $result = $conn->query($baseQuery . "
         GROUP BY p.id
+        HAVING total_units > 0
         ORDER BY total_units DESC
         LIMIT $limit
     ");

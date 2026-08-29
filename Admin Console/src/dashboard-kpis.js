@@ -28,7 +28,7 @@ function loadDashboardKpis(branch) {
                 const meta = unitsCard.querySelector('.kpi-meta');
                 if (meta) {
                     if (data.avg_units_per_txn > 0) {
-                        meta.innerHTML = `<span class="badge-up">↑ +${data.avg_units_per_txn}%</span> ${data.avg_units_per_txn} units avg per transaction`;
+                        meta.innerHTML = `${data.avg_units_per_txn} units avg per transaction`;
                     } else {
                         meta.innerHTML = 'No transactions this month';
                     }

@@ -10,30 +10,36 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') 
 
 require_once '../../Landing Page/php/db.php';
 
-$branch = trim($_GET['branch'] ?? '');
+$branch = strtoupper(trim($_GET['branch'] ?? ''));
 
-// Calculate average daily consumption over last 30 days.
-// Flag products whose projected days of stock remaining < 14.
+// Average daily consumption over the last 30 days; flag products whose
+// projected days of stock remaining < 14. The 30-day filter must live in a
+// subquery so it restricts the summed sale-item rows — on the pos_sales JOIN's
+// ON clause, SUM(si.quantity) would keep counting all-time sales and the
+// "/ 30.0" would understate consumption badly.
 $baseQuery = "
     SELECT
         p.id, p.name, p.sku, p.category, p.branch, p.stock,
-        COALESCE(SUM(si.quantity), 0) / 30.0                       AS avg_daily_units,
+        COALESCE(SUM(u.qty), 0) / 30.0                        AS avg_daily_units,
         CASE
-            WHEN COALESCE(SUM(si.quantity), 0) > 0
-            THEN p.stock / (COALESCE(SUM(si.quantity), 0) / 30.0)
+            WHEN COALESCE(SUM(u.qty), 0) > 0
+            THEN p.stock / (COALESCE(SUM(u.qty), 0) / 30.0)
             ELSE 9999
-        END                                                          AS days_remaining
+        END                                                  AS days_remaining
     FROM pos_products p
-    LEFT JOIN pos_sale_items si ON si.product_id = p.id
-    LEFT JOIN pos_sales s       ON si.sale_id = s.id
-                               AND s.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    LEFT JOIN (
+        SELECT si.product_id, si.quantity AS qty
+        FROM pos_sale_items si
+        JOIN pos_sales s ON s.id = si.sale_id
+        WHERE s.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    ) u ON u.product_id = p.id
 ";
 
 if ($branch !== '') {
     $stmt = $conn->prepare($baseQuery . "
         WHERE UPPER(p.branch) = ?
         GROUP BY p.id
-        HAVING days_remaining < 14 AND COALESCE(SUM(si.quantity), 0) > 0
+        HAVING days_remaining < 14 AND COALESCE(SUM(u.qty), 0) > 0
         ORDER BY days_remaining ASC
         LIMIT 20
     ");
@@ -43,7 +49,7 @@ if ($branch !== '') {
 } else {
     $result = $conn->query($baseQuery . "
         GROUP BY p.id
-        HAVING days_remaining < 14 AND COALESCE(SUM(si.quantity), 0) > 0
+        HAVING days_remaining < 14 AND COALESCE(SUM(u.qty), 0) > 0
         ORDER BY days_remaining ASC
         LIMIT 20
     ");
