@@ -1,6 +1,7 @@
 <?php
 require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/employee_id_helper.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
     header('Location: ../../Landing Page/php/login.php'); exit;
@@ -15,17 +16,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'add') {
-        $full_name   = trim($_POST['full_name']   ?? '');
-        $employee_id = trim($_POST['employee_id'] ?? '');
-        $email       = trim($_POST['email']       ?? '');
-        $role        = in_array($_POST['role']??'',['branch_staff','administrator'])?$_POST['role']:'branch_staff';
-        $branch      = trim($_POST['branch'] ?? '');
-        $password    = password_hash(trim($_POST['password']??'password123'), PASSWORD_BCRYPT);
-        $status      = 'offline';
+        $full_name = trim($_POST['full_name'] ?? '');
+        $email     = trim($_POST['email']     ?? '');
+        $role      = in_array($_POST['role']??'',['branch_staff','administrator'])?$_POST['role']:'branch_staff';
+        $branch    = trim($_POST['branch'] ?? '');
+        $password  = password_hash(trim($_POST['password']??'password123'), PASSWORD_BCRYPT);
+        $status    = 'offline';
+
+        // Employee ID is generated server-side, never trusted from the form.
         $stmt = $conn->prepare("INSERT INTO users (full_name,employee_id,email,password,branch,role,status) VALUES (?,?,?,?,?,?,?)");
-        $stmt->bind_param('sssssss',$full_name,$employee_id,$email,$password,$branch,$role,$status);
-        $stmt->execute(); $stmt->close();
-        header('Location: users.php?flash=added'); exit;
+        for ($try = 0; $try < 5; $try++) {
+            $employee_id = next_employee_id($conn);
+            $stmt->bind_param('sssssss',$full_name,$employee_id,$email,$password,$branch,$role,$status);
+            if ($stmt->execute()) {
+                $stmt->close();
+                header('Location: users.php?flash=added'); exit;
+            }
+            if ($conn->errno !== 1062) break;   // 1062 = duplicate key; only a clashing ID is worth retrying
+        }
+        $stmt->close();
+        header('Location: users.php?flash=error'); exit;
     }
 
     if ($action === 'edit') {
@@ -64,6 +74,9 @@ $branches=[];
 $r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch!='' ORDER BY b");
 while($row=$r->fetch_row()) $branches[]=$row[0];
 
+/* ── Next auto-generated Employee ID (shown in the Add modal) ── */
+$next_employee_id = next_employee_id($conn);
+
 $conn->close();
 ?>
 <!DOCTYPE html>
@@ -73,7 +86,7 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Users</title>
 <link rel="stylesheet" href="../styles/admin.css">
-<link rel="stylesheet" href="../styles/users.css">
+<link rel="stylesheet" href="../styles/users.css?v=20260829-1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -92,8 +105,15 @@ $conn->close();
 
     <div class="page-content">
 
-        <?php if(isset($_GET['flash'])):?>
-        <div class="flash ok"><?=$_GET['flash']==='added'?'User added.':($_GET['flash']==='edited'?'User updated.':'User deleted.')?></div>
+        <?php if(isset($_GET['flash'])):
+            $fl    = $_GET['flash'];
+            $isErr = $fl === 'error';
+            $msg   = $fl==='added'   ? 'User added.'
+                   : ($fl==='edited'  ? 'User updated.'
+                   : ($fl==='deleted' ? 'User deleted.'
+                   : 'Could not add user — that email may already be registered.'));
+        ?>
+        <div class="flash <?=$isErr?'err':'ok'?>"><?=$msg?></div>
         <?php endif;?>
 
         <!-- KPIs -->
@@ -170,24 +190,47 @@ $conn->close();
             <input type="hidden" name="action" value="add">
             <div class="form-row">
                 <div class="form-group"><label>Full Name</label><input name="full_name" required></div>
-                <div class="form-group"><label>Employee ID</label><input name="employee_id" required></div>
+                <div class="form-group">
+                    <label>Employee ID <span class="hint">auto-generated</span></label>
+                    <input name="employee_id" value="<?=htmlspecialchars($next_employee_id)?>" readonly>
+                </div>
             </div>
             <div class="form-group"><label>Email</label><input name="email" type="email" required></div>
             <div class="form-row">
                 <div class="form-group"><label>Role</label>
-                    <select name="role">
-                        <option value="branch_staff">Branch Staff</option>
-                        <option value="administrator">Administrator</option>
-                    </select>
+                    <div class="cselect" id="addRoleSelect">
+                        <button type="button" class="cselect-trigger">
+                            <span class="cselect-value" data-placeholder="Select role">Branch Staff</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <input type="hidden" name="role" value="branch_staff">
+                        <ul class="cselect-list">
+                            <li data-value="branch_staff" class="selected">Branch Staff</li>
+                            <li data-value="administrator">Administrator</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="form-group"><label>Branch</label>
-                    <select name="branch">
-                        <option value="">— Select —</option>
-                        <?php foreach($branches as $b):?><option><?=htmlspecialchars($b)?></option><?php endforeach;?>
-                    </select>
+                    <div class="cselect" id="addBranchSelect">
+                        <button type="button" class="cselect-trigger">
+                            <span class="cselect-value placeholder" data-placeholder="— Select —">— Select —</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <input type="hidden" name="branch" value="">
+                        <ul class="cselect-list">
+                            <?php foreach($branches as $b):?>
+                            <li data-value="<?=htmlspecialchars($b)?>"><?=htmlspecialchars($b)?></li>
+                            <?php endforeach;?>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <div class="form-group"><label>Password</label><input name="password" type="password" placeholder="Min. 8 characters" required></div>
+            <div class="form-group"><label>Password</label>
+                <div class="pw-wrap">
+                    <input name="password" id="addPassword" type="password" placeholder="Min. 8 characters" minlength="8" required>
+                    <i class="fa-solid fa-eye pw-toggle" onclick="togglePw('addPassword', this)" title="Show password"></i>
+                </div>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn-ghost" onclick="closeModal('addModal')">Cancel</button>
                 <button type="submit" class="btn-orange">Add User</button>
@@ -206,20 +249,35 @@ $conn->close();
             <div class="form-group"><label>Name (read-only)</label><input id="editName" disabled style="background:#f9fafb;color:#9ca3af;"></div>
             <div class="form-row">
                 <div class="form-group"><label>Role</label>
-                    <select name="role" id="editRole">
-                        <option value="branch_staff">Branch Staff</option>
-                        <option value="administrator">Administrator</option>
-                    </select>
+                    <div class="cselect" id="editRoleSelect">
+                        <button type="button" class="cselect-trigger">
+                            <span class="cselect-value" data-placeholder="Select role">Branch Staff</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <input type="hidden" name="role" value="branch_staff">
+                        <ul class="cselect-list">
+                            <li data-value="branch_staff">Branch Staff</li>
+                            <li data-value="administrator">Administrator</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="form-group"><label>Status (live)</label>
                     <input id="editStatus" disabled style="background:#f9fafb;color:#9ca3af;">
                 </div>
             </div>
             <div class="form-group"><label>Branch</label>
-                <select name="branch" id="editBranch">
-                    <option value="">— None —</option>
-                    <?php foreach($branches as $b):?><option><?=htmlspecialchars($b)?></option><?php endforeach;?>
-                </select>
+                <div class="cselect" id="editBranchSelect">
+                    <button type="button" class="cselect-trigger">
+                        <span class="cselect-value placeholder" data-placeholder="— None —">— None —</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <input type="hidden" name="branch" value="">
+                    <ul class="cselect-list">
+                        <?php foreach($branches as $b):?>
+                        <li data-value="<?=htmlspecialchars($b)?>"><?=htmlspecialchars($b)?></li>
+                        <?php endforeach;?>
+                    </ul>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-ghost" onclick="closeModal('editModal')">Cancel</button>
@@ -234,6 +292,6 @@ $conn->close();
     <input type="hidden" name="id" id="deleteId">
 </form>
 
-<script src="../src/users.js"></script>
+<script src="../src/users.js?v=20260829-1"></script>
 </body>
 </html>

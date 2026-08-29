@@ -173,3 +173,145 @@
     font-size: 11px;
     font-weight: 700;
 }
+
+/* ── Flash: error variant ── */
+.flash.err {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+/* ── Auto-generated Employee ID field ── */
+.form-group label .hint {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    font-size: 10px;
+    color: #9ca3af;
+}
+.form-group input[readonly] {
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: default;
+    letter-spacing: .03em;
+}
+
+/* ── Password field with reveal toggle ── */
+.pw-wrap {
+    position: relative;
+    display: block;
+}
+.pw-wrap input {
+    width: 100%;
+    padding-right: 36px;
+}
+.pw-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color .15s;
+}
+.pw-toggle:hover {
+    color: #e8611a;
+}
+
+/* ── Custom dropdown (Role / Branch) ── */
+.cselect {
+    position: relative;
+    width: 100%;
+}
+.cselect-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13px;
+    font-family: inherit;
+    color: #111827;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+}
+.cselect-trigger:hover {
+    border-color: #d1d5db;
+}
+.cselect.open .cselect-trigger {
+    border-color: #e8611a;
+    box-shadow: 0 0 0 3px rgba(232, 97, 26, 0.12);
+}
+.cselect-trigger > i {
+    font-size: 11px;
+    color: #9ca3af;
+    transition: transform .18s ease;
+}
+.cselect.open .cselect-trigger > i {
+    transform: rotate(180deg);
+}
+.cselect-value.placeholder {
+    color: #9ca3af;
+}
+.cselect-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 5px;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 14px 34px rgba(17, 24, 39, 0.14);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 40;
+    display: none;
+}
+.cselect.open .cselect-list {
+    display: block;
+    animation: cselect-in .14s ease;
+}
+@keyframes cselect-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.cselect-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    transition: background .12s;
+}
+.cselect-list li:hover {
+    background: #f9fafb;
+}
+.cselect-list li.selected {
+    background: rgba(232, 97, 26, 0.10);
+    color: #e8611a;
+    font-weight: 600;
+}
+.cselect-list li.selected::after {
+    content: "\2713";
+    font-size: 11px;
+    margin-left: 8px;
+}
+.cselect-list::-webkit-scrollbar {
+    width: 6px;
+}
+.cselect-list::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+}

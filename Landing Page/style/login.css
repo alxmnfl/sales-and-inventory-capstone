@@ -15,7 +15,7 @@ body {
     width: 50%;
     height: 100vh;
     position: relative;
-    background-image: url('');
+    background-image: url('../../Images/background.jpg');
     background-size: cover;
     background-position: center;
     flex-shrink: 0;

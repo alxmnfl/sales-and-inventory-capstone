@@ -27,11 +27,14 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky 8 Hydraulics Co. — Operations Console</title>
+    <title>Lucky Charm — Hydraulic Hose &amp; Industrial Sales Co.</title>
+
     <link rel="stylesheet" href="../style/login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 </head>
 <body>
 
@@ -41,10 +44,10 @@ if (isset($_SESSION['user_id'])) {
         <div class="left-inner">
 
             <div class="logo-block">
-                <div class="logo-badge">L8</div>
+                <div class="logo-badge">LC</div>
                 <div class="logo-text">
-                    <span class="logo-name">LUCKY 8</span>
-                    <span class="logo-sub">HYDRAULICS CO.</span>
+                    <span class="logo-name">LUCKY CHARM</span>
+                    <span class="logo-sub">HYDRAULIC HOSE &amp; INDUSTRIAL SALES CO.</span>
                 </div>
             </div>
 
