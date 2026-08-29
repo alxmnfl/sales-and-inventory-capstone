@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/branch_list.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
     header('Location: ../../Landing Page/login.php'); exit;
@@ -10,13 +11,10 @@ $user_name = $_SESSION['user_name'] ?? 'Admin';
 $words     = explode(' ', trim($user_name));
 $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
 
-/* ── Branch data ── */
+/* ── Branch data — every company branch, even with no users/products/sales ── */
 $branch_data = [];
-
-// Distinct branches from users (authoritative source)
-$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
-while ($row = $r->fetch_row()) {
-    $branch_data[$row[0]] = ['name'=>$row[0],'products'=>0,'stock'=>0,'low_stock'=>0,'staff'=>0,'revenue'=>0,'revenue_prev'=>0];
+foreach (all_branches($conn) as $b) {
+    $branch_data[$b] = ['name'=>$b,'products'=>0,'stock'=>0,'low_stock'=>0,'staff'=>0,'revenue'=>0,'revenue_prev'=>0];
 }
 
 // Product count + stock per branch

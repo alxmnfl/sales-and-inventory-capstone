@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/branch_list.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
     header('Location: ../../Landing Page/login.php');
@@ -16,12 +17,8 @@ $initials  = strtoupper(
 $branch = trim($_GET['branch'] ?? '');
 $days   = max(7, min(60, (int)($_GET['days'] ?? 14)));
 
-/* ── Branch list ── */
-$branches = [];
-$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
-while ($row = $r->fetch_row()) {
-    $branches[] = $row[0];
-}
+/* ── Branch list (every company branch) ── */
+$branches = all_branches($conn);
 
 $conn->close();
 

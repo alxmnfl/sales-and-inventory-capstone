@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/branch_list.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
     header('Location: ../../Landing Page/login.php'); exit;
@@ -47,9 +48,7 @@ $r2 = $conn->query("SELECT COUNT(*) FROM audit_trail WHERE action LIKE '%DELETE%
 $delete_count = (int)$r2->fetch_row()[0];
 
 /* ── Dropdown lists ── */
-$branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM audit_trail WHERE branch!='' ORDER BY b");
-while($row=$r->fetch_row()) $branches[]=$row[0];
+$branches = all_branches($conn);
 
 $actions=[];
 $r=$conn->query("SELECT DISTINCT action FROM audit_trail ORDER BY action");

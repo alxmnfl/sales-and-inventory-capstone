@@ -11,11 +11,15 @@ if (!isset($_SESSION['pos_cashier'])) {
 
 require_once __DIR__ . '/../../Landing Page/php/db.php';
 
+$branch = strtoupper(trim($_SESSION['pos_cashier_branch'] ?? ''));
+
 $stmt = $conn->prepare(
     "SELECT id, sku, name, category, price, stock
      FROM pos_products
+     WHERE branch = ?
      ORDER BY category, name"
 );
+$stmt->bind_param('s', $branch);
 $stmt->execute();
 $result = $stmt->get_result();
 

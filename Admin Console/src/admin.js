@@ -1,64 +1,16 @@
-/* ── Chart defaults ── */
-Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
-Chart.defaults.font.size   = 11;
-Chart.defaults.color       = '#9ca3af';
-
-/* ── Init ── */
-document.addEventListener('DOMContentLoaded', () => {
-    buildSalesChart('revenue');
-    buildAbcChart();
-    loadAllSections();
-    initBranchDropdown();
-});
-
-function initBranchDropdown() {
-    const wrapper  = document.getElementById('branchFilterWrapper');
-    const btn      = document.getElementById('branchSelectBtn');
-    const panel    = document.getElementById('branchDropdownPanel');
-    const label    = document.getElementById('branchSelectedLabel');
-    const chevron  = document.getElementById('branchChevron');
-    const hidden   = document.getElementById('globalBranchFilter');
-    if (!wrapper || !btn || !panel) return;
-
-    function openPanel() {
-        panel.classList.add('open');
-        chevron.classList.add('rotated');
-        btn.setAttribute('aria-expanded', 'true');
-    }
-    function closePanel() {
-        panel.classList.remove('open');
-        chevron.classList.remove('rotated');
-        btn.setAttribute('aria-expanded', 'false');
-    }
-
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        panel.classList.contains('open') ? closePanel() : openPanel();
-    });
-
-    panel.querySelectorAll('.branch-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            const val = opt.dataset.value;
-            label.textContent = opt.querySelector('span').textContent;
-            hidden.value = val;
-
-            panel.querySelectorAll('.branch-option').forEach(o => {
-                o.classList.remove('branch-option--selected');
-                o.setAttribute('aria-selected', 'false');
-            });
-            opt.classList.add('branch-option--selected');
-            opt.setAttribute('aria-selected', 'true');
-
-            hidden.dispatchEvent(new Event('change'));
-            closePanel();
-        });
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!wrapper.contains(e.target)) closePanel();
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closePanel();
-    });
+/* ── Chart defaults ── (skip if the Chart.js CDN didn't load) */
+if (window.Chart) {
+    Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+    Chart.defaults.font.size   = 11;
+    Chart.defaults.color       = '#9ca3af';
 }
+
+/* ── Init ──
+   Each step is isolated: a failing chart (e.g. the Chart.js CDN is blocked)
+   must not stop the others. The branch filter is wired up separately by
+   branch-filter-widget.js, which every other admin page uses too. */
+document.addEventListener('DOMContentLoaded', () => {
+    try { buildSalesChart('revenue'); } catch (e) { console.error('sales chart failed:', e); }
+    try { buildAbcChart(); }            catch (e) { console.error('ABC chart failed:', e); }
+    try { loadAllSections(); }          catch (e) { console.error('dashboard sections failed:', e); }
+});

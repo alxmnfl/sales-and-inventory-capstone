@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 'branch_staff') {
 }
 
 if (!isset($_SESSION['pos_cashier'])) {
-    header('Location: ../../Landing Page/login.php');
+    header('Location: ../../Landing Page/php/login.php');
     exit;
 }
 
@@ -22,7 +22,14 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 POS</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="..//style/pos.css">
+
+<link rel="stylesheet" href="../style/base.css">
+<link rel="stylesheet" href="../style/header.css">
+<link rel="stylesheet" href="../style/products.css">
+<link rel="stylesheet" href="../style/cart.css">
+<link rel="stylesheet" href="../style/modal.css">
+<link rel="stylesheet" href="../style/sale-complete.css">
+
 </head>
 <body>
 
@@ -41,6 +48,10 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
     </div>
   </div>
   <div class="header-right">
+    <a href="batch-stock.php" class="btn-header">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      BATCH STOCK
+    </a>
     <a href="logout.php" class="btn-header btn-exit">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       EXIT
@@ -66,25 +77,25 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor"/></svg>
         All Products
       </button>
-      <button class="tab" data-cat="Hoses">
+      <button class="tab" data-cat="Hydraulic Hose">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 8c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
-        Hoses
+        Hydraulic Hose
+      </button>
+      <button class="tab" data-cat="Other Hose">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="11" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>
+        Other Hose
       </button>
       <button class="tab" data-cat="Fittings">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 2l12 12M2 14L14 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Fittings
       </button>
-      <button class="tab" data-cat="Couplers">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="5" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="11" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>
-        Couplers
-      </button>
-      <button class="tab" data-cat="Adapters">
+      <button class="tab" data-cat="Ferrule">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M4 6h8M4 10h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        Adapters
+        Ferrule
       </button>
-      <button class="tab" data-cat="Accessories">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Accessories
+      <button class="tab" data-cat="Hoses">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 8c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+        Hoses
       </button>
     </div>
 
@@ -244,29 +255,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
   </div>
 </div>
 
-<div class="modal-overlay" id="stockModal" style="display:none">
-  <div class="modal" style="width:380px;">
-    <div class="modal-header">
-      <div>
-        <h2 class="modal-title" style="font-size:18px;">Adjust Stock</h2>
-        <p class="modal-subtitle" id="stockModalSubtitle"></p>
-      </div>
-      <button class="modal-close" onclick="closeStockModal()">✕</button>
-    </div>
-
-    <label class="cash-label">NEW STOCK QUANTITY</label>
-    <div class="cash-input-wrap">
-      <input type="number" id="stockNewValue" class="cash-input" placeholder="0" min="0" step="1">
-    </div>
-    <p class="modal-subtitle" id="stockCurrentLabel"></p>
-
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeStockModal()">CANCEL</button>
-      <button class="btn-complete" id="btnSaveStock" onclick="saveStock()">SAVE</button>
-    </div>
-  </div>
-</div>
-
 <script>const CASHIER = <?= json_encode($cashier) ?>; const BRANCH = <?= json_encode($branch) ?>;</script>
 
 <script src="../src/pos.js"></script>
@@ -275,7 +263,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <script src="../src/receipt.js"></script>
 <script src="../src/cart.js"></script>
 <script src="../src/products.js"></script>
-<script src="../src/stock.js"></script>
 
 </body>
 </html>

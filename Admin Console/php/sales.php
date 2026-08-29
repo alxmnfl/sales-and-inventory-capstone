@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/branch_list.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
     header('Location: ../../Landing Page/login.php'); exit;
@@ -43,10 +44,8 @@ $sql = "SELECT s.transaction_id, s.cashier, s.branch, s.payment_method, s.total,
 $r = $conn->query($sql);
 while($row=$r->fetch_assoc()) $sales[]=$row;
 
-/* ── Branch list ── */
-$branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM pos_sales WHERE branch!='' ORDER BY b");
-while($row=$r->fetch_row()) $branches[]=$row[0];
+/* ── Branch list (every company branch) ── */
+$branches = all_branches($conn);
 
 $conn->close();
 ?>

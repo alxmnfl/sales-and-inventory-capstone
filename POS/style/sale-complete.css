@@ -1,0 +1,154 @@
+/* Lucky 8 POS — Sale complete screen + receipt */
+
+.sale-complete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.sale-complete-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.success-icon {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #FED7AA;
+  color: var(--orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.sale-complete-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.sale-complete-date {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-bottom: 28px;
+}
+
+.receipt {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 28px;
+}
+
+.receipt-header {
+  background: var(--dark);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.receipt-store {
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+}
+
+.receipt-branch {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 2px;
+}
+
+.receipt-body {
+  background: white;
+  padding: 20px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--gray-700);
+  padding: 4px 0;
+}
+
+.receipt-val-bold {
+  font-weight: 700;
+}
+
+.receipt-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 12px 0;
+}
+
+.receipt-total {
+  font-size: 15px;
+  font-weight: 800;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.receipt-total span:last-child {
+  color: var(--orange);
+}
+
+.sale-complete-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-new-sale {
+  flex: 1;
+  padding: 11px;
+  background: var(--orange);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.btn-new-sale:hover {
+  background: var(--orange-hover);
+}
+
+.btn-dashboard {
+  flex: 1;
+  padding: 11px;
+  background: white;
+  color: var(--dark);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all .15s;
+}
+
+.btn-dashboard:hover {
+  border-color: var(--dark);
+}

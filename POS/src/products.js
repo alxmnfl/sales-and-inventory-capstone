@@ -33,7 +33,7 @@ function stockBadge(stock) {
 }
 
 function catIcon(cat) {
-  const icons = { Hoses: '🪢', Fittings: '🔧', Couplers: '🔗', Adapters: '⚙️', Accessories: '🔩' };
+  const icons = { 'Hydraulic Hose': '🚰', 'Other Hose': '➰', Fittings: '🔧', Ferrule: '🔩' };
   return icons[cat] || '📦';
 }
 
@@ -54,14 +54,14 @@ function renderProducts() {
         ${inCart ? `<div class="cart-qty-badge">${inCart}</div>` : ''}
       </div>
       <div class="product-info">
-        <div class="product-sku">${escHtml(p.sku)}</div>
+        <div class="product-meta">
+          <span class="product-sku">${escHtml(p.sku)}</span>
+          <span class="product-category">${escHtml(p.category)}</span>
+        </div>
         <div class="product-name">${escHtml(p.name)}</div>
         <div class="product-footer">
           <span class="product-price">${fmt(p.price)}</span>
           <div class="product-footer-actions">
-            <button class="btn-stock" title="Adjust stock" onclick="event.stopPropagation(); openStockModal(${p.id})">
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.3 2.3a1.5 1.5 0 0 1 2.1 2.1L5 12.8l-2.8.7.7-2.8 8.4-8.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-            </button>
             <button class="btn-add" ${p.stock === 0 ? 'disabled' : ''}
                     onclick="addToCart(${p.id})">+</button>
           </div>

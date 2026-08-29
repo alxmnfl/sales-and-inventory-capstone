@@ -1,10 +1,12 @@
 function filterTable(){
-    var q=document.getElementById('searchInp').value.toLowerCase();
-    var br=document.getElementById('branchSel').value.toUpperCase();
-    var cat=document.getElementById('catSel').value;
+    var searchEl=document.getElementById('searchInp');
+    var catEl=document.getElementById('catSel');
+    var q=searchEl?searchEl.value.toLowerCase():'';
+    var cat=catEl?catEl.value:'';
     document.querySelectorAll('#invTable tbody tr').forEach(function(tr){
-        var name=tr.dataset.name,sku=tr.dataset.sku,b=tr.dataset.branch,c=tr.dataset.cat;
-        var show=((!q||(name.includes(q)||sku.includes(q)))&&(!br||b===br)&&(!cat||c===cat));
+        var name=tr.dataset.name,sku=tr.dataset.sku,c=tr.dataset.cat;
+        if(name===undefined)return;
+        var show=((!q||(name.includes(q)||sku.includes(q)))&&(!cat||c===cat));
         tr.style.display=show?'':'none';
     });
 }

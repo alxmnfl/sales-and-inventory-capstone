@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/branch_list.php';
 
 // Auth guard — admin only
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
@@ -117,16 +118,8 @@ $r = $conn->query("
 $days_elapsed  = max(1, (int)$r->fetch_row()[0]);
 $avg_daily_rev = $days_elapsed > 0 ? $mtd_revenue / $days_elapsed : 0;
 
-// ── Branch list for the intelligence section filter 
-$branches_list = [];
-$r = $conn->query("SELECT DISTINCT UPPER(branch) AS branch FROM users WHERE branch IS NOT NULL AND branch != '' ORDER BY branch");
-if ($r) {
-    while ($row = $r->fetch_assoc()) {
-        if (strcasecmp($row['branch'], 'ALL BRANCHES') !== 0) {
-            $branches_list[] = $row['branch'];
-        }
-    }
-}
+// ── Branch list for the intelligence section filter (every company branch)
+$branches_list = all_branches($conn);
 
 $r = $conn->query("SELECT COUNT(DISTINCT branch) FROM users WHERE branch IS NOT NULL AND branch != '' AND branch != 'ALL BRANCHES'");
 $active_branches = (int)$r->fetch_row()[0];
@@ -172,7 +165,7 @@ $month_label = date('F Y');
             <div class="branch-filter" id="branchFilterWrapper">
                 <i class="fa-solid fa-location-dot branch-filter-icon"></i>
                 <button class="branch-select-btn" id="branchSelectBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                    <span id="branchSelectedLabel">All Branches</span>
+                    <span class="branch-selected-label" id="branchSelectedLabel">All Branches</span>
                     <i class="fa-solid fa-chevron-down branch-chevron" id="branchChevron"></i>
                 </button>
                 <div class="branch-dropdown-panel" id="branchDropdownPanel" role="listbox" aria-label="Select branch">
@@ -189,7 +182,7 @@ $month_label = date('F Y');
                         </div>
                     <?php endforeach; ?>
                 </div>
-                <select id="globalBranchFilter" style="display:none" onchange="loadAllSections()">
+                <select id="globalBranchFilter" class="branch-filter-hidden-select" style="display:none" onchange="loadAllSections()">
                     <option value="">All Branches</option>
                     <?php foreach ($branches_list as $b): ?>
                         <option value="<?= htmlspecialchars($b) ?>"><?= htmlspecialchars($b) ?></option>
@@ -451,6 +444,7 @@ $month_label = date('F Y');
         };
     </script>
 
+    <script src="../src/branch-filter-widget.js"></script>
     <script src="../src/admin.js"></script>
     <script src="../src/abc-donut.js"></script>
     <script src="../src/audit.js"></script>

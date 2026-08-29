@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/branch_list.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
     header('Location: ../../Landing Page/login.php'); exit;
@@ -59,10 +60,8 @@ $admins   = count(array_filter($users,fn($u)=>$u['role']==='administrator'));
 $staff    = $total - $admins;
 $online   = count(array_filter($users,fn($u)=>$u['status']==='online'));
 
-/* ── Branch list ── */
-$branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch!='' ORDER BY b");
-while($row=$r->fetch_row()) $branches[]=$row[0];
+/* ── Branch list (every company branch) ── */
+$branches = all_branches($conn);
 
 $conn->close();
 ?>
