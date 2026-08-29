@@ -4,6 +4,7 @@ async function loadProducts() {
     const data = await res.json();
     if (data.success) {
       products = data.products;
+      renderCategoryTabs();
       renderProducts();
     } else {
       setGridMsg('Failed to load products.');
@@ -33,8 +34,36 @@ function stockBadge(stock) {
 }
 
 function catIcon(cat) {
-  const icons = { 'Hydraulic Hose': '🚰', 'Other Hose': '➰', Fittings: '🔧', Ferrule: '🔩' };
+  const icons = {
+    'Hoses': '🪢', 'Hydraulic Hose': '🪢', 'Other Hose': '🪢',
+    'Fittings': '🔧', 'Ferrule': '🔩',
+    'Couplers': '🔗', 'Adapters': '⚙️', 'Accessories': '🔩',
+  };
   return icons[cat] || '📦';
+}
+
+// Build the category tabs from the branch's actual products (was hardcoded,
+// so real categories were unreachable and dead tabs showed nothing).
+function renderCategoryTabs() {
+  const cats = [...new Set(products.map(p => p.category).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
+  const bar = document.getElementById('categoryTabs');
+
+  bar.innerHTML = ['All Products', ...cats].map((c, i) =>
+    `<button class="tab${i === 0 ? ' active' : ''}" data-cat="${escHtml(c)}">` +
+    `${c === 'All Products' ? '' : catIcon(c) + ' '}${escHtml(c)}</button>`
+  ).join('');
+
+  bar.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      bar.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentCategory = tab.dataset.cat;
+      renderProducts();
+    });
+  });
+
+  currentCategory = 'All Products';
 }
 
 function renderProducts() {
@@ -54,14 +83,14 @@ function renderProducts() {
         ${inCart ? `<div class="cart-qty-badge">${inCart}</div>` : ''}
       </div>
       <div class="product-info">
-        <div class="product-meta">
-          <span class="product-sku">${escHtml(p.sku)}</span>
-          <span class="product-category">${escHtml(p.category)}</span>
-        </div>
+        <div class="product-sku">${escHtml(p.sku)}</div>
         <div class="product-name">${escHtml(p.name)}</div>
         <div class="product-footer">
           <span class="product-price">${fmt(p.price)}</span>
           <div class="product-footer-actions">
+            <button class="btn-stock" title="Adjust stock" onclick="event.stopPropagation(); openStockModal(${p.id})">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11.3 2.3a1.5 1.5 0 0 1 2.1 2.1L5 12.8l-2.8.7.7-2.8 8.4-8.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            </button>
             <button class="btn-add" ${p.stock === 0 ? 'disabled' : ''}
                     onclick="addToCart(${p.id})">+</button>
           </div>

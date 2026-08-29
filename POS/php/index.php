@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../../Landing Page/php/auth.php';
 
 // Accept session from main login (branch_staff) or POS-direct login
 if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 'branch_staff') {
@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 'branch_staff') {
 }
 
 if (!isset($_SESSION['pos_cashier'])) {
-    header('Location: ../../Landing Page/php/login.php');
+    header('Location: ../../Landing Page/login.php');
     exit;
 }
 
@@ -92,10 +92,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
       <button class="tab" data-cat="Ferrule">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M4 6h8M4 10h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         Ferrule
-      </button>
-      <button class="tab" data-cat="Hoses">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 8c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
-        Hoses
       </button>
     </div>
 

@@ -11,7 +11,8 @@ if (!isset($_SESSION['pos_cashier'])) {
 
 require_once __DIR__ . '/../../Landing Page/php/db.php';
 
-$branch = strtoupper(trim($_SESSION['pos_cashier_branch'] ?? ''));
+// POS is branch-scoped: a cashier only sees their own branch's catalogue.
+$branch = $_SESSION['pos_cashier_branch'] ?? '';
 
 $stmt = $conn->prepare(
     "SELECT id, sku, name, category, price, stock

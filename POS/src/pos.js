@@ -17,14 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
   });
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentCategory = tab.dataset.cat;
-      renderProducts();
-    });
-  });
+  // Category tabs are built from real data in renderCategoryTabs() (products.js)
+  // once the branch's catalogue has loaded.
 });
 
 // ─── HELPERS

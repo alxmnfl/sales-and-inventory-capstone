@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../../Landing Page/php/auth.php';
 
 // Accept session from main login (branch_staff) or POS-direct login
 if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 'branch_staff') {
@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 'branch_staff') {
 }
 
 if (!isset($_SESSION['pos_cashier'])) {
-    header('Location: ../../Landing Page/php/login.php');
+    header('Location: ../../Landing Page/login.php');
     exit;
 }
 
@@ -82,7 +82,6 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
       <button class="tab" data-cat="Other Hose">Other Hose</button>
       <button class="tab" data-cat="Fittings">Fittings</button>
       <button class="tab" data-cat="Ferrule">Ferrule</button>
-      <button class="tab" data-cat="Hoses">Hoses</button>
     </div>
   </div>
 
