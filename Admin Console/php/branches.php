@@ -13,8 +13,22 @@ $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1]
 /* ── Branch data ── */
 $branch_data = [];
 
-// Distinct branches from users (authoritative source)
-$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
+// Every branch that appears anywhere — staff roster, product catalogue, or sales
+// history — so branches that carry stock but have no staff assigned still show.
+// (branch columns differ in collation between tables, hence the explicit COLLATE.)
+$r = $conn->query("
+    SELECT DISTINCT b FROM (
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
+            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
+            WHERE branch IS NOT NULL AND branch <> ''
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
+            WHERE branch IS NOT NULL AND branch <> ''
+    ) t
+    ORDER BY b
+");
 while ($row = $r->fetch_row()) {
     $branch_data[$row[0]] = ['name'=>$row[0],'products'=>0,'stock'=>0,'low_stock'=>0,'staff'=>0,'revenue'=>0,'revenue_prev'=>0];
 }
@@ -59,7 +73,8 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Branches</title>
-<link rel="stylesheet" href="../styles/admin.css">
+<link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+<link rel="stylesheet" href="../styles/admin.css?v=20260829">
 <link rel="stylesheet" href="../styles/branches.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -117,14 +117,26 @@ $r = $conn->query("
 $days_elapsed  = max(1, (int)$r->fetch_row()[0]);
 $avg_daily_rev = $days_elapsed > 0 ? $mtd_revenue / $days_elapsed : 0;
 
-// ── Branch list for the intelligence section filter 
+// ── Branch list for the intelligence section filter — every branch that appears
+//    anywhere (staff roster, product catalogue, or sales history) so branches
+//    with no staff still appear. (branch columns differ in collation, hence COLLATE.)
 $branches_list = [];
-$r = $conn->query("SELECT DISTINCT UPPER(branch) AS branch FROM users WHERE branch IS NOT NULL AND branch != '' ORDER BY branch");
+$r = $conn->query("
+    SELECT DISTINCT b FROM (
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
+            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
+            WHERE branch IS NOT NULL AND branch <> ''
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
+            WHERE branch IS NOT NULL AND branch <> ''
+    ) t
+    ORDER BY b
+");
 if ($r) {
-    while ($row = $r->fetch_assoc()) {
-        if (strcasecmp($row['branch'], 'ALL BRANCHES') !== 0) {
-            $branches_list[] = $row['branch'];
-        }
+    while ($row = $r->fetch_row()) {
+        $branches_list[] = $row[0];
     }
 }
 
@@ -155,7 +167,8 @@ $month_label = date('F Y');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky 8 — Admin Console</title>
-    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+    <link rel="stylesheet" href="../styles/admin.css?v=20260829">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -448,7 +461,7 @@ $month_label = date('F Y');
         };
     </script>
 
-    <script src="../src/admin.js"></script>
+    <script src="../src/admin.js?v=20260829"></script>
     <script src="../src/abc-donut.js"></script>
     <script src="../src/audit.js"></script>
     <script src="../src/branchint-sec.js"></script>

@@ -10,9 +10,23 @@ $user_name = $_SESSION['user_name'] ?? 'Admin';
 $words     = explode(' ', trim($user_name));
 $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
 
-/* ── Branch list (authoritative source) ── */
+/* ── Branch list — every branch that appears anywhere (staff roster, product
+   catalogue, or sales history) so branches with no products still show. ──
+   (branch columns differ in collation between tables, hence the explicit COLLATE.) */
 $branches = [];
-$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
+$r = $conn->query("
+    SELECT DISTINCT b FROM (
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
+            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
+            WHERE branch IS NOT NULL AND branch <> ''
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
+            WHERE branch IS NOT NULL AND branch <> ''
+    ) t
+    ORDER BY b
+");
 while ($row = $r->fetch_row()) $branches[] = $row[0];
 
 /* ── Resolve which branch (if any) is being viewed ── */
@@ -134,12 +148,26 @@ if ($viewBranch === '') {
         }
     }
 
-    $r  = $conn->query("SELECT COUNT(*), COUNT(DISTINCT category), SUM(stock), SUM(price*stock) FROM pos_products");
-    [$total_products, $total_cats, $total_stock, $total_value] = $r->fetch_row();
-    $r  = $conn->query("SELECT COUNT(*) FROM pos_products WHERE stock=0");
-    $out_of_stock = (int)$r->fetch_row()[0];
-    $r  = $conn->query("SELECT COUNT(*) FROM pos_products WHERE stock>0 AND stock<10");
-    $low_stock = (int)$r->fetch_row()[0];
+    /* Catalogue-level totals. The catalogue is ~250 SKUs and every branch carries
+       the full list, so COUNT(*) over pos_products (250 x 18 branches = 4,500) is
+       not the "total products" figure a user expects — roll up per SKU instead.
+       Stock / value stay as true system-wide sums (unchanged by the rollup). */
+    $r = $conn->query("
+        SELECT
+            COUNT(*)                                                    AS total_products,
+            SUM(CASE WHEN total_stock = 0             THEN 1 ELSE 0 END) AS out_of_stock,
+            SUM(CASE WHEN total_stock BETWEEN 1 AND 9 THEN 1 ELSE 0 END) AS low_stock,
+            SUM(total_stock)                                            AS total_stock,
+            SUM(stock_value)                                            AS total_value
+        FROM (
+            SELECT sku, SUM(stock) AS total_stock, SUM(price * stock) AS stock_value
+            FROM pos_products
+            GROUP BY sku
+        ) c
+    ");
+    [$total_products, $out_of_stock, $low_stock, $total_stock, $total_value] = $r->fetch_row();
+    $r  = $conn->query("SELECT COUNT(DISTINCT category) FROM pos_products");
+    $total_cats = (int)$r->fetch_row()[0];
 
     /* Products per branch, for the "View Products" modal */
     $branch_products = [];
@@ -166,7 +194,8 @@ if ($viewBranch === '') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inventory</title>
-<link rel="stylesheet" href="../styles/admin.css">
+<link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+<link rel="stylesheet" href="../styles/admin.css?v=20260829">
 <link rel="stylesheet" href="../styles/inventory.css">
 <link rel="stylesheet" href="../styles/branches.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -389,7 +418,8 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inventory — <?=htmlspecialchars($viewBranch)?></title>
-<link rel="stylesheet" href="../styles/admin.css">
+<link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+<link rel="stylesheet" href="../styles/admin.css?v=20260829">
 <link rel="stylesheet" href="../styles/inventory.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -572,7 +602,7 @@ $conn->close();
     <input type="hidden" name="redirect_branch" value="<?=htmlspecialchars($viewBranch)?>">
 </form>
 
-<script src="../src/branch-filter-widget.js"></script>
+<script src="../src/branch-filter-widget.js?v=20260829"></script>
 <script src="../src/inventory.js"></script>
 </body>
 </html>

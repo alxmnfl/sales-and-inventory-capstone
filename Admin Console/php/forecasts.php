@@ -18,7 +18,22 @@ $days   = max(7, min(60, (int)($_GET['days'] ?? 14)));
 
 /* ── Branch list ── */
 $branches = [];
-$r = $conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
+// Every branch that appears anywhere (staff roster, product catalogue, or sales
+// history) so branches with no staff still appear. (branch columns differ in
+// collation between tables, hence the explicit COLLATE.)
+$r = $conn->query("
+    SELECT DISTINCT b FROM (
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
+            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
+            WHERE branch IS NOT NULL AND branch <> ''
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
+            WHERE branch IS NOT NULL AND branch <> ''
+    ) t
+    ORDER BY b
+");
 while ($row = $r->fetch_row()) {
     $branches[] = $row[0];
 }
@@ -61,7 +76,8 @@ if ($api_ok) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky 8 — Forecasts</title>
-    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+    <link rel="stylesheet" href="../styles/admin.css?v=20260829">
 <link rel="stylesheet" href="../styles/forecasts.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -430,6 +446,6 @@ new Chart(ctx, {
 });
 </script>
 <?php endif; ?>
-<script src="../src/branch-filter-widget.js"></script>
+<script src="../src/branch-filter-widget.js?v=20260829"></script>
 </body>
 </html>

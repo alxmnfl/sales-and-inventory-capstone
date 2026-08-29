@@ -71,7 +71,22 @@ $online   = count(array_filter($users,fn($u)=>$u['status']==='online'));
 
 /* ── Branch list ── */
 $branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch!='' ORDER BY b");
+// Every branch that appears anywhere (staff roster, product catalogue, or sales
+// history) so staff can be assigned to a branch that has no staff yet.
+// "ALL BRANCHES" is kept here — it is a valid assignment for administrators.
+$r=$conn->query("
+    SELECT DISTINCT b FROM (
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
+            WHERE branch IS NOT NULL AND branch <> ''
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
+            WHERE branch IS NOT NULL AND branch <> ''
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
+            WHERE branch IS NOT NULL AND branch <> ''
+    ) t
+    ORDER BY b
+");
 while($row=$r->fetch_row()) $branches[]=$row[0];
 
 /* ── Next auto-generated Employee ID (shown in the Add modal) ── */
@@ -85,7 +100,8 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Users</title>
-<link rel="stylesheet" href="../styles/admin.css">
+<link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+<link rel="stylesheet" href="../styles/admin.css?v=20260829">
 <link rel="stylesheet" href="../styles/users.css?v=20260829-1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

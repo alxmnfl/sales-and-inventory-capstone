@@ -119,13 +119,37 @@ ob_start(); ?>
 <script>
     
 (function(){
-    /* ── Sidebar burger toggle ── */
+    /* ── Sidebar burger toggle — collapsed state persists across page loads ── */
+    var COLLAPSE_KEY='lucky8_sidebar_collapsed';
     var b=document.getElementById('sidebarBurger'),s=document.querySelector('.sidebar');
+
+    var startCollapsed=false;
+    try{ startCollapsed=localStorage.getItem(COLLAPSE_KEY)==='1'; }catch(e){}
+
+    // Apply the saved state to the sidebar immediately (this script runs inline
+    // before first paint), so it doesn't render open then snap shut on every nav.
+    if(startCollapsed&&s) s.classList.add('collapsed');
+
+    function syncMain(collapsed,animate){
+        var m=document.getElementById('mainContent')||document.querySelector('.main');
+        if(!m) return;
+        if(animate){ m.classList.toggle('sidebar-collapsed',collapsed); return; }
+        // suppress the width/margin transition when applying the restored state
+        var t=m.style.transition; m.style.transition='none';
+        m.classList.toggle('sidebar-collapsed',collapsed);
+        void m.offsetWidth;
+        m.style.transition=t;
+    }
+
+    // .main is not parsed yet when this runs — apply once the DOM is ready.
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ syncMain(startCollapsed,false); });
+    else syncMain(startCollapsed,false);
+
     if(b&&s){
         b.addEventListener('click',function(){
             var c=s.classList.toggle('collapsed');
-            var m=document.getElementById('mainContent')||document.querySelector('.main');
-            if(m)m.classList.toggle('sidebar-collapsed',c);
+            syncMain(c,true);
+            try{ localStorage.setItem(COLLAPSE_KEY,c?'1':'0'); }catch(e){}
         });
     }
 
@@ -149,10 +173,33 @@ ob_start(); ?>
         document.body.appendChild(userDrop);
 
         function positionBelow(drop, trigger) {
+            var gap = 8, pad = 8;
+
+            // Measure the panel (temporarily shown but invisible).
+            var wasOpen = drop.classList.contains('open');
+            if (!wasOpen) { drop.style.visibility = 'hidden'; drop.classList.add('open'); }
+            var dw = drop.offsetWidth, dh = drop.offsetHeight;
+            if (!wasOpen) { drop.classList.remove('open'); drop.style.visibility = ''; }
+
             var r = trigger.getBoundingClientRect();
-            drop.style.top   = (r.bottom + 8) + 'px';
-            drop.style.right = (window.innerWidth - r.right) + 'px';
-            drop.style.left  = 'auto';
+
+            // Prefer aligning the panel's right edge with the trigger; if that
+            // spills off the left, align left edges instead; then clamp to viewport.
+            var left = r.right - dw;
+            if (left < pad) left = r.left;
+            if (left + dw > window.innerWidth - pad) left = window.innerWidth - dw - pad;
+            if (left < pad) left = pad;
+
+            // Below the trigger, or above it if there isn't room.
+            var top = r.bottom + gap;
+            if (top + dh > window.innerHeight - pad && r.top - gap - dh >= pad) {
+                top = r.top - gap - dh;
+            }
+
+            drop.style.left     = left + 'px';
+            drop.style.top      = top + 'px';
+            drop.style.right    = 'auto';
+            drop.style.maxWidth = (window.innerWidth - 2 * pad) + 'px';
         }
 
         notifBtn.addEventListener('click', function(e) {

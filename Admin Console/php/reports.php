@@ -10,41 +10,200 @@ $user_name = $_SESSION['user_name'] ?? 'Admin';
 $words     = explode(' ', trim($user_name));
 $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
 
-/* ── CSV export ── */
+/* ── Report export ──
+   Produces a self-contained, print-ready HTML sheet (A4, letterhead, totals)
+   that opens in the browser and auto-fires the print dialog, where the user can
+   pick "Save as PDF". No external PDF library required. */
 $export = trim($_GET['export'] ?? '');
 $branch = trim($_GET['branch'] ?? '');
 $from   = trim($_GET['from']   ?? date('Y-m-01'));
 $to     = trim($_GET['to']     ?? date('Y-m-d'));
 $bwhere = $branch ? "AND UPPER(branch)='".strtoupper(addslashes($branch))."'" : '';
 
-if ($export === 'sales') {
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="sales_report_'.$from.'_'.$to.'.csv"');
-    $out = fopen('php://output','w');
-    fputcsv($out, ['Transaction ID','Cashier','Branch','Payment','Subtotal','VAT','Total','Date']);
-    $r = $conn->query("SELECT transaction_id,cashier,branch,payment_method,subtotal,vat,total,created_at FROM pos_sales WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere ORDER BY created_at DESC");
-    while ($row = $r->fetch_row()) fputcsv($out, $row);
-    fclose($out); exit;
-}
+if (in_array($export, ['sales', 'inventory', 'audit'], true)) {
 
-if ($export === 'inventory') {
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="inventory_report_'.date('Y-m-d').'.csv"');
-    $out = fopen('php://output','w');
-    fputcsv($out, ['SKU','Name','Category','Branch','Price','Stock','Value']);
-    $r = $conn->query("SELECT sku,name,category,branch,price,stock,ROUND(price*stock,2) FROM pos_products ".($branch?"WHERE UPPER(branch)='".strtoupper(addslashes($branch))."'":'')." ORDER BY branch,name");
-    while ($row = $r->fetch_row()) fputcsv($out, $row);
-    fclose($out); exit;
-}
+    $scope  = $branch !== '' ? strtoupper($branch) : 'All Branches';
+    $gen_at = date('M j, Y · g:i A');
+    $foot   = null;
 
-if ($export === 'audit') {
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="audit_report_'.$from.'_'.$to.'.csv"');
-    $out = fopen('php://output','w');
-    fputcsv($out, ['Time','User','Branch','Action','Item','Details']);
-    $r = $conn->query("SELECT created_at,user_name,branch,action,entity_name,details FROM audit_trail WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere ORDER BY created_at DESC");
-    while ($row = $r->fetch_row()) fputcsv($out, $row);
-    fclose($out); exit;
+    if ($export === 'sales') {
+        $doc_title = 'Sales Report';
+        $meta      = "Period: {$from} to {$to}  •  Branch: {$scope}";
+        $cols      = ['Transaction ID', 'Cashier', 'Branch', 'Payment', 'Subtotal', 'VAT', 'Total', 'Date'];
+        $rightcol  = [4, 5, 6];
+        $rows      = [];
+        $sub = $vat = $tot = 0.0;
+        $r = $conn->query("SELECT transaction_id,cashier,branch,payment_method,subtotal,vat,total,created_at
+                           FROM pos_sales
+                           WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere
+                           ORDER BY created_at DESC");
+        while ($x = $r->fetch_assoc()) {
+            $sub += (float)$x['subtotal']; $vat += (float)$x['vat']; $tot += (float)$x['total'];
+            $rows[] = [
+                $x['transaction_id'], $x['cashier'], strtoupper($x['branch']), strtoupper($x['payment_method'] ?? 'CASH'),
+                '₱'.number_format((float)$x['subtotal'], 2), '₱'.number_format((float)$x['vat'], 2),
+                '₱'.number_format((float)$x['total'], 2), $x['created_at'],
+            ];
+        }
+        $foot = ['TOTAL — '.count($rows).' transactions', '', '', '',
+                 '₱'.number_format($sub, 2), '₱'.number_format($vat, 2), '₱'.number_format($tot, 2), ''];
+
+    } elseif ($export === 'inventory') {
+        $doc_title = 'Inventory Report';
+        $meta      = "Branch: {$scope}  •  As of ".date('M j, Y');
+        $cols      = ['SKU', 'Name', 'Category', 'Branch', 'Price', 'Stock', 'Value'];
+        $rightcol  = [4, 5, 6];
+        $rows      = [];
+        $stk = 0; $val = 0.0;
+        $iw = $branch ? "WHERE UPPER(branch)='".strtoupper(addslashes($branch))."'" : '';
+        $r = $conn->query("SELECT sku,name,category,branch,price,stock,ROUND(price*stock,2) v
+                           FROM pos_products $iw ORDER BY branch,name");
+        while ($x = $r->fetch_assoc()) {
+            $stk += (int)$x['stock']; $val += (float)$x['v'];
+            $rows[] = [
+                $x['sku'], $x['name'], $x['category'], strtoupper($x['branch']),
+                '₱'.number_format((float)$x['price'], 2), (string)(int)$x['stock'], '₱'.number_format((float)$x['v'], 2),
+            ];
+        }
+        $foot = ['TOTAL — '.count($rows).' items', '', '', '', '', (string)$stk, '₱'.number_format($val, 2)];
+
+    } else { // audit
+        $doc_title = 'Audit Trail Report';
+        $meta      = "Period: {$from} to {$to}  •  Branch: {$scope}";
+        $cols      = ['Time', 'User', 'Branch', 'Action', 'Item', 'Details'];
+        $rightcol  = [];
+        $rows      = [];
+        $r = $conn->query("SELECT created_at,user_name,branch,action,entity_name,details
+                           FROM audit_trail
+                           WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere
+                           ORDER BY created_at DESC");
+        while ($x = $r->fetch_assoc()) {
+            $rows[] = [
+                $x['created_at'], $x['user_name'], strtoupper($x['branch']),
+                $x['action'], $x['entity_name'] ?? '—', $x['details'] ?? '',
+            ];
+        }
+    }
+    $conn->close();
+
+    $R = array_flip($rightcol);   // quick "is this column right-aligned?" lookup
+
+    // Paginate into fixed-size pages so rows never overlap a page boundary and
+    // every sheet carries its own header, totals (last page) and "Page X of Y".
+    $rows_per_page = ($export === 'audit') ? 16 : 30;
+    $pages_out     = $rows ? array_chunk($rows, $rows_per_page) : [[]];
+    $total_pages   = count($pages_out);
+    $row_total     = count($rows);
+
+    header('Content-Type: text/html; charset=utf-8');
+    ?><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title><?= htmlspecialchars($doc_title) ?> — Lucky 8</title>
+<link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+<style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f4f6; color: #1f2937;
+           font-family: 'Segoe UI', 'Inter', Arial, sans-serif; }
+    .toolbar { position: sticky; top: 0; z-index: 5; display: flex; gap: 10px; align-items: center;
+               background: #111827; color: #fff; padding: 10px 16px; }
+    .toolbar button { font: inherit; padding: 7px 14px; border: 0; border-radius: 6px; cursor: pointer;
+                      background: #e8611a; color: #fff; font-weight: 600; }
+    .toolbar button.ghost { background: #374151; }
+    .toolbar .hint { margin-left: auto; font-size: 12px; color: #9ca3af; }
+
+    .page { background: #fff; width: 210mm; min-height: 297mm; margin: 18px auto; padding: 16mm;
+            box-shadow: 0 2px 14px rgba(0,0,0,.12); display: flex; flex-direction: column; }
+    .letterhead { display: flex; justify-content: space-between; align-items: flex-start;
+                  border-bottom: 2px solid #e8611a; padding-bottom: 12px; margin-bottom: 16px; }
+    .brand { display: flex; gap: 10px; align-items: center; }
+    .brand .badge { background: #e8611a; color: #fff; font-weight: 800; font-size: 14px;
+                    padding: 8px 10px; border-radius: 8px; }
+    .brand b { display: block; font-size: 15px; letter-spacing: 1px; }
+    .brand small { color: #6b7280; font-size: 10px; letter-spacing: 2px; }
+    .docmeta { text-align: right; }
+    .docmeta h1 { margin: 0 0 5px; font-size: 20px; }
+    .docmeta p { margin: 2px 0; font-size: 11px; color: #4b5563; }
+    .docmeta .gen { color: #9ca3af; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top;
+             overflow-wrap: anywhere; word-break: break-word; }
+    th { background: #f9fafb; text-transform: uppercase; font-size: 9px; letter-spacing: .5px;
+         color: #6b7280; border-bottom: 1.5px solid #d1d5db; }
+    td.r, th.r { text-align: right; white-space: nowrap; }
+    tfoot td { font-weight: 700; background: #f9fafb; border-top: 2px solid #d1d5db; }
+    .empty { text-align: center; color: #9ca3af; padding: 26px; }
+
+    .pagefoot { margin-top: auto; padding-top: 10px; border-top: 1px solid #e5e7eb;
+                display: flex; justify-content: space-between; font-size: 9px; color: #9ca3af; }
+
+    @media print {
+        body { background: #fff; }
+        .no-print { display: none !important; }
+        .page { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none;
+                page-break-after: always; }
+        .page:last-child { page-break-after: auto; }
+        tr { page-break-inside: avoid; }
+        @page { size: A4; margin: 14mm; }
+    }
+</style>
+</head>
+<body>
+<div class="toolbar no-print">
+    <button onclick="window.print()">🖨 Print / Save as PDF</button>
+    <button class="ghost" onclick="window.close()">Close</button>
+    <span class="hint">In the print dialog, choose “Save as PDF” as the destination.</span>
+</div>
+
+<?php foreach ($pages_out as $pi => $page_rows): $pageno = $pi + 1; ?>
+<div class="page">
+    <div class="letterhead">
+        <div class="brand">
+            <span class="badge">L8</span>
+            <div><b>LUCKY 8</b><small>ADMIN CONSOLE</small></div>
+        </div>
+        <div class="docmeta">
+            <h1><?= htmlspecialchars($doc_title) ?></h1>
+            <p><?= htmlspecialchars($meta) ?></p>
+            <p class="gen">Generated <?= htmlspecialchars($gen_at) ?> by <?= htmlspecialchars($user_name) ?></p>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr><?php foreach ($cols as $i => $c): ?><th class="<?= isset($R[$i]) ? 'r' : '' ?>"><?= htmlspecialchars($c) ?></th><?php endforeach; ?></tr>
+        </thead>
+        <tbody>
+        <?php foreach ($page_rows as $row): ?>
+            <tr><?php foreach ($row as $i => $cell): ?><td class="<?= isset($R[$i]) ? 'r' : '' ?>"><?= htmlspecialchars((string)$cell) ?></td><?php endforeach; ?></tr>
+        <?php endforeach; ?>
+        <?php if (!$row_total): ?>
+            <tr><td class="empty" colspan="<?= count($cols) ?>">No records for the selected filters.</td></tr>
+        <?php endif; ?>
+        </tbody>
+        <?php if ($foot && $row_total && $pageno === $total_pages): ?>
+        <tfoot>
+            <tr><?php foreach ($foot as $i => $cell): ?><td class="<?= isset($R[$i]) ? 'r' : '' ?>"><?= htmlspecialchars((string)$cell) ?></td><?php endforeach; ?></tr>
+        </tfoot>
+        <?php endif; ?>
+    </table>
+
+    <div class="pagefoot">
+        <span>Lucky 8 Sales &amp; Inventory System · <?= $row_total ?> record(s) · Confidential</span>
+        <span>Page <?= $pageno ?> of <?= $total_pages ?></span>
+    </div>
+</div>
+<?php endforeach; ?>
+
+<script>
+    window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 300); });
+</script>
+</body>
+</html>
+    <?php
+    exit;
 }
 
 /* ── Preview data for selected report ── */
@@ -92,9 +251,34 @@ if ($report_type === 'sales') {
     $pages = 1;
 }
 
+/* Column presentation for the preview table: which columns are numeric
+   (right-aligned) and which leading column renders in a mono font. */
+$col_align = [
+    'sales'     => ['r' => [4],       'mono' => 0],
+    'inventory' => ['r' => [4, 5, 6], 'mono' => 0],
+    'audit'     => ['r' => [],        'mono' => 0],
+];
+$ca    = $col_align[$report_type] ?? ['r' => [], 'mono' => -1];
+$rcols = array_flip($ca['r']);
+$mono  = $ca['mono'];
+
 /* ── Branch list ── */
 $branches=[];
-$r=$conn->query("SELECT DISTINCT UPPER(branch) b FROM users WHERE branch IS NOT NULL AND branch != '' AND UPPER(branch) != 'ALL BRANCHES' ORDER BY b");
+// Every branch that appears anywhere (staff roster, product catalogue, or sales
+// history) so branches with no staff still appear.
+$r=$conn->query("
+    SELECT DISTINCT b FROM (
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
+            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
+            WHERE branch IS NOT NULL AND branch <> ''
+        UNION
+        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
+            WHERE branch IS NOT NULL AND branch <> ''
+    ) t
+    ORDER BY b
+");
 while($row=$r->fetch_row()) $branches[]=$row[0];
 
 $conn->close();
@@ -105,8 +289,9 @@ $conn->close();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Reports</title>
-<link rel="stylesheet" href="../styles/admin.css">
-<link rel="stylesheet" href="../styles/reports.css">
+<link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+<link rel="stylesheet" href="../styles/admin.css?v=20260829">
+<link rel="stylesheet" href="../styles/reports.css?v=20260829">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -127,25 +312,34 @@ $conn->close();
 
         <!-- Report type selector -->
         <div class="report-types">
-            <a href="?type=sales&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>" style="text-decoration:none;">
+            <a href="?type=sales&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>">
                 <div class="report-type-card<?=$report_type==='sales'?' selected':''?>">
                     <div class="rt-icon rt-sales"><i class="fa-solid fa-chart-line"></i></div>
-                    <div class="rt-title">Sales Report</div>
-                    <div class="rt-desc">Transactions by date range and branch</div>
+                    <div class="rt-body">
+                        <div class="rt-title">Sales Report</div>
+                        <div class="rt-desc">Transactions by date range and branch</div>
+                    </div>
+                    <i class="fa-solid fa-check rt-check"></i>
                 </div>
             </a>
-            <a href="?type=inventory&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>" style="text-decoration:none;">
+            <a href="?type=inventory&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>">
                 <div class="report-type-card<?=$report_type==='inventory'?' selected':''?>">
                     <div class="rt-icon rt-inv"><i class="fa-solid fa-boxes-stacked"></i></div>
-                    <div class="rt-title">Inventory Report</div>
-                    <div class="rt-desc">Current stock levels and product values</div>
+                    <div class="rt-body">
+                        <div class="rt-title">Inventory Report</div>
+                        <div class="rt-desc">Current stock levels and product values</div>
+                    </div>
+                    <i class="fa-solid fa-check rt-check"></i>
                 </div>
             </a>
-            <a href="?type=audit&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>" style="text-decoration:none;">
+            <a href="?type=audit&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>">
                 <div class="report-type-card<?=$report_type==='audit'?' selected':''?>">
                     <div class="rt-icon rt-audit"><i class="fa-solid fa-shield-halved"></i></div>
-                    <div class="rt-title">Audit Report</div>
-                    <div class="rt-desc">Full system activity and change log</div>
+                    <div class="rt-body">
+                        <div class="rt-title">Audit Report</div>
+                        <div class="rt-desc">Full system activity and change log</div>
+                    </div>
+                    <i class="fa-solid fa-check rt-check"></i>
                 </div>
             </a>
         </div>
@@ -155,10 +349,10 @@ $conn->close();
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
                 <div>
                     <div class="chart-title"><?=ucfirst($report_type)?> Report</div>
-                    <div class="chart-subtitle">Configure filters then export to CSV</div>
+                    <div class="chart-subtitle">Configure filters, then open a print-ready PDF</div>
                 </div>
-                <a href="?export=<?=$report_type?>&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>" class="btn-green">
-                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                <a href="?export=<?=$report_type?>&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>" class="btn-green" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-file-pdf"></i> Print / Save as PDF
                 </a>
             </div>
 
@@ -193,25 +387,27 @@ $conn->close();
             </form>
 
             <?php if($report_type==='sales' && !empty($preview_total_rev)):?>
-            <div style="display:flex;gap:24px;margin-bottom:16px;padding:14px 16px;background:#f9fafb;border-radius:10px;">
-                <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">TOTAL REVENUE</span><div style="font-size:18px;font-weight:800;color:#111827;">₱<?=number_format((float)$preview_total_rev,0)?></div></div>
-                <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">TRANSACTIONS</span><div style="font-size:18px;font-weight:800;color:#111827;"><?=number_format((int)($preview_count??0))?></div></div>
-                <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">PERIOD</span><div style="font-size:18px;font-weight:800;color:#111827;"><?=$from?> → <?=$to?></div></div>
+            <div class="report-summary">
+                <div class="rs-item"><div class="rs-label">Total Revenue</div><div class="rs-value">₱<?=number_format((float)$preview_total_rev,0)?></div></div>
+                <div class="rs-item"><div class="rs-label">Transactions</div><div class="rs-value"><?=number_format((int)($preview_count??0))?></div></div>
+                <div class="rs-item"><div class="rs-label">Period</div><div class="rs-value small"><?=htmlspecialchars($from)?> &rarr; <?=htmlspecialchars($to)?></div></div>
             </div>
             <?php endif;?>
 
-            <p class="preview-note">Showing <?=number_format(count($preview))?> of <?=number_format($preview_total)?> rows — page <?=$page_num?>/<?=$pages?>. Export CSV to get all records.</p>
+            <p class="preview-note">Showing <?=number_format(count($preview))?> of <?=number_format($preview_total)?> rows &middot; page <?=$page_num?>/<?=$pages?> &middot; the PDF includes all records.</p>
+            <div class="report-table-wrap">
             <table class="intel-table">
-                <thead><tr><?php foreach($preview_cols as $col):?><th><?=htmlspecialchars($col)?></th><?php endforeach;?></tr></thead>
+                <thead><tr><?php foreach($preview_cols as $ci=>$col):?><th class="<?=isset($rcols[$ci])?'r':''?>"><?=htmlspecialchars($col)?></th><?php endforeach;?></tr></thead>
                 <tbody>
                 <?php foreach($preview as $row):?>
-                <tr><?php foreach($row as $cell):?><td><?=htmlspecialchars($cell??'')?></td><?php endforeach;?></tr>
+                <tr><?php foreach(array_values($row) as $ci=>$cell):?><td class="<?=isset($rcols[$ci])?'r':''?><?=$ci===$mono?' mono':''?>"><?=htmlspecialchars($cell??'')?></td><?php endforeach;?></tr>
                 <?php endforeach;?>
                 <?php if(empty($preview)):?>
-                <tr><td colspan="<?=count($preview_cols)?>" style="text-align:center;padding:32px;color:#9ca3af;">No data found for the selected filters.</td></tr>
+                <tr><td colspan="<?=count($preview_cols)?>" style="text-align:center;padding:36px;color:#9ca3af;">No data found for the selected filters.</td></tr>
                 <?php endif;?>
                 </tbody>
             </table>
+            </div>
 
             <?php if($pages>1):
                 $qp=http_build_query(array_filter(['type'=>$report_type,'branch'=>$branch,'from'=>$from,'to'=>$to]));
@@ -227,6 +423,6 @@ $conn->close();
         </div>
     </div>
 </div>
-<script src="../src/branch-filter-widget.js"></script>
+<script src="../src/branch-filter-widget.js?v=20260829"></script>
 </body>
 </html>

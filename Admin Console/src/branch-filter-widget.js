@@ -12,12 +12,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!btn || !panel || !hidden) return;
 
         function openPanel() {
+            panel.classList.remove('flip-right');
             panel.classList.add('open');
             if (chevron) chevron.classList.add('rotated');
             btn.setAttribute('aria-expanded', 'true');
+            // If the panel spills past the right edge of the window, anchor it
+            // to the trigger's right edge instead (open leftward).
+            if (panel.getBoundingClientRect().right > window.innerWidth - 8) {
+                panel.classList.add('flip-right');
+            }
         }
         function closePanel() {
             panel.classList.remove('open');
+            panel.classList.remove('flip-right');
             if (chevron) chevron.classList.remove('rotated');
             btn.setAttribute('aria-expanded', 'false');
         }

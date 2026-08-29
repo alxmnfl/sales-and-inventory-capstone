@@ -21,12 +21,17 @@ function initBranchDropdown() {
     if (!wrapper || !btn || !panel) return;
 
     function openPanel() {
+        panel.classList.remove('flip-right');
         panel.classList.add('open');
         chevron.classList.add('rotated');
         btn.setAttribute('aria-expanded', 'true');
+        if (panel.getBoundingClientRect().right > window.innerWidth - 8) {
+            panel.classList.add('flip-right');
+        }
     }
     function closePanel() {
         panel.classList.remove('open');
+        panel.classList.remove('flip-right');
         chevron.classList.remove('rotated');
         btn.setAttribute('aria-expanded', 'false');
     }
