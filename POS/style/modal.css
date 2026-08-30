@@ -1,6 +1,6 @@
 /* Lucky 8 POS — Shared modal shell + checkout modal
    (.modal-overlay/.modal/.modal-header/.cash-input-wrap/.btn-cancel/.btn-complete
-   are reused by the checkout modal and the batch-stock confirmation modal.) */
+   are reused by the checkout modal and the delivery review modal.) */
 
 .modal-overlay {
   position: fixed;

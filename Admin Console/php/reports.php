@@ -1,10 +1,13 @@
 <?php
 require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
+require_once '../../Landing Page/php/delivery_schema.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
     header('Location: ../../Landing Page/php/login.php'); exit;
 }
+
+ensure_delivery_schema($conn);
 
 $user_name = $_SESSION['user_name'] ?? 'Admin';
 $words     = explode(' ', trim($user_name));
@@ -20,7 +23,7 @@ $from   = trim($_GET['from']   ?? date('Y-m-01'));
 $to     = trim($_GET['to']     ?? date('Y-m-d'));
 $bwhere = $branch ? "AND UPPER(branch)='".strtoupper(addslashes($branch))."'" : '';
 
-if (in_array($export, ['sales', 'inventory', 'audit'], true)) {
+if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
 
     $scope  = $branch !== '' ? strtoupper($branch) : 'All Branches';
     $gen_at = date('M j, Y · g:i A');
@@ -66,6 +69,30 @@ if (in_array($export, ['sales', 'inventory', 'audit'], true)) {
             ];
         }
         $foot = ['TOTAL — '.count($rows).' items', '', '', '', '', (string)$stk, '₱'.number_format($val, 2)];
+
+    } elseif ($export === 'deliveries') {
+        $doc_title = 'Delivery Report';
+        $meta      = "Period: {$from} to {$to}  •  Branch: {$scope}";
+        $cols      = ['Reference', 'Branch', 'Status', 'Lines', 'Units', 'Sent', 'Received'];
+        $rightcol  = [3, 4];
+        $rows      = [];
+        $ln = 0; $un = 0;
+        $r = $conn->query("SELECT d.reference, d.branch, d.status,
+                                  (SELECT COUNT(*) FROM inventory_delivery_items i WHERE i.delivery_id = d.id) lc,
+                                  (SELECT COALESCE(SUM(qty_sent),0) FROM inventory_delivery_items i WHERE i.delivery_id = d.id) uc,
+                                  d.created_at, d.received_at
+                           FROM inventory_deliveries d
+                           WHERE DATE(d.created_at) BETWEEN '$from' AND '$to' $bwhere
+                           ORDER BY d.created_at DESC");
+        while ($x = $r->fetch_assoc()) {
+            $ln += (int)$x['lc']; $un += (int)$x['uc'];
+            $rows[] = [
+                $x['reference'], strtoupper($x['branch']), strtoupper($x['status']),
+                (string)(int)$x['lc'], (string)(int)$x['uc'],
+                $x['created_at'], $x['received_at'] ?? '—',
+            ];
+        }
+        $foot = ['TOTAL — '.count($rows).' deliveries', '', '', (string)$ln, (string)$un, '', ''];
 
     } else { // audit
         $doc_title = 'Audit Trail Report';
@@ -247,6 +274,23 @@ if ($report_type === 'sales') {
     $r = $conn->query("SELECT created_at,user_name,branch,action,COALESCE(entity_name,'—'),COALESCE(details,'') FROM audit_trail WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere ORDER BY created_at DESC LIMIT $per_page OFFSET $offset");
     while ($row = $r->fetch_row()) $preview[] = $row;
     $preview_count = $preview_total;
+} elseif ($report_type === 'deliveries') {
+    $preview_cols = ['Reference','Branch','Status','Lines','Units','Sent','Received'];
+    $rc = $conn->query("SELECT COUNT(*) FROM inventory_deliveries WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere");
+    $preview_total = (int)$rc->fetch_row()[0];
+    $dlv_received  = (int)$conn->query("SELECT COUNT(*) FROM inventory_deliveries WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere AND status='received'")->fetch_row()[0];
+    $pages    = max(1, (int)ceil($preview_total / $per_page));
+    $page_num = min($page_num, $pages);
+    $offset   = ($page_num - 1) * $per_page;
+    $r = $conn->query("SELECT d.reference, UPPER(d.branch), UPPER(d.status),
+                              (SELECT COUNT(*) FROM inventory_delivery_items i WHERE i.delivery_id = d.id),
+                              (SELECT COALESCE(SUM(qty_sent),0) FROM inventory_delivery_items i WHERE i.delivery_id = d.id),
+                              d.created_at, COALESCE(d.received_at,'—')
+                       FROM inventory_deliveries d
+                       WHERE DATE(d.created_at) BETWEEN '$from' AND '$to' $bwhere
+                       ORDER BY d.created_at DESC LIMIT $per_page OFFSET $offset");
+    while ($row = $r->fetch_row()) $preview[] = $row;
+    $preview_count = $preview_total;
 } else {
     $pages = 1;
 }
@@ -254,9 +298,10 @@ if ($report_type === 'sales') {
 /* Column presentation for the preview table: which columns are numeric
    (right-aligned) and which leading column renders in a mono font. */
 $col_align = [
-    'sales'     => ['r' => [4],       'mono' => 0],
-    'inventory' => ['r' => [4, 5, 6], 'mono' => 0],
-    'audit'     => ['r' => [],        'mono' => 0],
+    'sales'      => ['r' => [4],       'mono' => 0],
+    'inventory'  => ['r' => [4, 5, 6], 'mono' => 0],
+    'audit'      => ['r' => [],        'mono' => 0],
+    'deliveries' => ['r' => [3, 4],    'mono' => 0],
 ];
 $ca    = $col_align[$report_type] ?? ['r' => [], 'mono' => -1];
 $rcols = array_flip($ca['r']);
@@ -291,7 +336,7 @@ $conn->close();
 <title>Lucky 8 — Reports</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 <link rel="stylesheet" href="../styles/admin.css?v=20260829">
-<link rel="stylesheet" href="../styles/reports.css?v=20260829">
+<link rel="stylesheet" href="../styles/reports.css?v=20260830b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -338,6 +383,16 @@ $conn->close();
                     <div class="rt-body">
                         <div class="rt-title">Audit Report</div>
                         <div class="rt-desc">Full system activity and change log</div>
+                    </div>
+                    <i class="fa-solid fa-check rt-check"></i>
+                </div>
+            </a>
+            <a href="?type=deliveries&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>">
+                <div class="report-type-card<?=$report_type==='deliveries'?' selected':''?>">
+                    <div class="rt-icon rt-dlv"><i class="fa-solid fa-truck-fast"></i></div>
+                    <div class="rt-body">
+                        <div class="rt-title">Delivery Report</div>
+                        <div class="rt-desc">Stock deliveries sent to branches and their status</div>
                     </div>
                     <i class="fa-solid fa-check rt-check"></i>
                 </div>
@@ -390,6 +445,14 @@ $conn->close();
             <div class="report-summary">
                 <div class="rs-item"><div class="rs-label">Total Revenue</div><div class="rs-value">₱<?=number_format((float)$preview_total_rev,0)?></div></div>
                 <div class="rs-item"><div class="rs-label">Transactions</div><div class="rs-value"><?=number_format((int)($preview_count??0))?></div></div>
+                <div class="rs-item"><div class="rs-label">Period</div><div class="rs-value small"><?=htmlspecialchars($from)?> &rarr; <?=htmlspecialchars($to)?></div></div>
+            </div>
+            <?php endif;?>
+
+            <?php if($report_type==='deliveries' && $preview_total):?>
+            <div class="report-summary">
+                <div class="rs-item"><div class="rs-label">Deliveries</div><div class="rs-value"><?=number_format((int)$preview_total)?></div></div>
+                <div class="rs-item"><div class="rs-label">Received</div><div class="rs-value"><?=number_format((int)($dlv_received??0))?></div></div>
                 <div class="rs-item"><div class="rs-label">Period</div><div class="rs-value small"><?=htmlspecialchars($from)?> &rarr; <?=htmlspecialchars($to)?></div></div>
             </div>
             <?php endif;?>

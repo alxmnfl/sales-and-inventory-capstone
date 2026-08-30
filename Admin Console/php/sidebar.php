@@ -26,6 +26,11 @@ $_r = $_sb->query("
 ");
 if ($_r) $_risk_cnt = (int)$_r->fetch_row()[0];
 
+// Badge: deliveries flagged by a branch as having a problem
+$_dispute_cnt = 0;
+$_r = @$_sb->query("SELECT COUNT(*) FROM inventory_deliveries WHERE status='disputed'");
+if ($_r) $_dispute_cnt = (int)$_r->fetch_row()[0];
+
 // Recent activity for notification bell (last 5 audit entries)
 $_notif_items = [];
 $_r = $_sb->query("SELECT action, entity_name, user_name, branch, created_at FROM audit_trail ORDER BY created_at DESC LIMIT 5");
@@ -39,9 +44,10 @@ $_sb_words     = explode(' ', trim($_sb_user_name));
 $_sb_initials  = strtoupper(substr($_sb_words[0],0,1).(isset($_sb_words[1])?substr($_sb_words[1],0,1):''));
 
 $_nav = [
-    ['index.php',       'fa-gauge-high',          'Dashboard',      0,            ''],
-    ['inventory.php',   'fa-boxes-stacked',       'Inventory',      0,            ''],
-    ['sales.php',       'fa-chart-line',          'Sales',          0,            ''],
+    ['index.php',       'fa-gauge-high',          'Dashboard',      0,             ''],
+    ['inventory.php',   'fa-boxes-stacked',       'Inventory',      0,             ''],
+    ['deliveries.php',  'fa-truck-fast',          'Deliveries',     $_dispute_cnt, ''],
+    ['sales.php',       'fa-chart-line',          'Sales',          0,             ''],
     ['branches.php',    'fa-building',            'Branches',       0,            ''],
     ['users.php',       'fa-users',               'Users',          $_staff_cnt,  ''],
     ['forecasts.php',   'fa-wand-magic-sparkles', 'Forecasts',      $_risk_cnt,   'blue'],

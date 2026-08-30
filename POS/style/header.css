@@ -96,3 +96,56 @@
 .btn-exit {
   color: var(--gray-500);
 }
+.btn-header.btn-exit svg { color: #DC2626; }
+.btn-header.btn-exit:hover {
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+  color: #DC2626;
+}
+
+/* ── Deliveries button ── */
+.btn-header--deliveries {
+  color: var(--orange);
+  border-color: #F4C9AE;
+}
+.btn-header--deliveries svg { color: var(--orange); }
+.btn-header--deliveries:hover {
+  background: var(--orange-light);
+  border-color: var(--orange);
+}
+
+/* Pending deliveries waiting → attention-grabbing highlight */
+.btn-header--alert {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: var(--white);
+  animation: hdrPulse 2s ease-in-out infinite;
+}
+.btn-header--alert svg { color: var(--white); }
+.btn-header--alert:hover {
+  background: var(--orange-hover);
+  border-color: var(--orange-hover);
+}
+.btn-header--alert .hdr-badge {
+  background: var(--white);
+  color: var(--orange);
+}
+@keyframes hdrPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 90, 26, .45); }
+  50%      { box-shadow: 0 0 0 6px rgba(224, 90, 26, 0); }
+}
+
+.hdr-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}

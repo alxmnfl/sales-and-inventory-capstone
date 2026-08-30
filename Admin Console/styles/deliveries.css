@@ -1,0 +1,119 @@
+/* Lucky 8 Admin — Deliveries page
+   Leans on admin.css + reports.css for the shell (report-summary, filter-bar,
+   report-table-wrap, pagination). Only page-specific pieces live here. */
+
+/* ── Summary cards: 3-up (KPI card style, like sales.php) ── */
+.dlv-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 720px) {
+    .dlv-kpi-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Filter bar: branch picker + note + search on one grey panel ── */
+.chart-card .filter-bar .branch-select-btn { min-width: 200px; }
+.chart-card .filter-bar .dlv-grow {
+    flex: 1 1 200px;
+    min-width: 180px;
+}
+
+/* ── Send button, disabled state ── */
+.btn-orange:disabled,
+.btn-orange[disabled] {
+    background: #e5e7eb;
+    color: #9ca3af;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* ── Product picker table (inside .report-table-wrap) ── */
+.dlv-product-table { table-layout: fixed; }
+.dlv-product-table th:nth-child(1), .dlv-product-table td:nth-child(1) { width: auto; }
+.dlv-product-table th:nth-child(2), .dlv-product-table td:nth-child(2) { width: 132px; }
+.dlv-product-table th:nth-child(3), .dlv-product-table td:nth-child(3) { width: 90px; }
+.dlv-product-table th:nth-child(4), .dlv-product-table td:nth-child(4) { width: 104px; }
+
+.report-table-wrap .intel-table th.c,
+.report-table-wrap .intel-table td.c { text-align: center; }
+
+.report-table-wrap .intel-table tbody tr.dlv-row-active {
+    background: #fff8f5;
+    box-shadow: inset 3px 0 0 #e8611a;
+}
+
+.dlv-qty {
+    width: 68px;
+    padding: 6px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    font: inherit;
+    text-align: center;
+    font-weight: 700;
+    color: #111827;
+    outline: none;
+    transition: border-color .15s;
+}
+.dlv-qty:focus { border-color: #e8611a; }
+.dlv-row-active .dlv-qty { border-color: #f0b892; background: #fff; }
+
+.pg-gap {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 2px;
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+/* ── Small text used in history rows ── */
+.dlv-sub { font-size: 11px; color: #9ca3af; }
+.dlv-dim { font-size: 12px; color: #6b7280; }
+
+/* ── Status badges ── */
+.dlv-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.badge-sent      { background: #fff7ed; color: #c2410c; }
+.badge-received  { background: #ecfdf5; color: #047857; }
+.badge-disputed  { background: #fef2f2; color: #dc2626; }
+.badge-cancelled { background: #f3f4f6; color: #6b7280; }
+
+/* ── Confirm / view modal item list ── */
+.dlv-confirm-list {
+    max-height: 340px;
+    overflow-y: auto;
+    border: 1px solid #f3f4f6;
+    border-radius: 12px;
+    margin-bottom: 6px;
+}
+.dlv-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13px;
+}
+.dlv-line:last-child { border-bottom: none; }
+.dlv-line-name { color: #111827; }
+.dlv-line-qty { font-weight: 700; color: #e8611a; white-space: nowrap; }
+
+/* ── Send / view modals: more room so the contents don't feel cramped ── */
+#dlvConfirmModal .modal,
+#dlvViewModal .modal {
+    width: 560px;
+    padding: 30px 32px 28px;
+}
+#dlvConfirmModal .modal h3,
+#dlvViewModal .modal h3 { margin-bottom: 16px; }
+#dlvConfirmModal .modal-note,
+#dlvViewModal .modal-note {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+}
+#dlvConfirmModal .modal-footer,
+#dlvViewModal .modal-footer { margin-top: 22px; }

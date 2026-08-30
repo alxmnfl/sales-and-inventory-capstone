@@ -3,17 +3,21 @@
 /* ── Report type selector ── */
 .report-types {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     margin-bottom: 18px;
 }
-.report-types > a { text-decoration: none; display: block; }
+@media (max-width: 1180px) {
+    .report-types { grid-template-columns: repeat(2, 1fr); }
+}
+.report-types > a { text-decoration: none; display: block; height: 100%; }
 
 .report-type-card {
     position: relative;
     display: flex;
     align-items: center;
     gap: 13px;
+    height: 100%;
     background: #fff;
     border: 1.5px solid #e8eaed;
     border-radius: 14px;
@@ -45,6 +49,7 @@
 .rt-sales { background: rgba(232, 97, 26, .12); color: #e8611a; }
 .rt-inv   { background: rgba(16, 185, 129, .12); color: #10b981; }
 .rt-audit { background: rgba(99, 102, 241, .12); color: #6366f1; }
+.rt-dlv   { background: rgba(245, 158, 11, .14); color: #d97706; }
 
 .report-type-card .rt-body { min-width: 0; }
 .report-type-card .rt-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 2px; }

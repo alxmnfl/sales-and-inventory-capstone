@@ -14,6 +14,18 @@ if (!isset($_SESSION['pos_cashier'])) {
 
 $cashier = $_SESSION['pos_cashier'];
 $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
+
+// Deliveries awaiting this branch's confirmation (header badge)
+require_once '../../Landing Page/php/delivery_schema.php';
+ensure_delivery_schema($conn);
+$pendingDeliveries = 0;
+$pdStmt = $conn->prepare("SELECT COUNT(*) FROM inventory_deliveries WHERE branch = ? AND status = 'sent'");
+$pdBranch = strtoupper($branch);
+$pdStmt->bind_param('s', $pdBranch);
+$pdStmt->execute();
+$pdStmt->bind_result($pendingDeliveries);
+$pdStmt->fetch();
+$pdStmt->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,7 +37,7 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
-<link rel="stylesheet" href="../style/header.css">
+<link rel="stylesheet" href="../style/header.css?v=20260830">
 <link rel="stylesheet" href="../style/products.css?v=2">
 <link rel="stylesheet" href="../style/cart.css?v=2">
 <link rel="stylesheet" href="../style/modal.css">
@@ -49,9 +61,10 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
     </div>
   </div>
   <div class="header-right">
-    <a href="batch-stock.php" class="btn-header">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      BATCH STOCK
+    <a href="deliveries.php" class="btn-header btn-header--deliveries<?= $pendingDeliveries > 0 ? ' btn-header--alert' : '' ?>">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1zM10 6h3l2 2v3h-5M3.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM12.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      DELIVERIES
+      <?php if ($pendingDeliveries > 0): ?><span class="hdr-badge"><?= (int)$pendingDeliveries ?></span><?php endif; ?>
     </a>
     <a href="logout.php" class="btn-header btn-exit">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>

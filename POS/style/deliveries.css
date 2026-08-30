@@ -1,0 +1,413 @@
+/* Lucky 8 POS — Inventory Deliveries (receiving) */
+
+.dlv-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+}
+
+.dlv-intro h1 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.dlv-intro p {
+  font-size: 13px;
+  color: var(--gray-500);
+  line-height: 1.5;
+}
+
+/* ── Success banner ── */
+.dlv-success {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 4px;
+  padding: 14px 16px;
+  background: var(--green-bg);
+  border: 1.5px solid #86EFAC;
+  border-radius: var(--radius);
+  color: #15803D;
+}
+.dlv-success i { font-size: 20px; flex-shrink: 0; }
+.dlv-success-title { font-weight: 700; font-size: 14px; }
+.dlv-success-sub { font-size: 12px; opacity: .85; margin-top: 2px; }
+.dlv-success-close {
+  margin-left: auto;
+  background: none; border: none; cursor: pointer;
+  color: #15803D; font-size: 20px; line-height: 1; padding: 0 4px;
+}
+
+/* ══ Admin Console concept: KPI cards + documents table ══ */
+
+/* ── KPI cards ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gray-500);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.kpi-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.kpi-icon.orange { background: rgba(224, 90, 26, .1);  color: var(--orange); }
+.kpi-icon.green  { background: rgba(34, 197, 94, .14); color: #15803D; }
+.kpi-icon.red    { background: rgba(239, 68, 68, .1);  color: #DC2626; }
+.kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--dark);
+  letter-spacing: -.02em;
+  line-height: 1;
+}
+.kpi-meta { font-size: 11px; color: var(--gray-500); }
+
+.kpi-card--alert {
+  border-color: var(--orange);
+  background: var(--orange-light);
+}
+.kpi-card--alert .kpi-value { color: var(--orange); }
+
+/* ── Incoming-delivery notification ── */
+.dlv-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 13px 16px;
+  background: var(--orange-light);
+  border: 1px solid #F4C9AE;
+  border-left: 4px solid var(--orange);
+  border-radius: var(--radius);
+  color: #9A3412;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.dlv-alert i { font-size: 18px; color: var(--orange); flex-shrink: 0; }
+.dlv-alert strong { color: var(--orange); font-weight: 700; }
+
+/* ── Documents card ── */
+.chart-card {
+  margin-top: 16px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 20px;
+}
+.chart-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dark);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.chart-subtitle {
+  font-size: 11px;
+  color: var(--gray-500);
+  margin-bottom: 16px;
+}
+
+.report-table-wrap {
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  overflow: hidden;
+  overflow-x: auto;
+}
+.dlv-doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.dlv-doc-table thead th {
+  background: var(--gray-100);
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+.dlv-doc-table thead th.col-r { text-align: right; }
+.dlv-doc-table tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: middle;
+  color: var(--gray-700);
+}
+.dlv-doc-table tbody td.col-r { text-align: right; }
+.dlv-doc-table tbody td.col-r strong { color: var(--dark); font-weight: 700; }
+.dlv-doc-table tbody tr:last-child td { border-bottom: none; }
+.dlv-doc-table tbody tr:hover { background: #fafafa; }
+.dlv-doc-table tbody tr.dlv-tr-new { background: var(--orange-light); }
+.dlv-doc-table tbody tr.dlv-tr-new:hover { background: #FCE7DA; }
+.dlv-doc-table tbody tr.dlv-tr-new td:first-child { box-shadow: inset 3px 0 0 var(--orange); }
+
+.dlv-dim { color: var(--gray-500); font-size: 12px; line-height: 1.5; }
+.dlv-sub { font-size: 11px; color: var(--gray-500); }
+.dlv-sub--warn { color: #B45309; }
+.dlv-td-empty {
+  text-align: center;
+  padding: 40px 20px !important;
+  color: var(--gray-500);
+  font-size: 13px;
+}
+
+/* ── Status badges ── */
+.dlv-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.dlv-badge--new   { background: var(--orange-light); color: var(--orange); }
+.dlv-badge--done  { background: var(--green-bg); color: #15803D; }
+.dlv-badge--warn  { background: #FEF3C7; color: #B45309; }
+.dlv-badge--muted { background: var(--gray-100); color: var(--gray-500); }
+
+/* ── Row action button ── */
+.dlv-open-btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.dlv-open-btn:hover { background: var(--orange-hover); }
+.dlv-open-btn--ghost {
+  background: var(--white);
+  color: var(--gray-700);
+  border: 1.5px solid var(--gray-200);
+}
+.dlv-open-btn--ghost:hover { background: var(--gray-100); }
+
+@media (max-width: 720px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}
+
+/* ══ Review / dispute modals ══ */
+#dlvDisputeModal { z-index: 210; }
+
+/* Dispute — roomier box */
+.modal--sm { width: 520px; }
+#dlvDisputeModal .modal--sm { padding: 32px 32px 28px; }
+#dlvDisputeModal .modal-header { margin-bottom: 20px; }
+
+/* Review — bigger box with more breathing room */
+#dlvReviewModal .modal { width: 700px; padding: 34px; }
+#dlvReviewModal .modal-header { margin-bottom: 20px; }
+#dlvReviewModal .modal-title { font-size: 21px; }
+#dlvReviewModal .modal-subtitle { font-size: 13px; margin-top: 5px; }
+
+.dlv-note {
+  background: var(--orange-light);
+  color: #9A3412;
+  border: 1px solid #F4C9AE;
+  border-radius: 9px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  margin-bottom: 16px;
+}
+.dlv-instruct {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin: 0 0 16px;
+}
+
+.dlv-check-wrap {
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+  overflow-y: auto;
+  max-height: 46vh;
+}
+.dlv-check-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.dlv-check-table thead th {
+  position: sticky;
+  top: 0;
+  background: #FAFAFA;
+  text-align: left;
+  padding: 12px 18px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-200);
+}
+.dlv-check-table td {
+  padding: 15px 18px;
+  border-top: 1px solid var(--gray-100);
+  vertical-align: middle;
+}
+.dlv-check-table tbody tr:first-child td { border-top: none; }
+.dlv-check-table tbody tr.is-ok { background: var(--green-bg); }
+.dlv-check-table tbody tr.is-ok .dlv-ci-name { color: #15803D; }
+.dlv-check-table .col-r { text-align: right; }
+.dlv-check-table .col-c { text-align: center; width: 56px; }
+
+.dlv-ci-name { font-weight: 600; font-size: 13px; color: var(--dark); }
+.dlv-ci-cat { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+.dlv-ci-qty { font-weight: 800; font-size: 15px; color: var(--dark); }
+.dlv-ci-ok { color: var(--green); }
+.dlv-mono { font-family: 'Courier New', monospace; font-size: 12px; color: var(--gray-700); }
+
+.dlv-chk-wrap {
+  display: inline-flex;
+  padding: 6px;
+  cursor: pointer;
+}
+.dlv-chk {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--orange);
+  cursor: pointer;
+}
+
+.dlv-error {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+/* ── Inline "are you sure?" confirmation (pops inside the review modal) ── */
+.dlv-inline-confirm {
+  margin-top: 18px;
+  padding: 18px 20px;
+  background: var(--orange-light);
+  border: 1px solid #F4C9AE;
+  border-radius: 12px;
+  animation: dlvPop .16s ease-out;
+}
+@keyframes dlvPop {
+  from { opacity: 0; transform: translateY(-6px) scale(.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.dlv-ic-q {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dark);
+  line-height: 1.4;
+}
+.dlv-ic-sub {
+  font-size: 12.5px;
+  color: #9A3412;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.dlv-ic-sub strong { font-weight: 700; }
+.dlv-ic-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+.dlv-ic-actions .btn-cancel,
+.dlv-ic-actions .btn-complete {
+  flex: 0 0 auto;
+  padding: 10px 18px;
+  font-size: 12.5px;
+  border-radius: 10px;
+  letter-spacing: .3px;
+}
+.dlv-ic-actions .btn-cancel { background: var(--white); }
+
+.dlv-textarea {
+  width: 100%;
+  min-height: 96px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+.dlv-textarea:focus { outline: none; border-color: var(--orange); }
+
+/* ── Footer buttons (scoped so the checkout modal keeps its size) ── */
+
+/* Review: compact, "Report a problem" sits left as a quiet link */
+#dlvReviewModal .modal-footer {
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+#dlvReviewModal .btn-cancel,
+#dlvReviewModal .btn-complete {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  font-size: 12px;
+  border-radius: 9px;
+  letter-spacing: .3px;
+}
+#dlvReviewFooter .btn-cancel {
+  margin-right: auto;
+  border-color: transparent;
+  color: var(--gray-500);
+}
+#dlvReviewFooter .btn-cancel:hover {
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+  color: #DC2626;
+}
+
+/* Dispute: "Cancel" left, "Send report" right */
+#dlvDisputeModal .modal-footer {
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+#dlvDisputeModal .btn-cancel,
+#dlvDisputeModal .btn-complete {
+  flex: 0 0 auto;
+  padding: 10px 18px;
+  font-size: 12.5px;
+  border-radius: 10px;
+  letter-spacing: .3px;
+}
