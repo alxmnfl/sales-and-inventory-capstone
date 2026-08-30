@@ -59,17 +59,23 @@ function updateCart() {
 
   document.getElementById('cartItems').innerHTML = cart.map(item => `
     <div class="cart-item">
-      <div class="cart-item-name">${escHtml(item.name)}</div>
-      <div class="cart-item-price-unit">${fmt(item.price)} × ${item.qty}</div>
+      <div class="cart-item-head">
+        <div class="cart-item-name">${escHtml(item.name)}</div>
+        <button class="cart-item-del" onclick="removeFromCart(${item.id})" aria-label="Remove ${escHtml(item.name)}" title="Remove">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M6 4V2h4v2M7 7v5M9 7v5M3 4l1 9h8l1-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
       <div class="cart-item-row">
         <div class="qty-controls">
           <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
           <span class="qty-num">${item.qty}</span>
           <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
         </div>
-        <span class="cart-item-total">${fmt(item.price * item.qty)}</span>
+        <div class="cart-item-amounts">
+          <span class="cart-item-unit">${fmt(item.price)} each</span>
+          <span class="cart-item-total">${fmt(item.price * item.qty)}</span>
+        </div>
       </div>
-      <button class="btn-remove" onclick="removeFromCart(${item.id})">REMOVE</button>
     </div>
   `).join('');
 

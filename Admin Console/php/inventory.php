@@ -196,7 +196,7 @@ if ($viewBranch === '') {
 <title>Lucky 8 — Inventory</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 <link rel="stylesheet" href="../styles/admin.css?v=20260829">
-<link rel="stylesheet" href="../styles/inventory.css">
+<link rel="stylesheet" href="../styles/inventory.css?v=20260830">
 <link rel="stylesheet" href="../styles/branches.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -295,12 +295,13 @@ if ($viewBranch === '') {
             <span class="bpm-count-badge" id="bpmCount"></span>
         </div>
 
-        <div class="bpm-cat-filter">
-            <i class="fa-solid fa-tag bpm-cat-icon"></i>
-            <select id="bpmCatSelect" onchange="renderBpmList()">
-                <option value="">All Categories</option>
-            </select>
-            <i class="fa-solid fa-chevron-down bpm-cat-chevron"></i>
+        <div class="branch-filter bpm-cat-filter" title="Filter by category">
+            <i class="fa-solid fa-tag branch-filter-icon"></i>
+            <button class="branch-select-btn" type="button" id="bpmCatBtn" aria-haspopup="listbox" aria-expanded="false">
+                <span class="branch-selected-label" id="bpmCatLabel">All Categories</span>
+                <i class="fa-solid fa-chevron-down branch-chevron"></i>
+            </button>
+            <div class="branch-dropdown-panel" id="bpmCatPanel" role="listbox" aria-label="Filter by category"></div>
         </div>
 
         <div id="bpmList" class="bpm-list"></div>
@@ -318,23 +319,74 @@ function escHtml(str){
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// The catalogue only uses these four categories; anything else (e.g. legacy
+// "Hoses") is ignored by the filter.
+const CANONICAL_CATS = ['Hydraulic Hose', 'Other Hose', 'Fittings', 'Ferrule'];
+
 let bpmProducts = [];
+let bpmCat = '';
 
 function openBranchModal(branchName){
     bpmProducts = PRODUCTS_BY_BRANCH[branchName] || [];
     document.getElementById('bpmBranchName').textContent = branchName;
 
-    const categories = Array.from(new Set(bpmProducts.map(function(p){ return p.category; }).filter(Boolean))).sort();
-    const catSelect = document.getElementById('bpmCatSelect');
-    catSelect.innerHTML = '<option value="">All Categories</option>'
-        + categories.map(function(c){ return '<option value="'+escHtml(c)+'">'+escHtml(c)+'</option>'; }).join('');
+    const categories = CANONICAL_CATS.filter(function(c){
+        return bpmProducts.some(function(p){ return p.category === c; });
+    });
+
+    bpmCat = '';
+    document.getElementById('bpmCatLabel').textContent = 'All Categories';
+
+    const panel = document.getElementById('bpmCatPanel');
+    const opts = [{ value: '', label: 'All Categories', icon: 'fa-layer-group' }]
+        .concat(categories.map(function(c){ return { value: c, label: c, icon: 'fa-box' }; }));
+    panel.innerHTML = opts.map(function(o, i){
+        return '<div class="branch-option' + (i === 0 ? ' branch-option--selected' : '') + '" '
+             + 'data-value="' + escHtml(o.value) + '" role="option" aria-selected="' + (i === 0) + '">'
+             + '<i class="fa-solid ' + o.icon + '"></i><span>' + escHtml(o.label) + '</span>'
+             + '<i class="fa-solid fa-check branch-option-check"></i></div>';
+    }).join('');
+
+    panel.querySelectorAll('.branch-option').forEach(function(opt){
+        opt.addEventListener('click', function(){
+            bpmCat = opt.dataset.value;
+            document.getElementById('bpmCatLabel').textContent = opt.querySelector('span').textContent;
+            panel.querySelectorAll('.branch-option').forEach(function(o){
+                o.classList.remove('branch-option--selected');
+                o.setAttribute('aria-selected', 'false');
+            });
+            opt.classList.add('branch-option--selected');
+            opt.setAttribute('aria-selected', 'true');
+            closeBpmCatPanel();
+            renderBpmList();
+        });
+    });
 
     renderBpmList();
     document.getElementById('branchProductsModal').classList.add('open');
 }
 
+function openBpmCatPanel(){
+    document.getElementById('bpmCatPanel').classList.add('open');
+    document.querySelector('.bpm-cat-filter .branch-chevron').classList.add('rotated');
+    document.getElementById('bpmCatBtn').setAttribute('aria-expanded', 'true');
+}
+function closeBpmCatPanel(){
+    document.getElementById('bpmCatPanel').classList.remove('open');
+    document.querySelector('.bpm-cat-filter .branch-chevron').classList.remove('rotated');
+    document.getElementById('bpmCatBtn').setAttribute('aria-expanded', 'false');
+}
+
+document.getElementById('bpmCatBtn').addEventListener('click', function(e){
+    e.stopPropagation();
+    document.getElementById('bpmCatPanel').classList.contains('open') ? closeBpmCatPanel() : openBpmCatPanel();
+});
+document.addEventListener('click', function(e){
+    if (!document.querySelector('.bpm-cat-filter').contains(e.target)) closeBpmCatPanel();
+});
+
 function renderBpmList(){
-    const cat  = document.getElementById('bpmCatSelect').value;
+    const cat  = bpmCat;
     const list = document.getElementById('bpmList');
     const filtered = cat ? bpmProducts.filter(function(p){ return p.category === cat; }) : bpmProducts;
 
@@ -420,7 +472,7 @@ $conn->close();
 <title>Lucky 8 — Inventory — <?=htmlspecialchars($viewBranch)?></title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 <link rel="stylesheet" href="../styles/admin.css?v=20260829">
-<link rel="stylesheet" href="../styles/inventory.css">
+<link rel="stylesheet" href="../styles/inventory.css?v=20260830">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">

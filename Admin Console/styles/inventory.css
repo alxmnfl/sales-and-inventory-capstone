@@ -212,44 +212,25 @@
     border-radius: 20px;
     white-space: nowrap;
 }
+/* Category filter — reuses the shared .branch-filter dropdown widget, stretched
+   to fill the modal width. */
 .bpm-cat-filter {
-    position: relative;
     display: flex;
-    align-items: center;
-    margin-bottom: 14px;
-}
-.bpm-cat-icon {
-    position: absolute;
-    left: 12px;
-    font-size: 12px;
-    color: #9ca3af;
-    pointer-events: none;
-}
-.bpm-cat-chevron {
-    position: absolute;
-    right: 12px;
-    font-size: 11px;
-    color: #9ca3af;
-    pointer-events: none;
-}
-.bpm-cat-filter select {
     width: 100%;
-    appearance: none;
-    -webkit-appearance: none;
-    padding: 9px 32px 9px 34px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #111827;
-    background: #fff;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s;
+    margin-bottom: 14px;
+    padding: 8px 12px;
 }
-.bpm-cat-filter select:focus,
-.bpm-cat-filter select:hover {
-    border-color: #e8611a;
+.bpm-cat-filter .branch-select-btn {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+}
+.bpm-cat-filter .branch-dropdown-panel {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    left: 0;
+    right: 0;
 }
 .bpm-list {
     max-height: 340px;

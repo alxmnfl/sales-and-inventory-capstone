@@ -26,8 +26,8 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 
 <link rel="stylesheet" href="../style/base.css">
 <link rel="stylesheet" href="../style/header.css">
-<link rel="stylesheet" href="../style/products.css">
-<link rel="stylesheet" href="../style/cart.css">
+<link rel="stylesheet" href="../style/products.css?v=2">
+<link rel="stylesheet" href="../style/cart.css?v=2">
 <link rel="stylesheet" href="../style/modal.css">
 <link rel="stylesheet" href="../style/sale-complete.css">
 
@@ -258,8 +258,8 @@ $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 <script src="../src/checkout.js"></script>
 <script src="../src/complete-sale.js"></script>
 <script src="../src/receipt.js"></script>
-<script src="../src/cart.js"></script>
-<script src="../src/products.js"></script>
+<script src="../src/cart.js?v=2"></script>
+<script src="../src/products.js?v=2"></script>
 
 </body>
 </html>

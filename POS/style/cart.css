@@ -70,40 +70,70 @@
 }
 
 .cart-item {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--gray-200);
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--gray-100, #F3F4F6);
+  transition: background .12s;
+}
+
+.cart-item:hover {
+  background: #FafafA;
+}
+
+.cart-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .cart-item-name {
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 2px;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
-.cart-item-price-unit {
-  font-size: 11px;
-  color: var(--gray-500);
-  margin-bottom: 8px;
+.cart-item-del {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--gray-400, #9CA3AF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s, background .15s;
+}
+
+.cart-item-del:hover {
+  color: #EF4444;
+  background: #FEE2E2;
 }
 
 .cart-item-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .qty-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+  background: var(--gray-100, #F3F4F6);
+  border-radius: 8px;
+  padding: 3px;
 }
 
 .qty-btn {
   width: 26px;
   height: 26px;
-  border: 1.5px solid var(--gray-200);
-  background: var(--white);
+  border: none;
+  background: transparent;
   border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
@@ -116,38 +146,33 @@
 }
 
 .qty-btn:hover {
-  border-color: var(--orange);
+  background: var(--white);
   color: var(--orange);
+  box-shadow: var(--shadow-sm);
 }
 
 .qty-num {
   font-size: 14px;
   font-weight: 700;
-  min-width: 20px;
+  min-width: 24px;
   text-align: center;
+}
+
+.cart-item-amounts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.3;
+}
+
+.cart-item-unit {
+  font-size: 10px;
+  color: var(--gray-500);
 }
 
 .cart-item-total {
   font-size: 14px;
   font-weight: 700;
-}
-
-.btn-remove {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--gray-500);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .3px;
-  text-transform: uppercase;
-  padding: 4px 0 0;
-  transition: color .15s;
-  display: block;
-}
-
-.btn-remove:hover {
-  color: #EF4444;
 }
 
 .cart-footer {

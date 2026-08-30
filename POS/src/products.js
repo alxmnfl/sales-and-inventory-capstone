@@ -46,8 +46,10 @@ function renderProducts() {
   document.getElementById('productGrid').innerHTML = list.map(p => {
     const inCart = cart.find(c => c.id === p.id)?.qty || 0;
     const b = stockBadge(p.stock);
+    const out = p.stock === 0;
     return `
-    <div class="product-card">
+    <div class="product-card${out ? ' product-card--out' : ''}"
+         ${out ? '' : `onclick="addToCart(${p.id})"`}>
       <div class="product-img">
         <span>${catIcon(p.category)}</span>
         <div class="stock-badge ${b.cls}">${b.label}</div>
@@ -61,10 +63,6 @@ function renderProducts() {
         <div class="product-name">${escHtml(p.name)}</div>
         <div class="product-footer">
           <span class="product-price">${fmt(p.price)}</span>
-          <div class="product-footer-actions">
-            <button class="btn-add" ${p.stock === 0 ? 'disabled' : ''}
-                    onclick="addToCart(${p.id})">+</button>
-          </div>
         </div>
       </div>
     </div>`;
