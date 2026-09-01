@@ -26,6 +26,22 @@ $pdStmt->execute();
 $pdStmt->bind_result($pendingDeliveries);
 $pdStmt->fetch();
 $pdStmt->close();
+
+// Inter-branch transfers needing this branch's attention:
+// incoming requests to approve + shipments on the way in to confirm.
+require_once '../../Landing Page/php/transfer_schema.php';
+ensure_transfer_schema($conn);
+$pendingTransfers = 0;
+$ptStmt = $conn->prepare(
+    "SELECT
+        (SELECT COUNT(*) FROM branch_transfers WHERE source_branch = ? AND status = 'requested')
+      + (SELECT COUNT(*) FROM branch_transfers WHERE requesting_branch = ? AND status = 'shipped')"
+);
+$ptStmt->bind_param('ss', $pdBranch, $pdBranch);
+$ptStmt->execute();
+$ptStmt->bind_result($pendingTransfers);
+$ptStmt->fetch();
+$ptStmt->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -37,7 +53,7 @@ $pdStmt->close();
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
-<link rel="stylesheet" href="../style/header.css?v=20260830">
+<link rel="stylesheet" href="../style/header.css?v=20260901">
 <link rel="stylesheet" href="../style/products.css?v=2">
 <link rel="stylesheet" href="../style/cart.css?v=2">
 <link rel="stylesheet" href="../style/modal.css">
@@ -61,6 +77,11 @@ $pdStmt->close();
     </div>
   </div>
   <div class="header-right">
+    <a href="transfers.php" class="btn-header btn-header--transfers<?= $pendingTransfers > 0 ? ' btn-header--alert' : '' ?>">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 3L1 6l3 3M1 6h11M12 13l3-3-3-3M15 10H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      TRANSFERS
+      <?php if ($pendingTransfers > 0): ?><span class="hdr-badge"><?= (int)$pendingTransfers ?></span><?php endif; ?>
+    </a>
     <a href="deliveries.php" class="btn-header btn-header--deliveries<?= $pendingDeliveries > 0 ? ' btn-header--alert' : '' ?>">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1zM10 6h3l2 2v3h-5M3.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM12.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       DELIVERIES

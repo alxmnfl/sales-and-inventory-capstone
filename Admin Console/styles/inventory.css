@@ -198,6 +198,31 @@
 .form-group select:focus {
     border-color: #e8611a;
 }
+
+/* ── Category picker: the shared .branch-filter dropdown widget, stretched to
+   fill a .form-group like a normal field (same approach as .bpm-cat-filter) ── */
+.form-group .branch-filter.cat-cselect {
+    display: flex;
+    width: 100%;
+    margin: 0;
+    padding: 7px 10px 7px 12px;
+}
+.cat-cselect .branch-select-btn {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+}
+.cat-cselect .branch-dropdown-panel {
+    left: 0;
+    right: 0;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+}
+.cat-cselect .branch-selected-label--placeholder {
+    color: #9ca3af;
+    font-weight: 500;
+}
 .modal-footer {
     display: flex;
     justify-content: flex-end;

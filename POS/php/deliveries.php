@@ -87,7 +87,7 @@ function dlvWhen(?string $s): string {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
-<link rel="stylesheet" href="../style/header.css?v=20260830">
+<link rel="stylesheet" href="../style/header.css?v=20260901">
 <link rel="stylesheet" href="../style/modal.css">
 <link rel="stylesheet" href="../style/deliveries.css?v=20260830j">
 </head>
@@ -108,6 +108,10 @@ function dlvWhen(?string $s): string {
     </div>
   </div>
   <div class="header-right">
+    <a href="transfers.php" class="btn-header btn-header--transfers">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 3L1 6l3 3M1 6h11M12 13l3-3-3-3M15 10H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      TRANSFERS
+    </a>
     <a href="index.php" class="btn-header">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       BACK TO POS

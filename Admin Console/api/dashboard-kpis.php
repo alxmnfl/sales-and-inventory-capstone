@@ -94,6 +94,8 @@ if ($branch !== '') {
     $stmt->execute();
     $critical_count = (int)$stmt->get_result()->fetch_row()[0];
 
+    $low_stock_branches = $low_stock_count > 0 ? 1 : 0;
+
     $stmt = $conn->prepare("
         SELECT p.id, COALESCE(SUM(si.total_price), 0) AS revenue
         FROM pos_products p
@@ -166,6 +168,9 @@ if ($branch !== '') {
     $r = $conn->query("SELECT COUNT(*) FROM pos_products WHERE stock < 5 AND stock >= 0");
     $critical_count = (int)$r->fetch_row()[0];
 
+    $r = $conn->query("SELECT COUNT(DISTINCT branch) FROM pos_products WHERE stock < 10 AND stock >= 0 AND branch IS NOT NULL AND branch <> ''");
+    $low_stock_branches = (int)$r->fetch_row()[0];
+
     $r = $conn->query("
         SELECT p.id, COALESCE(SUM(si.total_price), 0) AS revenue
         FROM pos_products p
@@ -185,7 +190,22 @@ if ($branch !== '') {
     $r = $conn->query("SELECT DATEDIFF(NOW(), MIN(created_at)) + 1 FROM pos_sales WHERE MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())");
     $days_elapsed = max(1, (int)$r->fetch_row()[0]);
 
-    $r = $conn->query("SELECT COUNT(DISTINCT branch) FROM pos_sales WHERE MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW()) AND branch IS NOT NULL AND branch != ''");
+    // Operational branches = every branch the system knows about (staff roster,
+    // product catalogue, or sales history) — NOT just branches that happened to
+    // record a sale in the current calendar month, which collapses to 0 at the
+    // start of a month before any sales land.
+    $r = $conn->query("
+        SELECT COUNT(*) FROM (
+            SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
+                WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
+            UNION
+            SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
+                WHERE branch IS NOT NULL AND branch <> ''
+            UNION
+            SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
+                WHERE branch IS NOT NULL AND branch <> ''
+        ) t
+    ");
     $active_branches = (int)$r->fetch_row()[0];
 }
 
@@ -206,6 +226,7 @@ echo json_encode([
     'daily_units'      => $daily_units,
     'low_stock_count'  => $low_stock_count,
     'critical_count'   => $critical_count,
+    'low_stock_branches' => $low_stock_branches,
     'abc'              => ['a' => $a_cut, 'b' => $b_cut, 'c' => $c_cut, 'total_sku' => $total_sku],
     'days_elapsed'     => $days_elapsed,
     'avg_daily_rev'    => $avg_daily_rev,

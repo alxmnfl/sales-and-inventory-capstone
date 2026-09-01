@@ -10,14 +10,20 @@ function loadDashboardKpis(branch) {
                 revCard.querySelector('.kpi-value').textContent = '₱' + Number(data.mtd_revenue).toLocaleString();
                 const meta = revCard.querySelector('.kpi-meta');
                 if (meta) {
-                    let badge = '';
-                    if (data.rev_pct !== null) {
-                        const cls = data.rev_pct >= 0 ? 'badge-up' : 'badge-down';
-                        const sign = data.rev_pct >= 0 ? '+' : '';
-                        badge = `<span class="${cls}">${data.rev_pct >= 0 ? '↑' : '↓'} ${sign}${data.rev_pct}%</span>`;
+                    if (Number(data.mtd_txn_count) === 0) {
+                        // No sales recorded yet for the current month — a "-100%"
+                        // drop here is noise, not a signal.
+                        meta.innerHTML = branch ? `No sales yet this month for ${esc(branch)}` : 'No sales yet this month';
+                    } else {
+                        let badge = '';
+                        if (data.rev_pct !== null) {
+                            const cls = data.rev_pct >= 0 ? 'badge-up' : 'badge-down';
+                            const sign = data.rev_pct >= 0 ? '+' : '';
+                            badge = `<span class="${cls}">${data.rev_pct >= 0 ? '↑' : '↓'} ${sign}${data.rev_pct}%</span>`;
+                        }
+                        const scope = branch ? ` for ${esc(branch)}` : ' Across all branches';
+                        meta.innerHTML = badge + scope;
                     }
-                    const scope = branch ? ` for ${esc(branch)}` : ' Across all branches';
-                    meta.innerHTML = badge + scope;
                 }
             }
 
@@ -45,7 +51,13 @@ function loadDashboardKpis(branch) {
                     if (data.critical_count > 0) {
                         criticalBadge = `<span class="badge-pill red">↓ ${data.critical_count} CRITICAL</span>`;
                     }
-                    const scope = branch ? ` for ${esc(branch)}` : '';
+                    let scope;
+                    if (branch) {
+                        scope = ` for ${esc(branch)}`;
+                    } else {
+                        const n = Number(data.low_stock_branches) || 0;
+                        scope = n > 0 ? ` ${n} branch${n !== 1 ? 'es' : ''} affected` : '';
+                    }
                     meta.innerHTML = criticalBadge + scope;
                 }
             }

@@ -239,8 +239,8 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inventory</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260829">
-<link rel="stylesheet" href="../styles/inventory.css?v=20260830e">
+<link rel="stylesheet" href="../styles/admin.css?v=20260901b">
+<link rel="stylesheet" href="../styles/inventory.css?v=20260901">
 <link rel="stylesheet" href="../styles/branches.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -419,13 +419,26 @@ $conn->close();
             <div class="form-row">
                 <div class="form-group"><label>SKU</label><input name="sku" required placeholder="e.g. P-0251"></div>
                 <div class="form-group"><label>Category</label>
-                    <select name="category" required>
-                        <option value="" disabled selected>Select category…</option>
-                        <option>Hydraulic Hose</option>
-                        <option>Other Hose</option>
-                        <option>Fittings</option>
-                        <option>Ferrule</option>
-                    </select>
+                    <div class="branch-filter cat-cselect" id="catAddCatWidget" title="Category">
+                        <i class="fa-solid fa-layer-group branch-filter-icon"></i>
+                        <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="branch-selected-label branch-selected-label--placeholder">Select category…</span>
+                            <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                        </button>
+                        <div class="branch-dropdown-panel" role="listbox" aria-label="Category">
+                            <?php foreach (['Hydraulic Hose','Other Hose','Fittings','Ferrule'] as $c): ?>
+                            <div class="branch-option" data-value="<?=$c?>" role="option" aria-selected="false">
+                                <i class="fa-solid fa-circle-dot"></i><span><?=$c?></span><i class="fa-solid fa-check branch-option-check"></i>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <select name="category" class="branch-filter-hidden-select" style="display:none">
+                            <option value="" selected>Select category…</option>
+                            <?php foreach (['Hydraulic Hose','Other Hose','Fittings','Ferrule'] as $c): ?>
+                            <option value="<?=$c?>"><?=$c?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="form-group"><label>Product Name</label><input name="name" required placeholder="Full product name"></div>
@@ -451,12 +464,25 @@ $conn->close();
             <div class="form-group"><label>Product Name</label><input name="name" id="catEditName" required></div>
             <div class="form-row">
                 <div class="form-group"><label>Category</label>
-                    <select name="category" id="catEditCat" required>
-                        <option>Hydraulic Hose</option>
-                        <option>Other Hose</option>
-                        <option>Fittings</option>
-                        <option>Ferrule</option>
-                    </select>
+                    <div class="branch-filter cat-cselect" id="catEditCatWidget" title="Category">
+                        <i class="fa-solid fa-layer-group branch-filter-icon"></i>
+                        <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="branch-selected-label">Hydraulic Hose</span>
+                            <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                        </button>
+                        <div class="branch-dropdown-panel" role="listbox" aria-label="Category">
+                            <?php foreach (['Hydraulic Hose','Other Hose','Fittings','Ferrule'] as $c): ?>
+                            <div class="branch-option" data-value="<?=$c?>" role="option" aria-selected="false">
+                                <i class="fa-solid fa-circle-dot"></i><span><?=$c?></span><i class="fa-solid fa-check branch-option-check"></i>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <select name="category" id="catEditCat" class="branch-filter-hidden-select" style="display:none">
+                            <?php foreach (['Hydraulic Hose','Other Hose','Fittings','Ferrule'] as $c): ?>
+                            <option value="<?=$c?>"><?=$c?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group"><label>SKU</label><input id="catEditSkuShow" readonly disabled style="background:#f9fafb;color:#6b7280;"></div>
             </div>
@@ -667,9 +693,53 @@ function catBySku(sku){
     return CATALOGUE.find(function(p){ return p.sku === sku; });
 }
 
+/* Drive a .branch-filter category widget: mirror the value into its hidden
+   <select>, mark the matching panel option, refresh the label. A value not in
+   the fixed list (a legacy category) is added to the hidden <select> only —
+   it stays selected and submits correctly; the panel keeps the standard list. */
+function catWidgetSet(widget, value){
+    if (!widget) return;
+    const hidden = widget.querySelector('.branch-filter-hidden-select');
+    const label  = widget.querySelector('.branch-selected-label');
+    const panel  = widget.querySelector('.branch-dropdown-panel');
+
+    Array.from(hidden.querySelectorAll('option[data-legacy]')).forEach(function(o){ o.remove(); });
+
+    let known = Array.from(hidden.options).some(function(o){ return o.value === value; });
+    if (value && !known){
+        hidden.insertAdjacentHTML('beforeend',
+            '<option data-legacy value="'+escHtml(value)+'">'+escHtml(value)+' (legacy)</option>');
+    }
+
+    hidden.value = value || '';
+    let labelText = '';
+    panel.querySelectorAll('.branch-option').forEach(function(o){
+        const hit = o.dataset.value === value;
+        o.classList.toggle('branch-option--selected', hit);
+        o.setAttribute('aria-selected', hit ? 'true' : 'false');
+        if (hit) labelText = o.querySelector('span').textContent;
+    });
+    if (!labelText && value && !known) labelText = value + ' (legacy)';
+    label.textContent = (value && labelText) ? labelText : 'Select category…';
+    label.classList.toggle('branch-selected-label--placeholder', !(value && labelText));
+}
+
+// Keep the label colour in step when the user picks from the panel
+// (branch-filter-widget.js fires "change" on the hidden <select>).
+['catAddCatWidget', 'catEditCatWidget'].forEach(function(id){
+    const w = document.getElementById(id);
+    if (!w) return;
+    const hidden = w.querySelector('.branch-filter-hidden-select');
+    const label  = w.querySelector('.branch-selected-label');
+    hidden.addEventListener('change', function(){
+        label.classList.toggle('branch-selected-label--placeholder', !hidden.value);
+    });
+});
+
 function openCatAddModal(){
     const form = document.querySelector('#catAddModal form');
     form.reset();
+    catWidgetSet(document.getElementById('catAddCatWidget'), '');
     document.getElementById('catAddModal').classList.add('open');
 }
 
@@ -678,13 +748,7 @@ function openCatEditModal(skuEnc){
     const p = catBySku(sku);
     if (!p) return;
 
-    const catSel = document.getElementById('catEditCat');
-    Array.from(catSel.querySelectorAll('option[data-legacy]')).forEach(function(o){ o.remove(); });
-    if (p.category && !Array.from(catSel.options).some(function(o){ return o.value === p.category; })){
-        catSel.insertAdjacentHTML('afterbegin',
-            '<option data-legacy value="'+escHtml(p.category)+'">'+escHtml(p.category)+' (legacy)</option>');
-    }
-    catSel.value = p.category;
+    catWidgetSet(document.getElementById('catEditCatWidget'), p.category || '');
 
     document.getElementById('catEditSku').value      = p.sku;
     document.getElementById('catEditSkuShow').value  = p.sku;

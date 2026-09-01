@@ -42,6 +42,11 @@ or derived from an admin's own session if they land here directly).
 | `api/save_product.php` | Add or edit a product. Enforces that edits can only target a product belonging to the cashier's branch. Writes an `ADD_PRODUCT`/`EDIT_PRODUCT` row to `audit_trail`. |
 | `api/delete_product.php` | Deletes a product (scoped to the cashier's branch) and logs a `DELETE_PRODUCT` audit entry. |
 | `api/complete_sale.php` | Finalizes a sale inside a DB transaction: generates a `SAL-XXXXXXXX-XXX` transaction ID, inserts into `pos_sales` + `pos_sale_items`, decrements `pos_products.stock` (locking rows with `FOR UPDATE` to prevent overselling), rolls back on any error (e.g. insufficient stock), and logs a `COMPLETE_SALE` audit entry. |
+| `deliveries.php` / `api/deliveries.php` / `src/deliveries.js` | Branch-staff view of inbound **deliveries** from head office: check each line against what arrived, then confirm (adds stock) or dispute. |
+| `transfers.php` | Branch-staff hub for **inter-branch transfers**. Four parts: (1) *Where's the stock?* — search a product and see which other branches hold spare stock (On-Hand + Surplus = stock beyond a 10-unit buffer), grouped *Nearby (same region)* vs *Other branches*; (2) *New request* — pick a source branch, add products + quantities from this branch's catalog, send; (3) *Incoming requests* (this branch is the source) — Approve & Ship (locks & decrements this branch's stock in a transaction) or Decline with a reason; (4) *My requests* — Confirm Receipt (adds shipped qty to stock, creating the product locally if new) or Cancel while still pending. |
+| `api/transfers.php` | JSON endpoint for the transfer flow. Actions: `stock_lookup` (surplus per branch for a SKU, split nearby/other by `branch_directory.region`), `request`, `approve` (ship — `FOR UPDATE` on source `pos_products`, caps qty at on-hand), `reject`, `cancel`, `receive`. Writes `REQUEST_/SHIP_/REJECT_/CANCEL_/RECEIVE_TRANSFER` audit rows. |
+| `src/transfers.js` | Front-end for `transfers.php`: cross-branch lookup, the paginated request picker, and the approve / decline / receive / cancel modals. |
+| `sql/migration_branch_transfer.sql` | Canonical DDL for `branch_transfers`, `branch_transfer_items`, `branch_directory` (also auto-created by `Landing Page/php/transfer_schema.php`). |
 | `setup.sql` | Initial schema: `pos_products`, `pos_sales`, `pos_sale_items`, `audit_trail`. Run once to bootstrap a fresh database. |
 | `migration.sql` | Incremental schema change: adds `branch`/`added_by` columns to `pos_products`, changes the SKU unique key to be per-branch (`sku_branch`), and creates `audit_trail` for databases that predate it. |
 
@@ -65,6 +70,8 @@ Every page here is gated to `$_SESSION['user_role'] === 'administrator'`
 | `forecast_api.py` | **Standalone Python Flask microservice** (not run by Apache/PHP — started manually with `python forecast_api.py`, listens on `127.0.0.1:5001`). Connects to the same `lucky8_db` MySQL database directly. Endpoints: `/api/status` (health check), `/api/forecast` (fits a per-day `LinearRegression` on the last 90 days of sales to project revenue/units N days ahead), `/api/product_forecast` (ranks products by days-until-stockout using 30-day average velocity). `forecasts.php` degrades gracefully if this process isn't running. |
 | `audit-trail.php` | Full, paginated, filterable (branch/action/user/date range) view of the `audit_trail` table, with KPIs (today's activity, total deletions). |
 | `reports.php` | Report builder: pick Sales / Inventory / Audit, preview up to 50 rows, and export the full result as CSV (`export=sales|inventory|audit` query param streams a `Content-Disposition: attachment` CSV). |
+| `deliveries.php` / `src/deliveries.js` | Head-office side of the delivery flow: build a delivery document for a branch and track its status. |
+| `transfers.php` / `src/transfers.js` | **Read-only** monitor of every inter-branch transfer (KPIs, filter by branch/status, per-transfer line-item view) plus the **Branch Region Directory** editor — the one write on this page. Setting a region on two branches makes them "Nearby" in the POS stock lookup. Staff, not admins, approve transfers. |
 | `admin.css` | Shared styling for the whole Admin Console (KPI cards, charts, sidebar, tables, etc.) — used by every page above. |
 | `admin.js` | Shared client-side logic for `index.php`: builds the Chart.js sales-trend and ABC donut charts, and fetches/renders the three lazy-loaded intelligence panels (fast-moving, critical stock, predictive alerts) plus paginated audit trail loading. |
 
@@ -100,11 +107,18 @@ Landing Page/login.php
         │no                                  │
         ▼                                    ├──▶ forecasts.php ──▶ forecast_api.py (Flask, port 5001)
    POS/index.php                             └──▶ inventory.php / sales.php / users.php / branches.php /
-        │                                          movement.php / audit-trail.php / reports.php
+        │  ├── deliveries.php                       movement.php / audit-trail.php / reports.php /
+        │  └── transfers.php  ◀───────────────▶     deliveries.php / transfers.php (monitor + regions)
         ▼
-   POS/api/*.php  ──▶  pos_products / pos_sales / pos_sale_items / audit_trail (MySQL: lucky8_db)
+   POS/api/*.php  ──▶  pos_products / pos_sales / pos_sale_items / audit_trail /
+                       inventory_deliver* / branch_transfer* / branch_directory (MySQL: lucky8_db)
 ```
 
-Every write action (product add/edit/delete, completed sale) writes a row to
-`audit_trail`, which both the POS-adjacent movement view and the Admin
-Console's dashboard/audit-trail pages read back.
+Inter-branch transfers move stock **POS ↔ POS**: the requesting branch raises a
+request, the source branch's staff approve & ship (their `pos_products.stock`
+drops), and the requesting branch confirms receipt (their stock rises). The
+Admin Console only watches and maintains `branch_directory` regions.
+
+Every write action (product add/edit/delete, completed sale, delivery receipt,
+transfer ship/receive) writes a row to `audit_trail`, which both the POS-adjacent
+movement view and the Admin Console's dashboard/audit-trail pages read back.

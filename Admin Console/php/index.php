@@ -140,8 +140,14 @@ if ($r) {
     }
 }
 
-$r = $conn->query("SELECT COUNT(DISTINCT branch) FROM users WHERE branch IS NOT NULL AND branch != '' AND branch != 'ALL BRANCHES'");
-$active_branches = (int)$r->fetch_row()[0];
+// Operational branch count = every branch the system knows about. Use the same
+// union just built for the picker so the KPI, the picker, and the dashboard-kpis
+// API all agree (and it never collapses to 0 in a month with no sales yet).
+$active_branches = count($branches_list);
+
+// How many branches have at least one low-stock item (for the KPI meta line).
+$r = $conn->query("SELECT COUNT(DISTINCT branch) FROM pos_products WHERE stock < 10 AND stock >= 0 AND branch IS NOT NULL AND branch <> ''");
+$low_stock_branches = (int)$r->fetch_row()[0];
 
 $conn->close();
 
@@ -168,7 +174,7 @@ $month_label = date('F Y');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky 8 — Admin Console</title>
     <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-    <link rel="stylesheet" href="../styles/admin.css?v=20260829">
+    <link rel="stylesheet" href="../styles/admin.css?v=20260901b">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -238,14 +244,18 @@ $month_label = date('F Y');
                     </div>
                     <div class="kpi-value"><?= fmt_peso($mtd_revenue) ?></div>
                     <div class="kpi-meta">
-                        <?php if ($rev_pct !== null): ?>
-                            <?php if ($rev_pct >= 0): ?>
-                                <span class="badge-up">↑ +<?= $rev_pct ?>%</span>
-                            <?php else: ?>
-                                <span class="badge-down">↓ <?= $rev_pct ?>%</span>
+                        <?php if ($mtd_txn_count === 0): ?>
+                            No sales yet this month
+                        <?php else: ?>
+                            <?php if ($rev_pct !== null): ?>
+                                <?php if ($rev_pct >= 0): ?>
+                                    <span class="badge-up">↑ +<?= $rev_pct ?>%</span>
+                                <?php else: ?>
+                                    <span class="badge-down">↓ <?= $rev_pct ?>%</span>
+                                <?php endif; ?>
                             <?php endif; ?>
+                            Across all <?= $active_branches ?> branches
                         <?php endif; ?>
-                        Across all 19 branches
                     </div>
                 </div>
 
@@ -276,7 +286,9 @@ $month_label = date('F Y');
                         <?php if ($critical_count > 0): ?>
                             <span class="badge-pill red">↓ <?= $critical_count ?> CRITICAL</span>
                         <?php endif; ?>
-                        Across 6 branches
+                        <?php if ($low_stock_branches > 0): ?>
+                            <?= $low_stock_branches ?> branch<?= $low_stock_branches !== 1 ? 'es' : '' ?> affected
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -469,7 +481,7 @@ $month_label = date('F Y');
     <script src="../src/fast-moving.js"></script>
     <script src="../src/predictive.js"></script>
     <script src="../src/sales-trend-line.js"></script>
-    <script src="../src/dashboard-kpis.js"></script>
+    <script src="../src/dashboard-kpis.js?v=20260901"></script>
     
 </body>
 

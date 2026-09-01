@@ -456,6 +456,33 @@ body {
     filter: opacity(1);
 }
 
+/* ── Styled native <select> ──────────────────────────────────────────────
+   Visible plain <select> in a .filter-bar (e.g. Audit Trail's Action filter):
+   drop the OS chrome, draw a themed chevron. The custom .branch-filter /
+   .cselect widgets are used everywhere else; their hidden <select> is
+   display:none so this is inert on them. */
+.filter-bar select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 34px;
+    cursor: pointer;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' stroke='%236b7280' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.filter-bar select::-ms-expand { display: none; }
+.filter-bar select:hover {
+    border-color: #d1d5db;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' stroke='%23e8611a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.filter-bar select:focus {
+    border-color: #e8611a;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' stroke='%23e8611a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
 /* ── Branch filter used inline inside a .filter-bar / .inv-filters (non-topbar) ── */
 .filter-bar .branch-filter,
 .inv-filters .branch-filter {

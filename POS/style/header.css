@@ -103,13 +103,16 @@
   color: #DC2626;
 }
 
-/* ── Deliveries button ── */
-.btn-header--deliveries {
+/* ── Deliveries + Transfers buttons ── */
+.btn-header--deliveries,
+.btn-header--transfers {
   color: var(--orange);
   border-color: #F4C9AE;
 }
-.btn-header--deliveries svg { color: var(--orange); }
-.btn-header--deliveries:hover {
+.btn-header--deliveries svg,
+.btn-header--transfers svg { color: var(--orange); }
+.btn-header--deliveries:hover,
+.btn-header--transfers:hover {
   background: var(--orange-light);
   border-color: var(--orange);
 }

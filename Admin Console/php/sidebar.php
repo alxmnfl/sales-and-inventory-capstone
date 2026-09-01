@@ -31,6 +31,11 @@ $_dispute_cnt = 0;
 $_r = @$_sb->query("SELECT COUNT(*) FROM inventory_deliveries WHERE status='disputed'");
 if ($_r) $_dispute_cnt = (int)$_r->fetch_row()[0];
 
+// Badge: inter-branch transfer requests still waiting on a source branch
+$_transfer_cnt = 0;
+$_r = @$_sb->query("SELECT COUNT(*) FROM branch_transfers WHERE status='requested'");
+if ($_r) $_transfer_cnt = (int)$_r->fetch_row()[0];
+
 // Recent activity for notification bell (last 5 audit entries)
 $_notif_items = [];
 $_r = $_sb->query("SELECT action, entity_name, user_name, branch, created_at FROM audit_trail ORDER BY created_at DESC LIMIT 5");
@@ -47,6 +52,7 @@ $_nav = [
     ['index.php',       'fa-gauge-high',          'Dashboard',      0,             ''],
     ['inventory.php',   'fa-boxes-stacked',       'Inventory',      0,             ''],
     ['deliveries.php',  'fa-truck-fast',          'Deliveries',     $_dispute_cnt, ''],
+    ['transfers.php',   'fa-right-left',          'Transfers',      $_transfer_cnt,''],
     ['sales.php',       'fa-chart-line',          'Sales',          0,             ''],
     ['branches.php',    'fa-building',            'Branches',       0,            ''],
     ['users.php',       'fa-users',               'Users',          $_staff_cnt,  ''],

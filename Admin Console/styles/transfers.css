@@ -1,0 +1,31 @@
+/* Lucky 8 Admin — Inter-branch transfers page.
+   Leans on admin.css + reports.css + deliveries.css for the shell
+   (kpi-card, chart-card, filter-bar, report-table-wrap, intel-table,
+   dlv-badge, dlv-line, modal-bg). Only page-specific bits here. */
+
+.dlv-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .dlv-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .dlv-kpi-grid { grid-template-columns: 1fr; } }
+
+/* Branch & Status filters use the shared .branch-filter dropdown widget
+   (admin.css + branch-filter-widget.js) — same fully-styled panel the rest
+   of the console uses, so nothing extra is needed here. */
+
+.trf-region-input {
+    width: 100%;
+    max-width: 320px;
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 13px;
+    color: #111827;
+    outline: none;
+    transition: border-color .15s;
+}
+.trf-region-input:focus { border-color: #e8611a; }
+
+/* In-transit badge (deliveries.css only ships sent/received/disputed/cancelled) */
+.dlv-badge.badge-transit { background: #eff6ff; color: #1d4ed8; }
+
+.intel-table td .dlv-sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
