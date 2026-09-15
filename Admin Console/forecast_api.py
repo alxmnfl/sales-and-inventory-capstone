@@ -22,6 +22,10 @@ DB_CONFIG = {
     'database': 'lucky8_db',
 }
 
+# If the most recent sale is older than this, treat the trend as too stale to
+# extrapolate reliably and refuse to forecast rather than guess.
+STALE_CUTOFF_DAYS = 14
+
 
 def get_conn():
     return mysql.connector.connect(**DB_CONFIG)
@@ -68,14 +72,31 @@ def forecast():
         df = df.set_index('day').asfreq('D', fill_value=0)
         df['t'] = range(len(df))
 
-        # Fit models
+        last_sale_date = df.index[-1].date()
+        today          = datetime.now().date()
+        stale_days     = (today - last_sale_date).days
+
+        if stale_days > STALE_CUTOFF_DAYS:
+            return jsonify({
+                'success': False,
+                'error': (
+                    f'No sales recorded since {last_sale_date} '
+                    f'({stale_days} days ago) — not enough recent data to forecast.'
+                ),
+            }), 200
+
+        # Fit models on observed data only — the gap between the last sale and
+        # today is NOT zero-filled here, since that would read as a demand
+        # crash rather than a reporting gap and skew the trend line.
         X = df[['t']].values
         m_rev   = LinearRegression().fit(X, df['revenue'].values)
         m_units = LinearRegression().fit(X, df['units'].values)
 
-        last_t = int(df['t'].max())
-        future_ts    = np.array([[last_t + i + 1] for i in range(days_ahead)])
-        future_dates = [(df.index[-1] + timedelta(days=i + 1)).strftime('%Y-%m-%d') for i in range(days_ahead)]
+        last_t      = int(df['t'].max())
+        anchor_date = max(last_sale_date, today)
+        future_dates_dt = [anchor_date + timedelta(days=i + 1) for i in range(days_ahead)]
+        future_ts = np.array([[last_t + (d - last_sale_date).days] for d in future_dates_dt])
+        future_dates = [d.strftime('%Y-%m-%d') for d in future_dates_dt]
 
         pred_rev   = [max(0.0, float(v)) for v in m_rev.predict(future_ts)]
         pred_units = [max(0, round(float(v))) for v in m_units.predict(future_ts)]
@@ -89,10 +110,12 @@ def forecast():
         trend_pct = round(abs(m_rev.coef_[0]) / max(df['revenue'].mean(), 1) * 100, 1)
 
         return jsonify({
-            'success':    True,
-            'trend':      trend_dir,
-            'trend_pct':  trend_pct,
-            'historical': historical,
+            'success':        True,
+            'trend':          trend_dir,
+            'trend_pct':      trend_pct,
+            'historical':     historical,
+            'last_sale_date': str(last_sale_date),
+            'stale_days':     stale_days,
             'forecast': [
                 {'date': d, 'revenue': round(r, 2), 'units': u}
                 for d, r, u in zip(future_dates, pred_rev, pred_units)

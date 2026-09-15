@@ -177,6 +177,16 @@ if ($api_ok) {
 
         <?php if ($forecast && $forecast['success']): ?>
 
+        <?php if (($forecast['stale_days'] ?? 0) > 3): ?>
+        <div class="intel-empty" style="padding:14px 18px; text-align:left; margin-bottom:16px; border:1px solid #fde68a; background:#fffbeb; border-radius:10px; display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i>
+            <span style="color:#92400e; font-size:13px;">
+                No sales recorded since <strong><?= htmlspecialchars($forecast['last_sale_date']) ?></strong>
+                (<?= (int)$forecast['stale_days'] ?> days ago). This forecast is extrapolated from that older trend and may be unreliable.
+            </span>
+        </div>
+        <?php endif; ?>
+
         <!-- KPIs -->
         <?php
         $is_up   = $forecast['trend'] === 'up';
