@@ -148,11 +148,34 @@ $conn->close();
                         <?php foreach($branches as $b):?><option value="<?=htmlspecialchars($b)?>"<?=$b===$branch?' selected':''?>><?=htmlspecialchars($b)?></option><?php endforeach;?>
                     </select>
                 </div>
-                <label>Action</label>
-                <select name="action">
-                    <option value="">All Actions</option>
-                    <?php foreach($actions as $a):?><option<?=$a===$action_f?' selected':''?>><?=htmlspecialchars($a)?></option><?php endforeach;?>
-                </select>
+                <div class="branch-filter" title="Filter by action">
+                    <i class="fa-solid fa-bolt branch-filter-icon"></i>
+                    <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="branch-selected-label"><?=$action_f?htmlspecialchars($action_f):'All Actions'?></span>
+                        <i class="fa-solid fa-chevron-down branch-chevron"></i>
+                    </button>
+                    <div class="branch-dropdown-panel" role="listbox" aria-label="Select action">
+                        <div class="branch-option<?=$action_f===''?' branch-option--selected':''?>" data-value="" role="option" aria-selected="<?=$action_f===''?'true':'false'?>">
+                            <i class="fa-solid fa-layer-group"></i><span>All Actions</span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php foreach($actions as $a):
+                            if (strpos($a,'DELETE')!==false || strpos($a,'CANCEL')!==false || strpos($a,'REJECT')!==false) $ic='fa-trash';
+                            elseif (strpos($a,'ADD')!==false || strpos($a,'RECEIVE')!==false || strpos($a,'IMPORT')!==false) $ic='fa-plus';
+                            elseif (strpos($a,'EDIT')!==false || strpos($a,'ADJUST')!==false) $ic='fa-pen';
+                            elseif (strpos($a,'TRANSFER')!==false || strpos($a,'SEND')!==false) $ic='fa-right-left';
+                            elseif (strpos($a,'SALE')!==false) $ic='fa-cash-register';
+                            else $ic='fa-circle-dot';
+                        ?>
+                        <div class="branch-option<?=$a===$action_f?' branch-option--selected':''?>" data-value="<?=htmlspecialchars($a)?>" role="option" aria-selected="<?=$a===$action_f?'true':'false'?>">
+                            <i class="fa-solid <?=$ic?>"></i><span><?=htmlspecialchars($a)?></span><i class="fa-solid fa-check branch-option-check"></i>
+                        </div>
+                        <?php endforeach;?>
+                    </div>
+                    <select name="action" class="branch-filter-hidden-select" style="display:none">
+                        <option value="">All Actions</option>
+                        <?php foreach($actions as $a):?><option value="<?=htmlspecialchars($a)?>"<?=$a===$action_f?' selected':''?>><?=htmlspecialchars($a)?></option><?php endforeach;?>
+                    </select>
+                </div>
                 <label>User</label>
                 <input name="user" placeholder="Search user…" value="<?=htmlspecialchars($user_f)?>">
                 <label>From</label><input type="date" name="from" value="<?=htmlspecialchars($date_from)?>">
