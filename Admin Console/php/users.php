@@ -11,6 +11,21 @@ $user_name = $_SESSION['user_name'] ?? 'Admin';
 $words     = explode(' ', trim($user_name));
 $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
 
+// Super admins are the only ones who may create/edit/delete other administrator
+// accounts (e.g. removing an admin who has resigned). Regular admins are limited
+// to managing branch staff.
+$is_super = !empty($_SESSION['is_super_admin']);
+
+function remaining_super_admins(mysqli $conn, int $excludeId = 0): int {
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE is_super_admin = 1 AND id <> ?");
+    $stmt->bind_param('i', $excludeId);
+    $stmt->execute();
+    $stmt->bind_result($cnt);
+    $stmt->fetch();
+    $stmt->close();
+    return (int) $cnt;
+}
+
 /* ── CRUD ── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -19,15 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $full_name = trim($_POST['full_name'] ?? '');
         $email     = trim($_POST['email']     ?? '');
         $role      = in_array($_POST['role']??'',['branch_staff','administrator'])?$_POST['role']:'branch_staff';
+        if ($role === 'administrator' && !$is_super) $role = 'branch_staff'; // only super admins can create admins
+        $make_super = ($is_super && $role === 'administrator' && !empty($_POST['is_super_admin'])) ? 1 : 0;
         $branch    = trim($_POST['branch'] ?? '');
         $password  = password_hash(trim($_POST['password']??'password123'), PASSWORD_BCRYPT);
         $status    = 'offline';
 
         // Employee ID is generated server-side, never trusted from the form.
-        $stmt = $conn->prepare("INSERT INTO users (full_name,employee_id,email,password,branch,role,status) VALUES (?,?,?,?,?,?,?)");
+        $stmt = $conn->prepare("INSERT INTO users (full_name,employee_id,email,password,branch,role,is_super_admin,status) VALUES (?,?,?,?,?,?,?,?)");
         for ($try = 0; $try < 5; $try++) {
             $employee_id = next_employee_id($conn);
-            $stmt->bind_param('sssssss',$full_name,$employee_id,$email,$password,$branch,$role,$status);
+            $stmt->bind_param('ssssssis',$full_name,$employee_id,$email,$password,$branch,$role,$make_super,$status);
             if ($stmt->execute()) {
                 $stmt->close();
                 header('Location: users.php?flash=added'); exit;
@@ -39,11 +56,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'edit') {
-        $id     = (int)($_POST['id']??0);
+        $id = (int)($_POST['id']??0);
+
+        $stmt = $conn->prepare("SELECT role, is_super_admin FROM users WHERE id=?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $target = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$target || ($target['role'] === 'administrator' && !$is_super)) {
+            header('Location: users.php?flash=denied'); exit;
+        }
+
         $role   = in_array($_POST['role']??'',['branch_staff','administrator'])?$_POST['role']:'branch_staff';
+        if ($role === 'administrator' && !$is_super) $role = 'branch_staff';
         $branch = trim($_POST['branch']??'');
-        $stmt   = $conn->prepare("UPDATE users SET role=?,branch=? WHERE id=?");
-        $stmt->bind_param('ssi',$role,$branch,$id);
+        $make_super = ($is_super && $role === 'administrator' && !empty($_POST['is_super_admin'])) ? 1 : 0;
+
+        // Never let the very last super admin be demoted — someone has to be
+        // left who can manage administrator accounts.
+        if ((int)$target['is_super_admin'] === 1 && $make_super === 0 && remaining_super_admins($conn, $id) === 0) {
+            $make_super = 1;
+        }
+
+        $stmt   = $conn->prepare("UPDATE users SET role=?,branch=?,is_super_admin=? WHERE id=?");
+        $stmt->bind_param('ssii',$role,$branch,$make_super,$id);
         $stmt->execute(); $stmt->close();
         header('Location: users.php?flash=edited'); exit;
     }
@@ -51,9 +88,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete') {
         $id = (int)($_POST['id']??0);
         if ($id !== (int)$_SESSION['user_id']) {
-            $stmt = $conn->prepare("DELETE FROM users WHERE id=?");
-            $stmt->bind_param('i',$id);
-            $stmt->execute(); $stmt->close();
+            $stmt = $conn->prepare("SELECT role, is_super_admin FROM users WHERE id=?");
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $target = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            $allowed = $target && (!($target['role'] === 'administrator') || $is_super);
+            // Refuse to delete the last remaining super admin, resigned or not —
+            // that would leave nobody able to manage admin accounts at all.
+            if ($allowed && (int)$target['is_super_admin'] === 1 && remaining_super_admins($conn, $id) === 0) {
+                $allowed = false;
+            }
+
+            if ($allowed) {
+                $stmt = $conn->prepare("DELETE FROM users WHERE id=?");
+                $stmt->bind_param('i',$id);
+                $stmt->execute(); $stmt->close();
+            } else {
+                header('Location: users.php?flash=denied'); exit;
+            }
         }
         header('Location: users.php?flash=deleted'); exit;
     }
@@ -61,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /* ── Users data ── */
 $users = [];
-$r = $conn->query("SELECT id,full_name,employee_id,email,branch,role,status FROM users ORDER BY role,full_name");
+$r = $conn->query("SELECT id,full_name,employee_id,email,branch,role,is_super_admin,status FROM users ORDER BY role,full_name");
 while ($row = $r->fetch_assoc()) $users[] = $row;
 
 $total    = count($users);
@@ -102,7 +156,7 @@ $conn->close();
 <title>Lucky 8 — Users</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 <link rel="stylesheet" href="../styles/admin.css?v=20260901b">
-<link rel="stylesheet" href="../styles/users.css?v=20260829-1">
+<link rel="stylesheet" href="../styles/users.css?v=20260926">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -123,11 +177,12 @@ $conn->close();
 
         <?php if(isset($_GET['flash'])):
             $fl    = $_GET['flash'];
-            $isErr = $fl === 'error';
+            $isErr = $fl === 'error' || $fl === 'denied';
             $msg   = $fl==='added'   ? 'User added.'
                    : ($fl==='edited'  ? 'User updated.'
                    : ($fl==='deleted' ? 'User deleted.'
-                   : 'Could not add user — that email may already be registered.'));
+                   : ($fl==='denied'  ? 'Only a super admin can manage another administrator\'s account.'
+                   : 'Could not add user — that email may already be registered.')));
         ?>
         <div class="flash <?=$isErr?'err':'ok'?>"><?=$msg?></div>
         <?php endif;?>
@@ -171,8 +226,13 @@ $conn->close();
                 <?php foreach($users as $u):
                     $w=explode(' ',trim($u['full_name']));
                     $ini=strtoupper(substr($w[0],0,1).(isset($w[1])?substr($w[1],0,1):''));
-                    $rc=$u['role']==='administrator'?'role-admin':'role-staff';
+                    $rowIsSuper=!empty($u['is_super_admin']);
+                    $rc=$rowIsSuper?'role-super':($u['role']==='administrator'?'role-admin':'role-staff');
+                    $roleLabel=$rowIsSuper?'Super Admin':($u['role']==='administrator'?'Admin':'Staff');
                     $sc=$u['status']==='online'?'status-ok':'status-rej';
+                    // Only super admins may edit/delete other administrator accounts
+                    // (e.g. removing one who has resigned); everyone can still manage staff.
+                    $canManageRow = $u['role']!=='administrator' || $is_super;
                 ?>
                 <tr>
                     <td><div style="display:flex;align-items:center;gap:10px;">
@@ -182,12 +242,16 @@ $conn->close();
                     <td class="col-mono"><?=htmlspecialchars($u['employee_id'])?></td>
                     <td><?=htmlspecialchars($u['email'])?></td>
                     <td><?=htmlspecialchars(strtoupper($u['branch']))?></td>
-                    <td><span class="role-badge <?=$rc?>"><?=$u['role']==='administrator'?'Admin':'Staff'?></span></td>
+                    <td><span class="role-badge <?=$rc?>"><?=$roleLabel?></span></td>
                     <td><span class="status-badge <?=$sc?>"><?=ucfirst($u['status']??'offline')?></span></td>
                     <td class="col-r" style="white-space:nowrap;">
+                        <?php if($canManageRow):?>
                         <button class="btn-ghost" onclick='openEditModal(<?=json_encode($u)?>)'>Edit</button>
                         <?php if((int)$u['id']!==(int)$_SESSION['user_id']):?>
                         <button class="btn-danger" onclick="confirmDelete(<?=(int)$u['id']?>, '<?=addslashes(htmlspecialchars($u['full_name']))?>')">Delete</button>
+                        <?php endif;?>
+                        <?php else:?>
+                        <span class="row-locked-hint" title="Only a super admin can manage another administrator's account">Super admin only</span>
                         <?php endif;?>
                     </td>
                 </tr>
@@ -222,7 +286,9 @@ $conn->close();
                         <input type="hidden" name="role" value="branch_staff">
                         <ul class="cselect-list">
                             <li data-value="branch_staff" class="selected">Branch Staff</li>
+                            <?php if($is_super):?>
                             <li data-value="administrator">Administrator</li>
+                            <?php endif;?>
                         </ul>
                     </div>
                 </div>
@@ -247,6 +313,12 @@ $conn->close();
                     <i class="fa-solid fa-eye pw-toggle" onclick="togglePw('addPassword', this)" title="Show password"></i>
                 </div>
             </div>
+            <?php if($is_super):?>
+            <label class="super-toggle">
+                <input type="checkbox" name="is_super_admin" value="1">
+                Grant Super Admin privileges <span class="hint">(can manage other administrator accounts)</span>
+            </label>
+            <?php endif;?>
             <div class="modal-footer">
                 <button type="button" class="btn-ghost" onclick="closeModal('addModal')">Cancel</button>
                 <button type="submit" class="btn-orange">Add User</button>
@@ -273,7 +345,9 @@ $conn->close();
                         <input type="hidden" name="role" value="branch_staff">
                         <ul class="cselect-list">
                             <li data-value="branch_staff">Branch Staff</li>
+                            <?php if($is_super):?>
                             <li data-value="administrator">Administrator</li>
+                            <?php endif;?>
                         </ul>
                     </div>
                 </div>
@@ -295,6 +369,12 @@ $conn->close();
                     </ul>
                 </div>
             </div>
+            <?php if($is_super):?>
+            <label class="super-toggle">
+                <input type="checkbox" name="is_super_admin" id="editIsSuper" value="1">
+                Grant Super Admin privileges <span class="hint">(can manage other administrator accounts)</span>
+            </label>
+            <?php endif;?>
             <div class="modal-footer">
                 <button type="button" class="btn-ghost" onclick="closeModal('editModal')">Cancel</button>
                 <button type="submit" class="btn-orange">Save Changes</button>
@@ -308,6 +388,6 @@ $conn->close();
     <input type="hidden" name="id" id="deleteId">
 </form>
 
-<script src="../src/users.js?v=20260829-1"></script>
+<script src="../src/users.js?v=20260926"></script>
 </body>
 </html>

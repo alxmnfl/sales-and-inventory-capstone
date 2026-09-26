@@ -1,9 +1,9 @@
 /* Lucky 8 POS — Inventory Deliveries (receiving) */
 
 .dlv-page {
-  max-width: 1080px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 24px 24px 80px;
+  padding: 24px 32px 80px;
 }
 
 .dlv-intro h1 {

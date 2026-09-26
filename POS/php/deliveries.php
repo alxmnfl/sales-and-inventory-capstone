@@ -18,6 +18,9 @@ ensure_delivery_schema($conn);
 $cashier = $_SESSION['pos_cashier'];
 $branch  = strtoupper($_SESSION['pos_cashier_branch'] ?? 'MAIN HUB');
 
+$cashier_words = explode(' ', trim($cashier));
+$initials = strtoupper(substr($cashier_words[0], 0, 1) . (isset($cashier_words[1]) ? substr($cashier_words[1], 0, 1) : ''));
+
 /* ── Deliveries addressed to this branch ── */
 $deliveries = [];
 $stmt = $conn->prepare("
@@ -87,9 +90,9 @@ function dlvWhen(?string $s): string {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
-<link rel="stylesheet" href="../style/header.css?v=20260901">
-<link rel="stylesheet" href="../style/modal.css">
-<link rel="stylesheet" href="../style/deliveries.css?v=20260830j">
+<link rel="stylesheet" href="../style/header.css?v=20260926j">
+<link rel="stylesheet" href="../style/modal.css?v=20260926i">
+<link rel="stylesheet" href="../style/deliveries.css?v=20260926l">
 </head>
 <body>
 
@@ -103,23 +106,33 @@ function dlvWhen(?string $s): string {
   </div>
   <div class="header-center">
     <div class="session-badge">
-      <span class="session-dot"></span>
+      <span class="session-avatar"><?= htmlspecialchars($initials) ?></span>
       SESSION: <?= htmlspecialchars($cashier) ?>
+      <span class="session-dot"></span>
     </div>
   </div>
   <div class="header-right">
-    <a href="transfers.php" class="btn-header btn-header--transfers">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 3L1 6l3 3M1 6h11M12 13l3-3-3-3M15 10H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      TRANSFERS
-    </a>
     <a href="index.php" class="btn-header">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      BACK TO POS
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      GO BACK TO POS
     </a>
-    <a href="logout.php" class="btn-header btn-exit">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      EXIT
-    </a>
+    <div class="hdr-menu" id="hdrMenu">
+      <button class="hdr-menu-btn" type="button" id="hdrMenuBtn" aria-haspopup="menu" aria-expanded="false" title="Menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <div class="hdr-menu-panel" id="hdrMenuPanel" role="menu">
+        <a href="transfers.php" class="hdr-menu-item" role="menuitem">
+          <span class="hdr-chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 3L1 6l3 3M1 6h11M12 13l3-3-3-3M15 10H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="hdr-menu-item-label">TRANSFERS</span>
+          <svg class="hdr-menu-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="hdr-menu-divider"></div>
+        <a href="logout.php" class="hdr-menu-item hdr-menu-item--danger" role="menuitem">
+          <span class="hdr-chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="hdr-menu-item-label">LOGOUT</span>
+        </a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -278,6 +291,7 @@ function dlvWhen(?string $s): string {
 const DELIVERIES = <?= json_encode($deliveries) ?>;
 const BRANCH = <?= json_encode($branch) ?>;
 </script>
+<script src="../src/header-menu.js"></script>
 <script src="../src/deliveries.js?v=20260830d"></script>
 </body>
 </html>

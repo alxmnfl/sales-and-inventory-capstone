@@ -18,6 +18,9 @@ ensure_transfer_schema($conn);
 $cashier = $_SESSION['pos_cashier'];
 $branch  = strtoupper($_SESSION['pos_cashier_branch'] ?? 'MAIN HUB');
 
+$cashier_words = explode(' ', trim($cashier));
+$initials = strtoupper(substr($cashier_words[0], 0, 1) . (isset($cashier_words[1]) ? substr($cashier_words[1], 0, 1) : ''));
+
 /* ── This branch's own catalogue (for the request picker) ── */
 $myProducts = [];
 $stmt = $conn->prepare("SELECT id, sku, name, category, stock FROM pos_products WHERE branch = ? ORDER BY name");
@@ -144,10 +147,10 @@ function trfWhen(?string $s): string {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
-<link rel="stylesheet" href="../style/header.css?v=20260901">
-<link rel="stylesheet" href="../style/modal.css">
-<link rel="stylesheet" href="../style/deliveries.css?v=20260830j">
-<link rel="stylesheet" href="../style/transfers.css?v=20260902">
+<link rel="stylesheet" href="../style/header.css?v=20260926j">
+<link rel="stylesheet" href="../style/modal.css?v=20260926i">
+<link rel="stylesheet" href="../style/deliveries.css?v=20260926l">
+<link rel="stylesheet" href="../style/transfers.css?v=20260926n">
 </head>
 <body>
 
@@ -160,21 +163,34 @@ function trfWhen(?string $s): string {
     </div>
   </div>
   <div class="header-center">
-    <div class="session-badge"><span class="session-dot"></span>SESSION: <?= htmlspecialchars($cashier) ?></div>
+    <div class="session-badge">
+      <span class="session-avatar"><?= htmlspecialchars($initials) ?></span>
+      SESSION: <?= htmlspecialchars($cashier) ?>
+      <span class="session-dot"></span>
+    </div>
   </div>
   <div class="header-right">
-    <a href="deliveries.php" class="btn-header btn-header--deliveries">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1zM10 6h3l2 2v3h-5M3.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM12.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      DELIVERIES
-    </a>
     <a href="index.php" class="btn-header">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      BACK TO POS
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      GO BACK TO POS
     </a>
-    <a href="logout.php" class="btn-header btn-exit">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      EXIT
-    </a>
+    <div class="hdr-menu" id="hdrMenu">
+      <button class="hdr-menu-btn" type="button" id="hdrMenuBtn" aria-haspopup="menu" aria-expanded="false" title="Menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <div class="hdr-menu-panel" id="hdrMenuPanel" role="menu">
+        <a href="deliveries.php" class="hdr-menu-item" role="menuitem">
+          <span class="hdr-chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1zM10 6h3l2 2v3h-5M3.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM12.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="hdr-menu-item-label">DELIVERIES</span>
+          <svg class="hdr-menu-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="hdr-menu-divider"></div>
+        <a href="logout.php" class="hdr-menu-item hdr-menu-item--danger" role="menuitem">
+          <span class="hdr-chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="hdr-menu-item-label">LOGOUT</span>
+        </a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -487,6 +503,7 @@ const TRF = {
   buffer:   <?= (int) TRANSFER_SURPLUS_BUFFER ?>,
 };
 </script>
-<script src="../src/transfers.js?v=20260902"></script>
+<script src="../src/header-menu.js"></script>
+<script src="../src/transfers.js?v=20260926n"></script>
 </body>
 </html>

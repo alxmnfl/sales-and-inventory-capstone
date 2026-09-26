@@ -18,7 +18,6 @@ function showReceipt(data) {
   `).join('');
 
   document.getElementById('receiptSubtotal').textContent = fmt(data.subtotal);
-  document.getElementById('receiptVat').textContent      = fmt(data.vat);
   document.getElementById('receiptTotal').textContent    = fmt(data.total);
 
   document.getElementById('saleComplete').style.display = 'flex';

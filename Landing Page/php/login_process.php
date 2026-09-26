@@ -19,11 +19,11 @@ if (!$email || !$password) {
 }
 
 $stmt = $conn->prepare(
-    "SELECT id, full_name, password, role, branch FROM users WHERE email = ?"
+    "SELECT id, full_name, password, role, branch, is_super_admin FROM users WHERE email = ?"
 );
 $stmt->bind_param('s', $email);
 $stmt->execute();
-$stmt->bind_result($id, $full_name, $hashed_password, $role, $branch);
+$stmt->bind_result($id, $full_name, $hashed_password, $role, $branch, $is_super_admin);
 $stmt->fetch();
 $stmt->close();
 
@@ -41,10 +41,11 @@ $stmt->close();
 
 // --- Success: start session ---
 session_regenerate_id(true);
-$_SESSION['user_id']     = $id;
-$_SESSION['user_name']   = $full_name;
-$_SESSION['user_role']   = $role;
-$_SESSION['user_branch'] = $branch;
+$_SESSION['user_id']         = $id;
+$_SESSION['user_name']       = $full_name;
+$_SESSION['user_role']       = $role;
+$_SESSION['user_branch']     = $branch;
+$_SESSION['is_super_admin']  = (bool) $is_super_admin;
 
 if (isset($_POST['remember']) && $_POST['remember'] === '1') {
     create_remember_token($conn, (int) $id);

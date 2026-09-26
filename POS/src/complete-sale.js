@@ -1,5 +1,5 @@
 async function completeSale() {
-  const { subtotal, vat, total } = cartTotals();
+  const { subtotal, total } = cartTotals();
   const cashTendered = selectedPayment === 'CASH'
     ? parseFloat(document.getElementById('cashTendered').value) || 0
     : null;
@@ -17,7 +17,7 @@ async function completeSale() {
     cashier:        CASHIER,
     branch:         BRANCH,
     payment_method: selectedPayment,
-    subtotal, vat, total,
+    subtotal, total,
     cash_tendered:  cashTendered,
     items: cart.map(c => ({
       product_id:   c.id,

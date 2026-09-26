@@ -212,11 +212,13 @@ function renderReqPager(totalPages) {
   const pager = document.getElementById('trfReqPager');
   if (!pager) return;
   if (totalPages <= 1) { pager.innerHTML = ''; return; }
-  let html = `<button class="pg-btn${reqPage <= 1 ? ' disabled' : ''}" onclick="reqGoto(${reqPage - 1})">‹</button>`;
+  const prevIcon = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const nextIcon = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let html = `<button class="pg-btn pg-btn--nav${reqPage <= 1 ? ' disabled' : ''}" onclick="reqGoto(${reqPage - 1})" aria-label="Previous page">${prevIcon}</button>`;
   for (let i = 1; i <= totalPages; i++) {
     html += `<button class="pg-btn${i === reqPage ? ' active' : ''}" onclick="reqGoto(${i})">${i}</button>`;
   }
-  html += `<button class="pg-btn${reqPage >= totalPages ? ' disabled' : ''}" onclick="reqGoto(${reqPage + 1})">›</button>`;
+  html += `<button class="pg-btn pg-btn--nav${reqPage >= totalPages ? ' disabled' : ''}" onclick="reqGoto(${reqPage + 1})" aria-label="Next page">${nextIcon}</button>`;
   pager.innerHTML = html;
 }
 function reqGoto(p) { reqPage = p; renderRequestRows(); }

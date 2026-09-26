@@ -1,6 +1,5 @@
 // Lucky 8 POS — Frontend Logic
 
-const VAT_RATE = 0.12;
 let products = [];
 let cart = [];
 let selectedPayment = 'CASH';

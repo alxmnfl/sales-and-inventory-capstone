@@ -14,6 +14,15 @@
     background: #f3f4f6;
     color: #374151;
 }
+.role-super {
+    background: rgba(124, 58, 237, 0.12);
+    color: #7c3aed;
+}
+.row-locked-hint {
+    font-size: 11px;
+    font-style: italic;
+    color: #9ca3af;
+}
 .status-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -217,6 +226,31 @@
 }
 .pw-toggle:hover {
     color: #e8611a;
+}
+
+/* ── Super Admin toggle ── */
+.super-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    background: rgba(124, 58, 237, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #5b21b6;
+    cursor: pointer;
+}
+.super-toggle input {
+    margin-top: 2px;
+    accent-color: #7c3aed;
+}
+.super-toggle .hint {
+    font-weight: 400;
+    color: #7c3aed;
+    opacity: .75;
 }
 
 /* ── Custom dropdown (Role / Branch) ── */

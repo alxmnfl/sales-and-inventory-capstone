@@ -35,7 +35,7 @@ try {
     $cashier       = trim($input['cashier']);
     $paymentMethod = trim($input['payment_method']);
     $subtotal      = round((float)$input['subtotal'], 2);
-    $vat           = round((float)$input['vat'],      2);
+    $vat           = 0.00;
     $total         = round((float)$input['total'],    2);
     $cashTendered  = isset($input['cash_tendered']) && $input['cash_tendered'] !== null
                      ? (float)$input['cash_tendered']
@@ -126,7 +126,6 @@ try {
         'transaction_id' => $txId,
         'cashier'        => $cashier,
         'subtotal'       => $subtotal,
-        'vat'            => $vat,
         'total'          => $total,
         'items'          => $responseItems,
         'created_at'     => $createdAt,

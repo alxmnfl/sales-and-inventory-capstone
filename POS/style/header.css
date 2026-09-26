@@ -7,30 +7,38 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 60px;
-  padding: 0 24px;
+  height: 66px;
+  padding: 0 28px;
   background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+}
+.pos-header::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--orange), transparent 65%);
+  opacity: .55;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .logo-box {
-  width: 38px;
-  height: 38px;
-  background: var(--orange);
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(145deg, var(--orange), var(--orange-hover));
   color: var(--white);
-  border-radius: 8px;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,105 +46,255 @@
   font-size: 13px;
   letter-spacing: -.5px;
   flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(224, 90, 26, .35);
+}
+
+.header-store {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .store-name {
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 800;
+  font-size: 12.5px;
+  letter-spacing: .3px;
+  color: var(--dark);
 }
 
 .store-branch {
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 600;
   color: var(--gray-500);
+  letter-spacing: .2px;
 }
 
+/* ── Session badge (avatar + name pill) ── */
 .session-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: var(--dark);
+  gap: 9px;
+  background: linear-gradient(145deg, var(--dark), #1f2a3d);
   color: var(--white);
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
+  padding: 5px 16px 5px 6px;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: .4px;
+  box-shadow: var(--shadow-sm);
 }
 
-.session-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--green);
+.session-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  color: var(--white);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0;
   flex-shrink: 0;
 }
 
+.session-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, .25);
+}
+
+/* "Go back to POS" — only rendered on Transfers/Deliveries */
 .btn-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  gap: 7px;
+  padding: 9px 18px 9px 15px;
   border: 1.5px solid var(--gray-200);
   background: var(--white);
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .4px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
   cursor: pointer;
   color: var(--dark);
   text-decoration: none;
-  transition: background .15s, border-color .15s;
+  transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+}
+.btn-header svg {
+  color: var(--gray-500);
+  transition: transform .15s, color .15s;
+}
+.btn-header:hover {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+.btn-header:hover svg {
+  color: var(--white);
+  transform: translateX(-2px);
 }
 
-.btn-header:hover {
+/* ── Hamburger menu (Transfers / Deliveries / Logout) ── */
+.hdr-menu {
+  position: relative;
+}
+
+.hdr-menu-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  border-radius: 9px;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.hdr-menu-btn:hover {
   background: var(--gray-100);
   border-color: var(--gray-500);
 }
-
-.btn-exit {
-  color: var(--gray-500);
-}
-.btn-header.btn-exit svg { color: #DC2626; }
-.btn-header.btn-exit:hover {
-  background: #FEF2F2;
-  border-color: #FCA5A5;
-  color: #DC2626;
-}
-
-/* ── Deliveries + Transfers buttons ── */
-.btn-header--deliveries,
-.btn-header--transfers {
-  color: var(--orange);
-  border-color: #F4C9AE;
-}
-.btn-header--deliveries svg,
-.btn-header--transfers svg { color: var(--orange); }
-.btn-header--deliveries:hover,
-.btn-header--transfers:hover {
-  background: var(--orange-light);
-  border-color: var(--orange);
-}
-
-/* Pending deliveries waiting → attention-grabbing highlight */
-.btn-header--alert {
-  background: var(--orange);
-  border-color: var(--orange);
+.hdr-menu-btn[aria-expanded="true"] {
+  background: var(--dark);
+  border-color: var(--dark);
   color: var(--white);
+}
+
+/* Pending items waiting somewhere in the menu → draw the eye to the trigger */
+.hdr-menu-btn--alert {
+  border-color: var(--orange);
+  color: var(--orange);
   animation: hdrPulse 2s ease-in-out infinite;
 }
-.btn-header--alert svg { color: var(--white); }
-.btn-header--alert:hover {
-  background: var(--orange-hover);
-  border-color: var(--orange-hover);
-}
-.btn-header--alert .hdr-badge {
-  background: var(--white);
-  color: var(--orange);
+.hdr-menu-btn--alert[aria-expanded="true"] {
+  color: var(--white);
+  background: var(--dark);
 }
 @keyframes hdrPulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(224, 90, 26, .45); }
   50%      { box-shadow: 0 0 0 6px rgba(224, 90, 26, 0); }
 }
+
+.hdr-menu-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 15px;
+  text-align: center;
+  border: 2px solid var(--white);
+}
+
+.hdr-menu-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 232px;
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  padding: 8px;
+  z-index: 200;
+}
+.hdr-menu-panel::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  background: var(--white);
+  border-left: 1.5px solid var(--gray-200);
+  border-top: 1.5px solid var(--gray-200);
+  border-radius: 3px 0 0 0;
+  transform: rotate(45deg);
+}
+.hdr-menu-panel.open {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: hdrMenuIn .15s ease;
+}
+@keyframes hdrMenuIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hdr-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: var(--dark);
+  text-decoration: none;
+  transition: background .12s;
+}
+.hdr-menu-item:hover { background: var(--gray-100); }
+.hdr-menu-item-label { flex: 1; }
+.hdr-menu-item .hdr-badge { flex-shrink: 0; }
+.hdr-menu-item .hdr-menu-chevron {
+  color: var(--gray-200);
+  flex-shrink: 0;
+  transition: transform .15s, color .15s;
+}
+.hdr-menu-item:hover .hdr-menu-chevron {
+  color: var(--gray-500);
+  transform: translateX(2px);
+}
+
+/* Icon chip — shared by menu items and the "Go back to POS" button */
+.hdr-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--orange-light);
+  color: var(--orange);
+  flex-shrink: 0;
+}
+
+.hdr-menu-item--alert {
+  background: var(--orange-light);
+}
+.hdr-menu-item--alert:hover { filter: brightness(.97); }
+.hdr-menu-item--alert .hdr-chip {
+  background: var(--white);
+  color: var(--orange);
+}
+
+.hdr-menu-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 6px 4px;
+}
+
+.hdr-menu-item--danger { color: #DC2626; }
+.hdr-menu-item--danger .hdr-chip { background: #FEF2F2; color: #DC2626; }
+.hdr-menu-item--danger:hover { background: #FEF2F2; }
+.hdr-menu-item--danger:hover .hdr-chip { background: #FEE2E2; }
 
 .hdr-badge {
   display: inline-flex;
@@ -148,7 +306,7 @@
   border-radius: 10px;
   background: var(--orange);
   color: var(--white);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   line-height: 1;
 }

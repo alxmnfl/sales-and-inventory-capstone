@@ -15,6 +15,9 @@ if (!isset($_SESSION['pos_cashier'])) {
 $cashier = $_SESSION['pos_cashier'];
 $branch  = $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB';
 
+$cashier_words = explode(' ', trim($cashier));
+$initials = strtoupper(substr($cashier_words[0], 0, 1) . (isset($cashier_words[1]) ? substr($cashier_words[1], 0, 1) : ''));
+
 // Deliveries awaiting this branch's confirmation (header badge)
 require_once '../../Landing Page/php/delivery_schema.php';
 ensure_delivery_schema($conn);
@@ -53,10 +56,10 @@ $ptStmt->close();
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
-<link rel="stylesheet" href="../style/header.css?v=20260926">
+<link rel="stylesheet" href="../style/header.css?v=20260926j">
 <link rel="stylesheet" href="../style/products.css?v=2">
-<link rel="stylesheet" href="../style/cart.css?v=2">
-<link rel="stylesheet" href="../style/modal.css">
+<link rel="stylesheet" href="../style/cart.css?v=20260926k">
+<link rel="stylesheet" href="../style/modal.css?v=20260926i">
 <link rel="stylesheet" href="../style/sale-complete.css">
 
 </head>
@@ -72,25 +75,38 @@ $ptStmt->close();
   </div>
   <div class="header-center">
     <div class="session-badge">
-      <span class="session-dot"></span>
+      <span class="session-avatar"><?= htmlspecialchars($initials) ?></span>
       SESSION: <?= htmlspecialchars($cashier) ?>
+      <span class="session-dot"></span>
     </div>
   </div>
   <div class="header-right">
-    <a href="transfers.php" class="btn-header btn-header--transfers<?= $pendingTransfers > 0 ? ' btn-header--alert' : '' ?>">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 3L1 6l3 3M1 6h11M12 13l3-3-3-3M15 10H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      TRANSFERS
-      <?php if ($pendingTransfers > 0): ?><span class="hdr-badge"><?= (int)$pendingTransfers ?></span><?php endif; ?>
-    </a>
-    <a href="deliveries.php" class="btn-header btn-header--deliveries<?= $pendingDeliveries > 0 ? ' btn-header--alert' : '' ?>">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1zM10 6h3l2 2v3h-5M3.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM12.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      DELIVERIES
-      <?php if ($pendingDeliveries > 0): ?><span class="hdr-badge"><?= (int)$pendingDeliveries ?></span><?php endif; ?>
-    </a>
-    <a href="logout.php" class="btn-header btn-exit">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      EXIT
-    </a>
+    <?php $hasPending = $pendingTransfers > 0 || $pendingDeliveries > 0; ?>
+    <div class="hdr-menu" id="hdrMenu">
+      <button class="hdr-menu-btn<?= $hasPending ? ' hdr-menu-btn--alert' : '' ?>" type="button" id="hdrMenuBtn" aria-haspopup="menu" aria-expanded="false" title="Menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <?php if ($hasPending): ?><span class="hdr-menu-dot"><?= (int)($pendingTransfers + $pendingDeliveries) ?></span><?php endif; ?>
+      </button>
+      <div class="hdr-menu-panel" id="hdrMenuPanel" role="menu">
+        <a href="transfers.php" class="hdr-menu-item<?= $pendingTransfers > 0 ? ' hdr-menu-item--alert' : '' ?>" role="menuitem">
+          <span class="hdr-chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 3L1 6l3 3M1 6h11M12 13l3-3-3-3M15 10H4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="hdr-menu-item-label">TRANSFERS</span>
+          <?php if ($pendingTransfers > 0): ?><span class="hdr-badge"><?= (int)$pendingTransfers ?></span><?php endif; ?>
+          <svg class="hdr-menu-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="deliveries.php" class="hdr-menu-item<?= $pendingDeliveries > 0 ? ' hdr-menu-item--alert' : '' ?>" role="menuitem">
+          <span class="hdr-chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 4h9v7H1zM10 6h3l2 2v3h-5M3.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM12.5 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="hdr-menu-item-label">DELIVERIES</span>
+          <?php if ($pendingDeliveries > 0): ?><span class="hdr-badge"><?= (int)$pendingDeliveries ?></span><?php endif; ?>
+          <svg class="hdr-menu-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="hdr-menu-divider"></div>
+        <a href="logout.php" class="hdr-menu-item hdr-menu-item--danger" role="menuitem">
+          <span class="hdr-chip"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2H2v12h4M11 5l3 3-3 3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="hdr-menu-item-label">LOGOUT</span>
+        </a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -158,10 +174,6 @@ $ptStmt->close();
           <span>Subtotal</span>
           <span id="cartSubtotal">₱0.00</span>
         </div>
-        <div class="total-row">
-          <span>VAT (12%)</span>
-          <span id="cartVat">₱0.00</span>
-        </div>
         <div class="total-row total-row--grand">
           <span>TOTAL</span>
           <span id="cartTotal">₱0.00</span>
@@ -180,24 +192,35 @@ $ptStmt->close();
 <div class="modal-overlay" id="checkoutModal" style="display:none">
   <div class="modal">
     <div class="modal-header">
-      <div>
-        <h2 class="modal-title">CHECKOUT</h2>
-        <p class="modal-subtitle" id="modalSubtitle"></p>
+      <div class="modal-header-left">
+        <div class="modal-icon">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="1" y="5" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M1 9h18" stroke="currentColor" stroke-width="1.6"/></svg>
+        </div>
+        <div>
+          <h2 class="modal-title">CHECKOUT</h2>
+          <p class="modal-subtitle" id="modalSubtitle"></p>
+        </div>
       </div>
       <button class="modal-close" onclick="closeCheckout()">✕</button>
     </div>
 
     <div class="payment-methods">
       <button class="payment-btn active" data-method="CASH" onclick="selectPayment(this,'CASH')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v10M9 9.5C9 8.1 10.3 7 12 7s3 1.1 3 2.5-1.3 2.5-3 2.5-3 1.1-3 2.5S10.3 17 12 17s3-1.1 3-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="payment-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v10M9 9.5C9 8.1 10.3 7 12 7s3 1.1 3 2.5-1.3 2.5-3 2.5-3 1.1-3 2.5S10.3 17 12 17s3-1.1 3-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
         CASH
       </button>
       <button class="payment-btn" data-method="CREDIT CARD" onclick="selectPayment(this,'CREDIT CARD')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="22" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M1 10h22" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="14" width="4" height="2" rx="0.5" fill="currentColor"/></svg>
+        <span class="payment-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="1" y="5" width="22" height="15" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M1 10h22" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="14" width="4" height="2" rx="0.5" fill="currentColor"/></svg>
+        </span>
         CREDIT CARD
       </button>
       <button class="payment-btn" data-method="CORPORATE ACCOUNT" onclick="selectPayment(this,'CORPORATE ACCOUNT')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="15" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 7V5a4 4 0 018 0v2" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="payment-btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="15" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 7V5a4 4 0 018 0v2" stroke="currentColor" stroke-width="1.6"/><path d="M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span>
         CORPORATE ACCOUNT
       </button>
     </div>
@@ -269,10 +292,6 @@ $ptStmt->close();
           <span>Subtotal</span>
           <span id="receiptSubtotal"></span>
         </div>
-        <div class="receipt-row">
-          <span>VAT (12%)</span>
-          <span id="receiptVat"></span>
-        </div>
         <div class="receipt-row receipt-total">
           <span>TOTAL</span>
           <span id="receiptTotal"></span>
@@ -288,11 +307,12 @@ $ptStmt->close();
 
 <script>const CASHIER = <?= json_encode($cashier) ?>; const BRANCH = <?= json_encode($branch) ?>;</script>
 
-<script src="../src/pos.js"></script>
+<script src="../src/header-menu.js"></script>
+<script src="../src/pos.js?v=20260926g"></script>
 <script src="../src/checkout.js"></script>
-<script src="../src/complete-sale.js"></script>
-<script src="../src/receipt.js"></script>
-<script src="../src/cart.js?v=2"></script>
+<script src="../src/complete-sale.js?v=20260926g"></script>
+<script src="../src/receipt.js?v=20260926g"></script>
+<script src="../src/cart.js?v=20260926g"></script>
 <script src="../src/products.js?v=2"></script>
 
 </body>

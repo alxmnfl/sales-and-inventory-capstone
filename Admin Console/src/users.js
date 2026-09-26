@@ -12,6 +12,9 @@ function openEditModal(u){
     setCSelect(document.getElementById('editRoleSelect'),   u.role);
     setCSelect(document.getElementById('editBranchSelect'), (u.branch || '').toUpperCase());
 
+    var superBox = document.getElementById('editIsSuper');
+    if (superBox) superBox.checked = !!(u.is_super_admin && Number(u.is_super_admin) === 1);
+
     document.getElementById('editModal').classList.add('open');
 }
 

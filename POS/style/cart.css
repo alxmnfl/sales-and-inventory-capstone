@@ -189,7 +189,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 4px 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--gray-700);
 }
 
@@ -197,19 +197,19 @@
   padding-top: 10px;
   margin-top: 6px;
   border-top: 1.5px solid var(--gray-200);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--dark);
 }
 
 .btn-pay {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: var(--orange);
   color: white;
   border: none;
   border-radius: var(--radius);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: .4px;
   cursor: pointer;

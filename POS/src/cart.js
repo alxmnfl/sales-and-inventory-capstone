@@ -36,17 +36,15 @@ function clearCart() {
 
 function cartTotals() {
   const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const vat      = subtotal * VAT_RATE;
-  return { subtotal, vat, total: subtotal + vat };
+  return { subtotal, total: subtotal };
 }
 
 function updateCart() {
-  const { subtotal, vat, total } = cartTotals();
+  const { subtotal, total } = cartTotals();
   const count = cart.reduce((s, c) => s + c.qty, 0);
 
   document.getElementById('cartCount').textContent   = `${count} ITEM${count !== 1 ? 'S' : ''}`;
   document.getElementById('cartSubtotal').textContent = fmt(subtotal);
-  document.getElementById('cartVat').textContent      = fmt(vat);
   document.getElementById('cartTotal').textContent    = fmt(total);
   document.getElementById('btnPayAmount').textContent = fmt(total);
   document.getElementById('btnPay').disabled          = cart.length === 0;

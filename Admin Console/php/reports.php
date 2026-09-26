@@ -32,24 +32,24 @@ if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
     if ($export === 'sales') {
         $doc_title = 'Sales Report';
         $meta      = "Period: {$from} to {$to}  •  Branch: {$scope}";
-        $cols      = ['Transaction ID', 'Cashier', 'Branch', 'Payment', 'Subtotal', 'VAT', 'Total', 'Date'];
-        $rightcol  = [4, 5, 6];
+        $cols      = ['Transaction ID', 'Cashier', 'Branch', 'Payment', 'Subtotal', 'Total', 'Date'];
+        $rightcol  = [4, 5];
         $rows      = [];
-        $sub = $vat = $tot = 0.0;
-        $r = $conn->query("SELECT transaction_id,cashier,branch,payment_method,subtotal,vat,total,created_at
+        $sub = $tot = 0.0;
+        $r = $conn->query("SELECT transaction_id,cashier,branch,payment_method,subtotal,total,created_at
                            FROM pos_sales
                            WHERE DATE(created_at) BETWEEN '$from' AND '$to' $bwhere
                            ORDER BY created_at DESC");
         while ($x = $r->fetch_assoc()) {
-            $sub += (float)$x['subtotal']; $vat += (float)$x['vat']; $tot += (float)$x['total'];
+            $sub += (float)$x['subtotal']; $tot += (float)$x['total'];
             $rows[] = [
                 $x['transaction_id'], $x['cashier'], strtoupper($x['branch']), strtoupper($x['payment_method'] ?? 'CASH'),
-                '₱'.number_format((float)$x['subtotal'], 2), '₱'.number_format((float)$x['vat'], 2),
+                '₱'.number_format((float)$x['subtotal'], 2),
                 '₱'.number_format((float)$x['total'], 2), $x['created_at'],
             ];
         }
         $foot = ['TOTAL — '.count($rows).' transactions', '', '', '',
-                 '₱'.number_format($sub, 2), '₱'.number_format($vat, 2), '₱'.number_format($tot, 2), ''];
+                 '₱'.number_format($sub, 2), '₱'.number_format($tot, 2), ''];
 
     } elseif ($export === 'inventory') {
         $doc_title = 'Inventory Report';

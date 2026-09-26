@@ -65,7 +65,7 @@ function restore_remembered_login(mysqli $conn): void {
 
     $selector = $parts[0];
     $tokenHash = hash('sha256', $parts[1]);
-    $stmt = $conn->prepare('SELECT u.id, u.full_name, u.role, u.branch, t.token_hash FROM remember_tokens t INNER JOIN users u ON u.id = t.user_id WHERE t.selector = ? AND t.expires_at > NOW() LIMIT 1');
+    $stmt = $conn->prepare('SELECT u.id, u.full_name, u.role, u.branch, u.is_super_admin, t.token_hash FROM remember_tokens t INNER JOIN users u ON u.id = t.user_id WHERE t.selector = ? AND t.expires_at > NOW() LIMIT 1');
     $stmt->bind_param('s', $selector);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -86,6 +86,7 @@ function restore_remembered_login(mysqli $conn): void {
     $_SESSION['user_name'] = $user['full_name'];
     $_SESSION['user_role'] = $user['role'];
     $_SESSION['user_branch'] = $user['branch'];
+    $_SESSION['is_super_admin'] = (bool) $user['is_super_admin'];
     if ($user['role'] === 'branch_staff') {
         $_SESSION['pos_cashier'] = strtoupper($user['full_name']);
         $_SESSION['pos_cashier_branch'] = strtoupper($user['branch'] ?? '');
