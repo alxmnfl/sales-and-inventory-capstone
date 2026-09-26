@@ -19,6 +19,14 @@ const branches = [
     { code: 'CAS', name: 'Win Flex — Castellejos',     id: 'CAS-01', region: 'Castellejos · Zambales' },
 ];
 
+function escAttr(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
 function renderBranches(list) {
     const container = document.getElementById('branchList');
     if (!container) return;
@@ -26,8 +34,11 @@ function renderBranches(list) {
         container.innerHTML = '<div class="branch-empty">No branches found.</div>';
         return;
     }
+    // Branch names/codes are passed via data-* attributes (not inline onclick)
+    // so names containing an apostrophe, like "Matthew's", don't break out of
+    // the JS string literal and silently kill the click handler.
     container.innerHTML = list.map(b => `
-        <div class="branch-item" onclick="selectBranch('${b.name}', '${b.code}')">
+        <div class="branch-item" data-name="${escAttr(b.name)}" data-code="${escAttr(b.code)}">
             <div class="branch-badge">${b.code}</div>
             <div class="branch-info">
                 <span class="branch-name">${b.name}</span>
@@ -132,6 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab(tab);
 
     document.addEventListener('click', (e) => {
+        const item = e.target.closest('.branch-item');
+        if (item) {
+            selectBranch(item.dataset.name, item.dataset.code);
+            return;
+        }
         if (!e.target.closest('#branchSelect')) {
             const dropdown = document.getElementById('branchDropdown');
             const arrow    = document.getElementById('branchArrow');

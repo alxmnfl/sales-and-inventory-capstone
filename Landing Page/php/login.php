@@ -265,6 +265,6 @@ if (isset($_SESSION['user_id'])) {
     <script>
         const initialTab = "<?= htmlspecialchars($active_tab) ?>";
     </script>
-    <script src="../src/login.js?v=20260926"></script>
+    <script src="../src/login.js?v=20260926c"></script>
 </body>
 </html>
