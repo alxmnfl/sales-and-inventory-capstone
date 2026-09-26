@@ -53,7 +53,7 @@ $ptStmt->close();
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
-<link rel="stylesheet" href="../style/header.css?v=20260901">
+<link rel="stylesheet" href="../style/header.css?v=20260926">
 <link rel="stylesheet" href="../style/products.css?v=2">
 <link rel="stylesheet" href="../style/cart.css?v=2">
 <link rel="stylesheet" href="../style/modal.css">

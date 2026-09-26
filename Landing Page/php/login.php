@@ -29,7 +29,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky Charm — Hydraulic Hose &amp; Industrial Sales Co.</title>
 
-    <link rel="stylesheet" href="../style/login.css">
+    <link rel="stylesheet" href="../style/login.css?v=20260926">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -37,6 +37,19 @@ if (isset($_SESSION['user_id'])) {
     <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 </head>
 <body>
+
+    <!-- PAGE LOADER -->
+    <div class="page-loader" id="pageLoader">
+        <div class="page-loader-logo">
+            <div class="page-loader-badge">LC</div>
+            <div class="page-loader-text">
+                <span class="page-loader-name">LUCKY CHARM</span>
+                <span class="page-loader-sub">HYDRAULIC HOSE &amp; INDUSTRIAL SALES CO.</span>
+            </div>
+        </div>
+        <div class="page-loader-bar"></div>
+        <span class="page-loader-status">Loading console&hellip;</span>
+    </div>
 
     <!-- LEFT PANEL -->
     <div class="left-panel">
@@ -252,6 +265,6 @@ if (isset($_SESSION['user_id'])) {
     <script>
         const initialTab = "<?= htmlspecialchars($active_tab) ?>";
     </script>
-    <script src="../src/login.js"></script>
+    <script src="../src/login.js?v=20260926"></script>
 </body>
 </html>

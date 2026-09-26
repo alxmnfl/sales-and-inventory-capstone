@@ -116,6 +116,15 @@ function toggleRegPassword(inputId, icon) {
     }
 }
 
+window.addEventListener('load', () => {
+    const loader = document.getElementById('pageLoader');
+    if (!loader) return;
+    setTimeout(() => {
+        loader.classList.add('is-hidden');
+        loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+    }, 700);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     renderBranches(branches);
 
