@@ -156,7 +156,7 @@ $conn->close();
 <title>Lucky 8 — Users</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 <link rel="stylesheet" href="../styles/admin.css?v=20260901b">
-<link rel="stylesheet" href="../styles/users.css?v=20260926">
+<link rel="stylesheet" href="../styles/users.css?v=20260926b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
