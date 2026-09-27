@@ -39,21 +39,11 @@ function openEditModal(u){
     document.getElementById('editModal').classList.add('open');
 }
 
-function closeModal(id){
-    var m = document.getElementById(id);
-    m.classList.remove('open');
-    m.querySelectorAll('.cselect.open').forEach(function(c){ c.classList.remove('open'); });
-}
-
 function confirmDelete(id, name){
     if (!confirm('Delete user "' + name + '"?')) return;
     document.getElementById('deleteId').value = id;
     document.getElementById('deleteForm').submit();
 }
-
-document.querySelectorAll('.modal-bg').forEach(function(m){
-    m.addEventListener('click', function(e){ if (e.target === m) closeModal(m.id); });
-});
 
 /* ── Custom dropdowns (Role / Branch) ── */
 function setCSelect(cs, value){

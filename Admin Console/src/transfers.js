@@ -29,6 +29,3 @@ function viewTransfer(t) {
     document.getElementById('trfViewModal').classList.add('open');
 }
 
-document.querySelectorAll('.modal-bg').forEach(m => {
-    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-});

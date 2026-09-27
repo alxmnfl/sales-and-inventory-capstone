@@ -1,22 +1,10 @@
 <?php
 require_once '../../Landing Page/php/auth.php';
 
-// Accept session from main login (branch_staff) or POS-direct login
-if (isset($_SESSION['user_id']) && ($_SESSION['user_role'] ?? '') === 'branch_staff') {
-    $_SESSION['pos_cashier']        = strtoupper($_SESSION['user_name']);
-    $_SESSION['pos_cashier_branch'] = strtoupper($_SESSION['user_branch'] ?? '');
-}
-
-if (!isset($_SESSION['pos_cashier'])) {
-    header('Location: ../../Landing Page/login.php');
-    exit;
-}
+['cashier' => $cashier, 'branch' => $branch] = require_pos_cashier();
 
 require_once '../../Landing Page/php/delivery_schema.php';
 ensure_delivery_schema($conn);
-
-$cashier = $_SESSION['pos_cashier'];
-$branch  = strtoupper($_SESSION['pos_cashier_branch'] ?? 'MAIN HUB');
 
 $cashier_words = explode(' ', trim($cashier));
 $initials = strtoupper(substr($cashier_words[0], 0, 1) . (isset($cashier_words[1]) ? substr($cashier_words[1], 0, 1) : ''));

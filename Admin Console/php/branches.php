@@ -2,35 +2,12 @@
 require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/php/login.php'); exit;
-}
-
-$user_name = $_SESSION['user_name'] ?? 'Admin';
-$words     = explode(' ', trim($user_name));
-$initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
+['user_name' => $user_name, 'initials' => $initials] = require_admin();
 
 /* ── Branch data ── */
 $branch_data = [];
-
-// Every branch that appears anywhere — staff roster, product catalogue, or sales
-// history — so branches that carry stock but have no staff assigned still show.
-// (branch columns differ in collation between tables, hence the explicit COLLATE.)
-$r = $conn->query("
-    SELECT DISTINCT b FROM (
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
-            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
-            WHERE branch IS NOT NULL AND branch <> ''
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
-            WHERE branch IS NOT NULL AND branch <> ''
-    ) t
-    ORDER BY b
-");
-while ($row = $r->fetch_row()) {
-    $branch_data[$row[0]] = ['name'=>$row[0],'products'=>0,'stock'=>0,'low_stock'=>0,'staff'=>0,'revenue'=>0,'revenue_prev'=>0];
+foreach (get_all_branches($conn) as $b) {
+    $branch_data[$b] = ['name'=>$b,'products'=>0,'stock'=>0,'low_stock'=>0,'staff'=>0,'revenue'=>0,'revenue_prev'=>0];
 }
 
 // Product count + stock per branch
@@ -74,7 +51,7 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Branches</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260927">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927e">
 <link rel="stylesheet" href="../styles/branches.css">
 <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
 <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">

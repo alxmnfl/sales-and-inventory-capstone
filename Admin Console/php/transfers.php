@@ -3,15 +3,9 @@ require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 require_once '../../Landing Page/php/transfer_schema.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/php/login.php'); exit;
-}
+['user_name' => $user_name, 'initials' => $initials] = require_admin();
 
 ensure_transfer_schema($conn);
-
-$user_name = $_SESSION['user_name'] ?? 'Admin';
-$words     = explode(' ', trim($user_name));
-$initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
 
 /* ── Filters ── */
 $fBranch = strtoupper(trim($_GET['branch'] ?? ''));
@@ -90,8 +84,8 @@ function tStatusBadge(string $s): array {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inter-Branch Transfers</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260927">
-<link rel="stylesheet" href="../styles/inventory.css?v=20260901">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927e">
+<link rel="stylesheet" href="../styles/inventory.css?v=20260927b">
 <link rel="stylesheet" href="../styles/reports.css?v=20260829">
 <link rel="stylesheet" href="../styles/deliveries.css?v=20260830f">
 <link rel="stylesheet" href="../styles/transfers.css?v=20260927">
@@ -245,6 +239,7 @@ function tStatusBadge(string $s): array {
 </div>
 
 <script src="../src/branch-filter-widget.js?v=20260829"></script>
+<script src="../src/modal-helpers.js?v=20260927"></script>
 <script src="../src/transfers.js?v=20260901"></script>
 </body>
 </html>

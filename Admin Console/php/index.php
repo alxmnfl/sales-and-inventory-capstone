@@ -2,15 +2,7 @@
 require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 
-// Auth guard — admin only
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/php/login.php');
-    exit;
-}
-
-$user_name = $_SESSION['user_name'] ?? 'Admin';
-$words     = explode(' ', trim($user_name));
-$initials  = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+['user_name' => $user_name, 'initials' => $initials] = require_admin();
 
 // ── KPI: MTD Revenue 
 $r = $conn->query("
@@ -119,26 +111,8 @@ $avg_daily_rev = $days_elapsed > 0 ? $mtd_revenue / $days_elapsed : 0;
 
 // ── Branch list for the intelligence section filter — every branch that appears
 //    anywhere (staff roster, product catalogue, or sales history) so branches
-//    with no staff still appear. (branch columns differ in collation, hence COLLATE.)
-$branches_list = [];
-$r = $conn->query("
-    SELECT DISTINCT b FROM (
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
-            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
-            WHERE branch IS NOT NULL AND branch <> ''
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
-            WHERE branch IS NOT NULL AND branch <> ''
-    ) t
-    ORDER BY b
-");
-if ($r) {
-    while ($row = $r->fetch_row()) {
-        $branches_list[] = $row[0];
-    }
-}
+//    with no staff still appear.
+$branches_list = get_all_branches($conn);
 
 // Operational branch count = every branch the system knows about. Use the same
 // union just built for the picker so the KPI, the picker, and the dashboard-kpis
@@ -174,7 +148,7 @@ $month_label = date('F Y');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky 8 — Admin Console</title>
     <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-    <link rel="stylesheet" href="../styles/admin.css?v=20260927">
+    <link rel="stylesheet" href="../styles/admin.css?v=20260927e">
     <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
     <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
@@ -190,7 +164,7 @@ $month_label = date('F Y');
             <div class="branch-filter" id="branchFilterWrapper">
                 <i class="fa-solid fa-location-dot branch-filter-icon"></i>
                 <button class="branch-select-btn" id="branchSelectBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                    <span id="branchSelectedLabel">All Branches</span>
+                    <span class="branch-selected-label" id="branchSelectedLabel">All Branches</span>
                     <i class="fa-solid fa-chevron-down branch-chevron" id="branchChevron"></i>
                 </button>
                 <div class="branch-dropdown-panel" id="branchDropdownPanel" role="listbox" aria-label="Select branch">
@@ -207,7 +181,7 @@ $month_label = date('F Y');
                         </div>
                     <?php endforeach; ?>
                 </div>
-                <select id="globalBranchFilter" style="display:none" onchange="loadAllSections()">
+                <select id="globalBranchFilter" class="branch-filter-hidden-select" style="display:none" onchange="loadAllSections()">
                     <option value="">All Branches</option>
                     <?php foreach ($branches_list as $b): ?>
                         <option value="<?= htmlspecialchars($b) ?>"><?= htmlspecialchars($b) ?></option>
@@ -472,7 +446,8 @@ $month_label = date('F Y');
         };
     </script>
 
-    <script src="../src/admin.js?v=20260829"></script>
+    <script src="../src/admin.js?v=20260927"></script>
+    <script src="../src/branch-filter-widget.js?v=20260829"></script>
     <script src="../src/abc-donut.js"></script>
     <script src="../src/audit.js"></script>
     <script src="../src/branchint-sec.js"></script>

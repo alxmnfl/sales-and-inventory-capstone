@@ -176,12 +176,5 @@ function cancelDelivery(id, ref){
     document.getElementById('dlvCancelForm').submit();
 }
 
-function closeModal(id){
-    document.getElementById(id).classList.remove('open');
-}
-
-document.querySelectorAll('.modal-bg').forEach(m => {
-    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-});
 
 renderDlvRows();

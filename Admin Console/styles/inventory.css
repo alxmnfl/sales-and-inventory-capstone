@@ -234,22 +234,6 @@
     margin-top: 24px;
 }
 
-/* ── Back to Branches link ── */
-.back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #6b7280;
-    text-decoration: none;
-    margin-bottom: 16px;
-    transition: color 0.2s;
-}
-.back-link:hover {
-    color: #e8611a;
-}
-
 /* ── Clickable branch cards (Product List grouped by branch) ── */
 .branch-card-link {
     display: block;

@@ -48,10 +48,10 @@ $_notif_latest_at = $_notif_items[0]['created_at'] ?? '';
 
 $_sb->close();
 
-// User info for profile dropdown (read from session)
-$_sb_user_name = $_SESSION['user_name'] ?? 'Admin';
-$_sb_words     = explode(' ', trim($_sb_user_name));
-$_sb_initials  = strtoupper(substr($_sb_words[0],0,1).(isset($_sb_words[1])?substr($_sb_words[1],0,1):''));
+// User info for profile dropdown — reuse the name/initials require_admin()
+// already computed on every page that includes this sidebar.
+$_sb_user_name = $user_name ?? ($_SESSION['user_name'] ?? 'Admin');
+$_sb_initials  = $initials  ?? strtoupper(substr($_sb_user_name, 0, 1));
 
 $_nav = [
     ['index.php',       'fa-gauge-high',          'Dashboard',      0,             ''],

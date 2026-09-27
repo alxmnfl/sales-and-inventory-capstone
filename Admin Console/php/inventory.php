@@ -2,32 +2,9 @@
 require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/php/login.php'); exit;
-}
+['user_name' => $user_name, 'initials' => $initials] = require_admin();
 
-$user_name = $_SESSION['user_name'] ?? 'Admin';
-$words     = explode(' ', trim($user_name));
-$initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
-
-/* ── Branch list — every branch that appears anywhere (staff roster, product
-   catalogue, or sales history) so branches with no products still show. ──
-   (branch columns differ in collation between tables, hence the explicit COLLATE.) */
-$branches = [];
-$r = $conn->query("
-    SELECT DISTINCT b FROM (
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
-            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
-            WHERE branch IS NOT NULL AND branch <> ''
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
-            WHERE branch IS NOT NULL AND branch <> ''
-    ) t
-    ORDER BY b
-");
-while ($row = $r->fetch_row()) $branches[] = $row[0];
+$branches = get_all_branches($conn);
 
 /* ── CRUD handling (catalogue-wide: every branch carries one row per SKU) ── */
 $flash = '';
@@ -239,8 +216,8 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inventory</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260927">
-<link rel="stylesheet" href="../styles/inventory.css?v=20260927">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927e">
+<link rel="stylesheet" href="../styles/inventory.css?v=20260927b">
 <link rel="stylesheet" href="../styles/branches.css">
 <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
 <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
@@ -496,6 +473,7 @@ $conn->close();
 </form>
 
 <script src="../src/branch-filter-widget.js?v=20260829"></script>
+<script src="../src/modal-helpers.js?v=20260927"></script>
 <script>
 const CATALOGUE = <?=json_encode($catalogue)?>;
 
@@ -589,10 +567,6 @@ function renderBpmList(){
              + '<div class="bpm-sku">'+escHtml(p.sku)+' · '+escHtml(p.category)+'</div></div>'
              + '<div class="bpm-stock '+sc+'">'+p.stock+' in stock</div></div>';
     }).join('');
-}
-
-function closeModal(id){
-    document.getElementById(id).classList.remove('open');
 }
 
 /* ══ Catalogue table (all branches) ══ */
@@ -770,9 +744,6 @@ document.querySelectorAll('.branch-card-link[data-branch]').forEach(function(car
     });
 });
 
-document.querySelectorAll('.modal-bg').forEach(function(m){
-    m.addEventListener('click', function(e){ if (e.target === m) m.classList.remove('open'); });
-});
 </script>
 </body>
 </html>

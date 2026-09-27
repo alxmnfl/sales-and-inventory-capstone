@@ -3,13 +3,7 @@ require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 require_once '../../Landing Page/php/employee_id_helper.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/php/login.php'); exit;
-}
-
-$user_name = $_SESSION['user_name'] ?? 'Admin';
-$words     = explode(' ', trim($user_name));
-$initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
+['user_name' => $user_name, 'initials' => $initials] = require_admin();
 
 // Super admins are the only ones who may create/edit/delete other administrator
 // accounts (e.g. removing an admin who has resigned). Regular admins are limited
@@ -124,24 +118,8 @@ $staff    = $total - $admins;
 $online   = count(array_filter($users,fn($u)=>$u['status']==='online'));
 
 /* ── Branch list ── */
-$branches=[];
-// Every branch that appears anywhere (staff roster, product catalogue, or sales
-// history) so staff can be assigned to a branch that has no staff yet.
 // "ALL BRANCHES" is kept here — it is a valid assignment for administrators.
-$r=$conn->query("
-    SELECT DISTINCT b FROM (
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
-            WHERE branch IS NOT NULL AND branch <> ''
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
-            WHERE branch IS NOT NULL AND branch <> ''
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
-            WHERE branch IS NOT NULL AND branch <> ''
-    ) t
-    ORDER BY b
-");
-while($row=$r->fetch_row()) $branches[]=$row[0];
+$branches = get_all_branches($conn, false);
 
 /* ── Next auto-generated Employee ID (shown in the Add modal) ── */
 $next_employee_id = next_employee_id($conn);
@@ -155,8 +133,8 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Users</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260927">
-<link rel="stylesheet" href="../styles/users.css?v=20260926b">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927e">
+<link rel="stylesheet" href="../styles/users.css?v=20260927">
 <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
 <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
@@ -383,6 +361,7 @@ $conn->close();
     <input type="hidden" name="id" id="deleteId">
 </form>
 
+<script src="../src/modal-helpers.js?v=20260927"></script>
 <script src="../src/users.js?v=20260927"></script>
 </body>
 </html>

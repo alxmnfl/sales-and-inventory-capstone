@@ -96,6 +96,42 @@ function restore_remembered_login(mysqli $conn): void {
     create_remember_token($conn, (int) $user['id']);
 }
 
+/** Admin Console pages call this first: enforces the administrator-only
+ *  session guard and returns the signed-in user's display name + avatar
+ *  initials (e.g. "Juan Dela Cruz" -> "JD"), redirecting to login otherwise. */
+function require_admin(): array {
+    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
+        header('Location: ../../Landing Page/php/login.php');
+        exit;
+    }
+
+    $user_name = $_SESSION['user_name'] ?? 'Admin';
+    $words     = explode(' ', trim($user_name));
+    $initials  = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
+
+    return ['user_name' => $user_name, 'initials' => $initials];
+}
+
+/** POS pages call this first: accepts a session from the main login
+ *  (branch_staff role) or a POS-direct login, redirecting to login otherwise.
+ *  Returns ['cashier' => ..., 'branch' => ...]. */
+function require_pos_cashier(): array {
+    if (isset($_SESSION['user_id']) && ($_SESSION['user_role'] ?? '') === 'branch_staff') {
+        $_SESSION['pos_cashier']        = strtoupper($_SESSION['user_name']);
+        $_SESSION['pos_cashier_branch'] = strtoupper($_SESSION['user_branch'] ?? '');
+    }
+
+    if (!isset($_SESSION['pos_cashier'])) {
+        header('Location: ../../Landing Page/php/login.php');
+        exit;
+    }
+
+    return [
+        'cashier' => $_SESSION['pos_cashier'],
+        'branch'  => $_SESSION['pos_cashier_branch'] ?? 'MAIN HUB',
+    ];
+}
+
 function forget_remembered_login(mysqli $conn): void {
     if (!empty($_COOKIE[REMEMBER_COOKIE])) {
         $selector = explode(':', $_COOKIE[REMEMBER_COOKIE], 2)[0];

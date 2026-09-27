@@ -2,13 +2,7 @@
 require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/php/login.php'); exit;
-}
-
-$user_name = $_SESSION['user_name'] ?? 'Admin';
-$words     = explode(' ', trim($user_name));
-$initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
+['user_name' => $user_name, 'initials' => $initials] = require_admin();
 
 /* ── Filters ── */
 $branch   = trim($_GET['branch']   ?? '');
@@ -52,23 +46,7 @@ $r = $conn->query($sql);
 while($row=$r->fetch_assoc()) $sales[]=$row;
 
 /* ── Branch list ── */
-$branches=[];
-// Every branch that appears anywhere (staff roster, product catalogue, or sales
-// history) so branches with no sales still appear.
-$r=$conn->query("
-    SELECT DISTINCT b FROM (
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
-            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
-            WHERE branch IS NOT NULL AND branch <> ''
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
-            WHERE branch IS NOT NULL AND branch <> ''
-    ) t
-    ORDER BY b
-");
-while($row=$r->fetch_row()) $branches[]=$row[0];
+$branches = get_all_branches($conn);
 
 $conn->close();
 ?>
@@ -79,7 +57,7 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Sales</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260927">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927e">
 <link rel="stylesheet" href="../styles/sales.css">
 <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
 <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
@@ -185,17 +163,10 @@ $conn->close();
                 </tbody>
             </table>
 
-            <?php if($pages>1):
+            <?php
                 $qp=http_build_query(array_filter(['branch'=>$branch,'from'=>$date_from,'to'=>$date_to]));
+                render_pagination($page_num, $pages, fn($p) => "?$qp&pg=$p", 'salesTable');
             ?>
-            <div class="pagination">
-                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>#salesTable" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
-                <?php for($pg=max(1,$page_num-2);$pg<=min($pages,$page_num+2);$pg++):?>
-                <a href="?<?=$qp?>&pg=<?=$pg?>#salesTable" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
-                <?php endfor;?>
-                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>#salesTable" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
-            </div>
-            <?php endif;?>
         </div>
     </div>
 </div>

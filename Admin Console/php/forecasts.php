@@ -2,41 +2,13 @@
 require_once '../../Landing Page/php/auth.php';
 require_once '../../Landing Page/php/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'administrator') {
-    header('Location: ../../Landing Page/php/login.php');
-    exit;
-}
-
-$user_name = $_SESSION['user_name'] ?? 'Admin';
-$words     = explode(' ', trim($user_name));
-$initials  = strtoupper(
-    substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : '')
-);
+['user_name' => $user_name, 'initials' => $initials] = require_admin();
 
 $branch = trim($_GET['branch'] ?? '');
 $days   = max(7, min(60, (int)($_GET['days'] ?? 14)));
 
 /* ── Branch list ── */
-$branches = [];
-// Every branch that appears anywhere (staff roster, product catalogue, or sales
-// history) so branches with no staff still appear. (branch columns differ in
-// collation between tables, hence the explicit COLLATE.)
-$r = $conn->query("
-    SELECT DISTINCT b FROM (
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci AS b FROM users
-            WHERE branch IS NOT NULL AND branch <> '' AND UPPER(branch) <> 'ALL BRANCHES'
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_products
-            WHERE branch IS NOT NULL AND branch <> ''
-        UNION
-        SELECT UPPER(branch) COLLATE utf8mb4_unicode_ci FROM pos_sales
-            WHERE branch IS NOT NULL AND branch <> ''
-    ) t
-    ORDER BY b
-");
-while ($row = $r->fetch_row()) {
-    $branches[] = $row[0];
-}
+$branches = get_all_branches($conn);
 
 $conn->close();
 
@@ -77,7 +49,7 @@ if ($api_ok) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky 8 — Forecasts</title>
     <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-    <link rel="stylesheet" href="../styles/admin.css?v=20260927">
+    <link rel="stylesheet" href="../styles/admin.css?v=20260927e">
 <link rel="stylesheet" href="../styles/forecasts.css">
     <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
     <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
