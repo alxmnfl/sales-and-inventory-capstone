@@ -13,34 +13,6 @@ $user_name = $_SESSION['user_name'] ?? 'Admin';
 $words     = explode(' ', trim($user_name));
 $initials  = strtoupper(substr($words[0],0,1).(isset($words[1])?substr($words[1],0,1):''));
 
-/* ── POST: save branch regions (the only write this page does) ── */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'set_regions') {
-    $regions = $_POST['region'] ?? [];        // branch => region
-    if (is_array($regions)) {
-        $up = $conn->prepare("UPDATE branch_directory SET region = ? WHERE branch = ?");
-        foreach ($regions as $b => $reg) {
-            $b   = strtoupper(trim((string)$b));
-            $reg = trim((string)$reg);
-            $regVal = $reg === '' ? null : $reg;
-            $up->bind_param('ss', $regVal, $b);
-            $up->execute();
-        }
-        $up->close();
-
-        $a = $conn->prepare(
-            "INSERT INTO audit_trail (user_id, user_name, branch, action, entity_type, entity_id, entity_name, details)
-             VALUES (?, ?, 'ALL BRANCHES', 'EDIT_BRANCH_REGION', 'branch', NULL, 'Branch directory', ?)"
-        );
-        $adminId = (int)$_SESSION['user_id'];
-        $detail  = 'Updated branch regions for the transfer directory';
-        $a->bind_param('iss', $adminId, $user_name, $detail);
-        $a->execute();
-        $a->close();
-    }
-    header('Location: transfers.php?flash=regions');
-    exit;
-}
-
 /* ── Filters ── */
 $fBranch = strtoupper(trim($_GET['branch'] ?? ''));
 $fStatus = trim($_GET['status'] ?? '');
@@ -94,9 +66,9 @@ $kpi = ['requested' => 0, 'shipped' => 0, 'received' => 0, 'rejected' => 0];
 $kr = $conn->query("SELECT status, COUNT(*) c FROM branch_transfers GROUP BY status");
 while ($row = $kr->fetch_row()) { if (isset($kpi[$row[0]])) $kpi[$row[0]] = (int)$row[1]; }
 
-/* ── Branch directory (for the region editor + filter dropdown) ── */
+/* ── Branch directory (for the branch filter dropdown) ── */
 $directory = [];
-$dr = $conn->query("SELECT branch, COALESCE(region,'') region FROM branch_directory ORDER BY branch");
+$dr = $conn->query("SELECT branch FROM branch_directory ORDER BY branch");
 while ($row = $dr->fetch_assoc()) $directory[] = $row;
 
 $conn->close();
@@ -118,14 +90,13 @@ function tStatusBadge(string $s): array {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inter-Branch Transfers</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260901b">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927">
 <link rel="stylesheet" href="../styles/inventory.css?v=20260901">
 <link rel="stylesheet" href="../styles/reports.css?v=20260829">
 <link rel="stylesheet" href="../styles/deliveries.css?v=20260830f">
-<link rel="stylesheet" href="../styles/transfers.css?v=20260901c">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../styles/transfers.css?v=20260927">
+<link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -133,21 +104,12 @@ function tStatusBadge(string $s): array {
 <div class="main" id="mainContent">
     <header class="topbar">
         <div style="font-size:15px;font-weight:700;color:#111827;">Inter-Branch Transfers</div>
-        <div class="topbar-right">
-            <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></div>
-            <div class="user-chip"><?=htmlspecialchars($initials)?></div>
-        </div>
     </header>
 
     <div class="page-content">
 
-        <?php if (($_GET['flash'] ?? '') === 'regions'): ?>
-        <div class="flash ok">Branch regions saved. Staff will now see “nearby” branches grouped by region in the POS stock lookup.</div>
-        <?php endif; ?>
-
         <div class="chart-subtitle" style="margin-bottom:14px;">
-            Read-only oversight of stock moving between branches. Requests are raised and approved by branch staff in the POS —
-            this page is for monitoring and for maintaining the region directory that powers the “nearby branches” view.
+            Read-only oversight of stock moving between branches. Requests are raised and approved by branch staff in the POS.
         </div>
 
         <div class="kpi-grid dlv-kpi-grid" style="margin-bottom:20px;">
@@ -267,39 +229,6 @@ function tStatusBadge(string $s): array {
             </div>
         </div>
 
-        <!-- Region directory -->
-        <div class="chart-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
-                <div>
-                    <div class="chart-title">Branch Region Directory</div>
-                    <div class="chart-subtitle">Give each branch a region name (e.g. “METRO MANILA”, “CENTRAL LUZON”). Branches that share a region show up as “Nearby” in the POS stock lookup.</div>
-                </div>
-                <button type="submit" form="regionForm" class="btn-orange"><i class="fa-solid fa-floppy-disk"></i> Save Regions</button>
-            </div>
-
-            <form method="POST" id="regionForm">
-                <input type="hidden" name="action" value="set_regions">
-                <div class="report-table-wrap">
-                    <table class="intel-table">
-                        <thead><tr><th>Branch</th><th>Region</th></tr></thead>
-                        <tbody>
-                        <?php foreach ($directory as $d): ?>
-                            <tr>
-                                <td><strong><?=htmlspecialchars($d['branch'])?></strong></td>
-                                <td><input type="text" class="trf-region-input" name="region[<?=htmlspecialchars($d['branch'])?>]" value="<?=htmlspecialchars($d['region'])?>" placeholder="— none —" list="regionSuggest"></td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <datalist id="regionSuggest">
-                    <?php
-                    $seen = [];
-                    foreach ($directory as $d) { if ($d['region'] !== '' && !isset($seen[$d['region']])) { $seen[$d['region']] = 1; echo '<option value="'.htmlspecialchars($d['region']).'">'; } }
-                    ?>
-                </datalist>
-            </form>
-        </div>
     </div>
 </div>
 

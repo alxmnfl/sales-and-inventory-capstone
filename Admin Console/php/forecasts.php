@@ -77,12 +77,11 @@ if ($api_ok) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky 8 — Forecasts</title>
     <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-    <link rel="stylesheet" href="../styles/admin.css?v=20260901b">
+    <link rel="stylesheet" href="../styles/admin.css?v=20260927">
 <link rel="stylesheet" href="../styles/forecasts.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
+    <script src="../../vendor/chartjs/chart.umd.min.js"></script>
     </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -92,13 +91,6 @@ if ($api_ok) {
         <div style="display:flex; align-items:center; gap:12px;">
             <div style="font-size:15px; font-weight:700; color:#111827;">Demand Forecasts</div>
             <span class="py-badge"><i class="fa-brands fa-python"></i>Python Powered</span>
-        </div>
-        <div class="topbar-right">
-            <div class="icon-btn">
-                <i class="fa-regular fa-bell"></i>
-                <span class="notif-dot"></span>
-            </div>
-            <div class="user-chip"><?= htmlspecialchars($initials) ?></div>
         </div>
     </header>
 

@@ -239,12 +239,11 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Inventory</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260901b">
-<link rel="stylesheet" href="../styles/inventory.css?v=20260901">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927">
+<link rel="stylesheet" href="../styles/inventory.css?v=20260927">
 <link rel="stylesheet" href="../styles/branches.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -252,10 +251,6 @@ $conn->close();
 <div class="main" id="mainContent">
     <header class="topbar">
         <div style="font-size:15px;font-weight:700;color:#111827;">Inventory</div>
-        <div class="topbar-right">
-            <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></div>
-            <div class="user-chip"><?=htmlspecialchars($initials)?></div>
-        </div>
     </header>
 
     <div class="page-content">
@@ -386,7 +381,7 @@ $conn->close();
 
 <!-- View Products Modal -->
 <div class="modal-bg" id="branchProductsModal">
-    <div class="modal" style="width:520px;">
+    <div class="modal">
         <div class="bpm-header">
             <h3><i class="fa-solid fa-store" style="color:#e8611a;margin-right:8px;"></i><span id="bpmBranchName"></span></h3>
             <span class="bpm-count-badge" id="bpmCount"></span>

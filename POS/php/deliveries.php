@@ -87,7 +87,7 @@ function dlvWhen(?string $s): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 POS — Deliveries</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 
 <link rel="stylesheet" href="../style/base.css">
 <link rel="stylesheet" href="../style/header.css?v=20260926j">

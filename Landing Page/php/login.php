@@ -24,9 +24,8 @@ if (isset($_SESSION['user_id'])) {
     <title>Lucky Charm — Hydraulic Hose &amp; Industrial Sales Co.</title>
 
     <link rel="stylesheet" href="../style/login.css?v=20260927d">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 
     <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
 </head>

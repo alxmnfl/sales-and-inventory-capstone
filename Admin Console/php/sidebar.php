@@ -41,6 +41,11 @@ $_notif_items = [];
 $_r = $_sb->query("SELECT action, entity_name, user_name, branch, created_at FROM audit_trail ORDER BY created_at DESC LIMIT 5");
 if ($_r) while ($_row = $_r->fetch_assoc()) $_notif_items[] = $_row;
 
+// Timestamp of the most recent item — compared client-side against the last
+// time this browser viewed the panel, so the red dot only shows when there's
+// something newer than what was already seen (and stays gone otherwise).
+$_notif_latest_at = $_notif_items[0]['created_at'] ?? '';
+
 $_sb->close();
 
 // User info for profile dropdown (read from session)
@@ -171,6 +176,22 @@ ob_start(); ?>
         var userChip = document.querySelector('.user-chip');
         if(!notifBtn||!userChip) return;
 
+        /* ── Notification dot — hide it once there's nothing newer than what
+           this browser already viewed; reappears only when fresh activity
+           happens after that. ── */
+        var NOTIF_SEEN_KEY = 'lucky8_notif_seen_at';
+        var latestNotifAt  = <?=json_encode($_notif_latest_at)?>;
+        var notifDot       = notifBtn.querySelector('.notif-dot');
+
+        function refreshNotifDot(){
+            if(!notifDot) return;
+            var seenAt = '';
+            try{ seenAt = localStorage.getItem(NOTIF_SEEN_KEY) || ''; }catch(e){}
+            var hasUnseen = latestNotifAt !== '' && latestNotifAt > seenAt;
+            notifDot.style.display = hasUnseen ? '' : 'none';
+        }
+        refreshNotifDot();
+
         // Create both panels as body children (avoids overflow/positioning issues inside small elements)
         var notifDrop = document.createElement('div');
         notifDrop.id = 'notifDrop';
@@ -219,7 +240,14 @@ ob_start(); ?>
             var wasOpen = notifDrop.classList.contains('open');
             notifDrop.classList.remove('open');
             userDrop.classList.remove('open');
-            if(!wasOpen){ positionBelow(notifDrop, notifBtn); notifDrop.classList.add('open'); }
+            if(!wasOpen){
+                positionBelow(notifDrop, notifBtn);
+                notifDrop.classList.add('open');
+                if(latestNotifAt !== ''){
+                    try{ localStorage.setItem(NOTIF_SEEN_KEY, latestNotifAt); }catch(e){}
+                }
+                refreshNotifDot();
+            }
         });
 
         userChip.addEventListener('click', function(e) {

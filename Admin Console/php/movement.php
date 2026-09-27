@@ -128,11 +128,10 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Movement Intel</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260901b">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927">
 <link rel="stylesheet" href="../styles/movement.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -140,10 +139,6 @@ $conn->close();
 <div class="main" id="mainContent">
     <header class="topbar">
         <div style="font-size:15px;font-weight:700;color:#111827;">Movement Intel</div>
-        <div class="topbar-right">
-            <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></div>
-            <div class="user-chip"><?=htmlspecialchars($initials)?></div>
-        </div>
     </header>
 
     <div class="page-content">
@@ -205,7 +200,7 @@ $conn->close();
                     </div>
                 </form>
             </div>
-            <table class="intel-table">
+            <table class="intel-table" id="velocityTable">
                 <thead><tr>
                     <th>#</th><th>Product</th><th>SKU</th><th>Branch</th>
                     <th class="col-r">Prev 7d</th><th class="col-r">Last 7d</th>
@@ -234,11 +229,11 @@ $conn->close();
             </table>
             <?php if($vel_pages>1):?>
             <div class="pagination">
-                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=max(1,$vel_page-1)?>" class="pg-btn<?=$vel_page<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=max(1,$vel_page-1)?>#velocityTable" class="pg-btn<?=$vel_page<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
                 <?php for($vp=max(1,$vel_page-2);$vp<=min($vel_pages,$vel_page+2);$vp++):?>
-                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=$vp?>" class="pg-btn<?=$vp===$vel_page?' active':''?>"><?=$vp?></a>
+                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=$vp?>#velocityTable" class="pg-btn<?=$vp===$vel_page?' active':''?>"><?=$vp?></a>
                 <?php endfor;?>
-                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=min($vel_pages,$vel_page+1)?>" class="pg-btn<?=$vel_page>=$vel_pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+                <a href="?<?=$vel_qbranch?>pg=<?=$act_page?>&vpg=<?=min($vel_pages,$vel_page+1)?>#velocityTable" class="pg-btn<?=$vel_page>=$vel_pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
             </div>
             <?php endif;?>
         </div>
@@ -248,7 +243,7 @@ $conn->close();
             <div class="chart-card-header">
                 <div><div class="chart-title">Recent Stock Activity</div><div class="chart-subtitle"><?=number_format($act_total)?> audit trail entries · page <?=$act_page?>/<?=$act_pages?></div></div>
             </div>
-            <table class="intel-table audit-table">
+            <table class="intel-table audit-table" id="movementAuditTable">
                 <thead><tr>
                     <th>Time</th><th>User</th><th>Branch</th><th>Action</th><th>Item</th><th>Details</th>
                 </tr></thead>
@@ -275,11 +270,11 @@ $conn->close();
                 $qp=http_build_query(array_filter(['branch'=>$branch,'vpg'=>$vel_page>1?$vel_page:null]));
             ?>
             <div class="pagination">
-                <a href="?<?=$qp?>&pg=<?=max(1,$act_page-1)?>" class="pg-btn<?=$act_page<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <a href="?<?=$qp?>&pg=<?=max(1,$act_page-1)?>#movementAuditTable" class="pg-btn<?=$act_page<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
                 <?php for($pg=max(1,$act_page-2);$pg<=min($act_pages,$act_page+2);$pg++):?>
-                <a href="?<?=$qp?>&pg=<?=$pg?>" class="pg-btn<?=$pg===$act_page?' active':''?>"><?=$pg?></a>
+                <a href="?<?=$qp?>&pg=<?=$pg?>#movementAuditTable" class="pg-btn<?=$pg===$act_page?' active':''?>"><?=$pg?></a>
                 <?php endfor;?>
-                <a href="?<?=$qp?>&pg=<?=min($act_pages,$act_page+1)?>" class="pg-btn<?=$act_page>=$act_pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+                <a href="?<?=$qp?>&pg=<?=min($act_pages,$act_page+1)?>#movementAuditTable" class="pg-btn<?=$act_page>=$act_pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
             </div>
             <?php endif;?>
         </div>

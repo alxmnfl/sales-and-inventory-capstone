@@ -99,6 +99,13 @@ function ensure_transfer_schema(mysqli $conn): void {
         WHERE b IS NOT NULL AND b <> ''
     ");
 
+    // Any branch still missing a region (freshly seeded, or left blank before
+    // this list existed) gets it auto-filled from the known 18-branch roster —
+    // nobody needs to open the region editor and type it in by hand anymore.
+    // A branch outside this list (genuinely new) is left NULL for an admin to
+    // set once; this never overwrites a region someone has already saved.
+    backfill_known_branch_regions($conn);
+
     // Transfer audit rows stamp audit_trail.batch_id with the transfer reference
     // — make sure that column exists on databases that predate the delivery work.
     $col = $conn->query("SHOW COLUMNS FROM audit_trail LIKE 'batch_id'");
@@ -107,6 +114,36 @@ function ensure_transfer_schema(mysqli $conn): void {
                       ADD COLUMN batch_id VARCHAR(40) NULL AFTER entity_name,
                       ADD INDEX idx_batch_id (batch_id)");
     }
+}
+
+function backfill_known_branch_regions(mysqli $conn): void {
+    static $regions = [
+        'CROWN FLEX — MOLINO'     => 'CALABARZON',
+        'LIMA — DASMARIÑAS'       => 'CALABARZON',
+        'LUCKY 8 — BAGABAG'       => 'Cagayan Valley',
+        'LUCKY 8 — BAMBANG'       => 'Cagayan Valley',
+        'LUCKY 8 — DINALUPIHAN'   => 'Central Luzon',
+        'LUCKY 8 — LAS PIÑAS CITY' => 'NCR',
+        'LUCKY 8 — VISCAYA'       => 'Cagayan Valley',
+        "MATTHEW'S — LIPA"        => 'CALABARZON',
+        "MATTHEW'S — SAN PABLO"   => 'CALABARZON',
+        'SMDA — STA. ROSA'        => 'CALABARZON',
+        'WIN FLEX — BAGUIO'       => 'Cordillera Administrative Region',
+        'WIN FLEX — BAÑAG'        => 'Ilocos Region',
+        'WIN FLEX — CASTELLEJOS'  => 'Central Luzon',
+        'WIN FLEX — CASTILLA'     => 'Bicol Region',
+        'WIN FLEX — LIGAO'        => 'Bicol Region',
+        'WIN FLEX — NAGA'         => 'Bicol Region',
+        'WIN FLEX — SAN PABLO'    => 'CALABARZON',
+        'WIN FLEX — SUCAT'        => 'NCR',
+    ];
+
+    $stmt = $conn->prepare("UPDATE branch_directory SET region = ? WHERE branch = ? AND region IS NULL");
+    foreach ($regions as $branch => $region) {
+        $stmt->bind_param('ss', $region, $branch);
+        $stmt->execute();
+    }
+    $stmt->close();
 }
 
 /** TRF-XXXXXXXX-XXX reference, matching the DEL- delivery format. */

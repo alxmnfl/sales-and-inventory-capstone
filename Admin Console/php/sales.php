@@ -79,12 +79,11 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Sales</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260901b">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927">
 <link rel="stylesheet" href="../styles/sales.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
+<script src="../../vendor/chartjs/chart.umd.min.js"></script>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -92,10 +91,6 @@ $conn->close();
 <div class="main" id="mainContent">
     <header class="topbar">
         <div style="font-size:15px;font-weight:700;color:#111827;">Sales</div>
-        <div class="topbar-right">
-            <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></div>
-            <div class="user-chip"><?=htmlspecialchars($initials)?></div>
-        </div>
     </header>
 
     <div class="page-content">
@@ -163,7 +158,7 @@ $conn->close();
                 <label>To</label><input type="date" name="to" value="<?=htmlspecialchars($date_to)?>">
                 <button type="submit" class="btn-orange"><i class="fa-solid fa-filter"></i> Filter</button>
             </form>
-            <table class="intel-table">
+            <table class="intel-table" id="salesTable">
                 <thead><tr>
                     <th>Transaction ID</th><th>Cashier</th><th>Branch</th>
                     <th class="col-r">Items</th><th>Payment</th>
@@ -194,11 +189,11 @@ $conn->close();
                 $qp=http_build_query(array_filter(['branch'=>$branch,'from'=>$date_from,'to'=>$date_to]));
             ?>
             <div class="pagination">
-                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>#salesTable" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
                 <?php for($pg=max(1,$page_num-2);$pg<=min($pages,$page_num+2);$pg++):?>
-                <a href="?<?=$qp?>&pg=<?=$pg?>" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
+                <a href="?<?=$qp?>&pg=<?=$pg?>#salesTable" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
                 <?php endfor;?>
-                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>#salesTable" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
             </div>
             <?php endif;?>
         </div>

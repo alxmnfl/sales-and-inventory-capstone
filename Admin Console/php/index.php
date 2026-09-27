@@ -174,10 +174,9 @@ $month_label = date('F Y');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucky 8 — Admin Console</title>
     <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-    <link rel="stylesheet" href="../styles/admin.css?v=20260901b">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles/admin.css?v=20260927">
+    <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
 
 <body>
@@ -457,7 +456,7 @@ $month_label = date('F Y');
     </div><!-- /main -->
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="../../vendor/chartjs/chart.umd.min.js"></script>
 
     <!-- Pass PHP data to JS -->
     <script>

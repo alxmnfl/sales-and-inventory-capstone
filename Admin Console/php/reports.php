@@ -30,7 +30,8 @@ if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
     $foot   = null;
 
     if ($export === 'sales') {
-        $doc_title = 'Sales Report';
+        $doc_title   = 'Sales Report';
+        $file_prefix = 'Sales';
         $meta      = "Period: {$from} to {$to}  •  Branch: {$scope}";
         $cols      = ['Transaction ID', 'Cashier', 'Branch', 'Payment', 'Subtotal', 'Total', 'Date'];
         $rightcol  = [4, 5];
@@ -52,7 +53,8 @@ if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
                  '₱'.number_format($sub, 2), '₱'.number_format($tot, 2), ''];
 
     } elseif ($export === 'inventory') {
-        $doc_title = 'Inventory Report';
+        $doc_title   = 'Inventory Report';
+        $file_prefix = 'Inventory';
         $meta      = "Branch: {$scope}  •  As of ".date('M j, Y');
         $cols      = ['SKU', 'Name', 'Category', 'Branch', 'Price', 'Stock', 'Value'];
         $rightcol  = [4, 5, 6];
@@ -71,7 +73,8 @@ if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
         $foot = ['TOTAL — '.count($rows).' items', '', '', '', '', (string)$stk, '₱'.number_format($val, 2)];
 
     } elseif ($export === 'deliveries') {
-        $doc_title = 'Delivery Report';
+        $doc_title   = 'Delivery Report';
+        $file_prefix = 'Delivery';
         $meta      = "Period: {$from} to {$to}  •  Branch: {$scope}";
         $cols      = ['Reference', 'Branch', 'Status', 'Lines', 'Units', 'Sent', 'Received'];
         $rightcol  = [3, 4];
@@ -95,7 +98,8 @@ if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
         $foot = ['TOTAL — '.count($rows).' deliveries', '', '', (string)$ln, (string)$un, '', ''];
 
     } else { // audit
-        $doc_title = 'Audit Trail Report';
+        $doc_title   = 'Audit Trail Report';
+        $file_prefix = 'Audit';
         $meta      = "Period: {$from} to {$to}  •  Branch: {$scope}";
         $cols      = ['Time', 'User', 'Branch', 'Action', 'Item', 'Details'];
         $rightcol  = [];
@@ -127,18 +131,28 @@ if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title><?= htmlspecialchars($doc_title) ?> — Lucky 8</title>
+<title><?= htmlspecialchars($file_prefix) ?> - <?= htmlspecialchars($scope) ?></title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #f3f4f6; color: #1f2937;
            font-family: 'Segoe UI', 'Inter', Arial, sans-serif; }
     .toolbar { position: sticky; top: 0; z-index: 5; display: flex; gap: 10px; align-items: center;
-               background: #111827; color: #fff; padding: 10px 16px; }
-    .toolbar button { font: inherit; padding: 7px 14px; border: 0; border-radius: 6px; cursor: pointer;
-                      background: #e8611a; color: #fff; font-weight: 600; }
-    .toolbar button.ghost { background: #374151; }
-    .toolbar .hint { margin-left: auto; font-size: 12px; color: #9ca3af; }
+               background: #111827; color: #fff; padding: 12px 20px;
+               box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+    .toolbar button { font: inherit; font-size: 13px; padding: 9px 16px; border: 0; border-radius: 9px;
+                      cursor: pointer; background: #e8611a; color: #fff; font-weight: 700;
+                      display: inline-flex; align-items: center; gap: 8px;
+                      box-shadow: 0 2px 8px rgba(232,97,26,.3);
+                      transition: background .15s, box-shadow .15s, transform .15s; }
+    .toolbar button:hover { background: #d1550f; box-shadow: 0 4px 14px rgba(232,97,26,.35); transform: translateY(-1px); }
+    .toolbar button:active { transform: translateY(0); }
+    .toolbar button.ghost { background: #2a2f3a; box-shadow: none; }
+    .toolbar button.ghost:hover { background: #374151; box-shadow: none; }
+    .toolbar .hint { margin-left: auto; display: flex; align-items: center; gap: 7px;
+                      font-size: 12px; color: #9ca3af; }
+    .toolbar .hint i { color: #6b7280; }
 
     .page { background: #fff; width: 210mm; min-height: 297mm; margin: 18px auto; padding: 16mm;
             box-shadow: 0 2px 14px rgba(0,0,0,.12); display: flex; flex-direction: column; }
@@ -179,9 +193,9 @@ if (in_array($export, ['sales', 'inventory', 'audit', 'deliveries'], true)) {
 </head>
 <body>
 <div class="toolbar no-print">
-    <button onclick="window.print()">🖨 Print / Save as PDF</button>
-    <button class="ghost" onclick="window.close()">Close</button>
-    <span class="hint">In the print dialog, choose “Save as PDF” as the destination.</span>
+    <button onclick="window.print()"><i class="fa-solid fa-file-pdf"></i> Save as PDF</button>
+    <button class="ghost" onclick="window.close()"><i class="fa-solid fa-xmark"></i> Close</button>
+    <span class="hint"><i class="fa-solid fa-circle-info"></i> In the print dialog, choose “Save as PDF” as the destination.</span>
 </div>
 
 <?php foreach ($pages_out as $pi => $page_rows): $pageno = $pi + 1; ?>
@@ -335,11 +349,10 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Reports</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260901b">
-<link rel="stylesheet" href="../styles/reports.css?v=20260830b">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927">
+<link rel="stylesheet" href="../styles/reports.css?v=20260927b">
+<link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -347,10 +360,6 @@ $conn->close();
 <div class="main" id="mainContent">
     <header class="topbar">
         <div style="font-size:15px;font-weight:700;color:#111827;">Reports</div>
-        <div class="topbar-right">
-            <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></div>
-            <div class="user-chip"><?=htmlspecialchars($initials)?></div>
-        </div>
     </header>
 
     <div class="page-content">
@@ -361,40 +370,36 @@ $conn->close();
                 <div class="report-type-card<?=$report_type==='sales'?' selected':''?>">
                     <div class="rt-icon rt-sales"><i class="fa-solid fa-chart-line"></i></div>
                     <div class="rt-body">
-                        <div class="rt-title">Sales Report</div>
+                        <div class="rt-title">Sales Report <i class="fa-solid fa-check rt-check"></i></div>
                         <div class="rt-desc">Transactions by date range and branch</div>
                     </div>
-                    <i class="fa-solid fa-check rt-check"></i>
                 </div>
             </a>
             <a href="?type=inventory&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>">
                 <div class="report-type-card<?=$report_type==='inventory'?' selected':''?>">
                     <div class="rt-icon rt-inv"><i class="fa-solid fa-boxes-stacked"></i></div>
                     <div class="rt-body">
-                        <div class="rt-title">Inventory Report</div>
+                        <div class="rt-title">Inventory Report <i class="fa-solid fa-check rt-check"></i></div>
                         <div class="rt-desc">Current stock levels and product values</div>
                     </div>
-                    <i class="fa-solid fa-check rt-check"></i>
                 </div>
             </a>
             <a href="?type=audit&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>">
                 <div class="report-type-card<?=$report_type==='audit'?' selected':''?>">
                     <div class="rt-icon rt-audit"><i class="fa-solid fa-shield-halved"></i></div>
                     <div class="rt-body">
-                        <div class="rt-title">Audit Report</div>
+                        <div class="rt-title">Audit Report <i class="fa-solid fa-check rt-check"></i></div>
                         <div class="rt-desc">Full system activity and change log</div>
                     </div>
-                    <i class="fa-solid fa-check rt-check"></i>
                 </div>
             </a>
             <a href="?type=deliveries&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>">
                 <div class="report-type-card<?=$report_type==='deliveries'?' selected':''?>">
                     <div class="rt-icon rt-dlv"><i class="fa-solid fa-truck-fast"></i></div>
                     <div class="rt-body">
-                        <div class="rt-title">Delivery Report</div>
+                        <div class="rt-title">Delivery Report <i class="fa-solid fa-check rt-check"></i></div>
                         <div class="rt-desc">Stock deliveries sent to branches and their status</div>
                     </div>
-                    <i class="fa-solid fa-check rt-check"></i>
                 </div>
             </a>
         </div>
@@ -407,7 +412,7 @@ $conn->close();
                     <div class="chart-subtitle">Configure filters, then open a print-ready PDF</div>
                 </div>
                 <a href="?export=<?=$report_type?>&from=<?=$from?>&to=<?=$to?>&branch=<?=urlencode($branch)?>" class="btn-green" target="_blank" rel="noopener">
-                    <i class="fa-solid fa-file-pdf"></i> Print / Save as PDF
+                    <i class="fa-solid fa-file-pdf"></i> Save as PDF
                 </a>
             </div>
 
@@ -443,21 +448,39 @@ $conn->close();
 
             <?php if($report_type==='sales' && !empty($preview_total_rev)):?>
             <div class="report-summary">
-                <div class="rs-item"><div class="rs-label">Total Revenue</div><div class="rs-value">₱<?=number_format((float)$preview_total_rev,0)?></div></div>
-                <div class="rs-item"><div class="rs-label">Transactions</div><div class="rs-value"><?=number_format((int)($preview_count??0))?></div></div>
-                <div class="rs-item"><div class="rs-label">Period</div><div class="rs-value small"><?=htmlspecialchars($from)?> &rarr; <?=htmlspecialchars($to)?></div></div>
+                <div class="rs-item">
+                    <div class="rs-icon orange"><i class="fa-solid fa-peso-sign"></i></div>
+                    <div><div class="rs-label">Total Revenue</div><div class="rs-value">₱<?=number_format((float)$preview_total_rev,0)?></div></div>
+                </div>
+                <div class="rs-item">
+                    <div class="rs-icon green"><i class="fa-solid fa-receipt"></i></div>
+                    <div><div class="rs-label">Transactions</div><div class="rs-value"><?=number_format((int)($preview_count??0))?></div></div>
+                </div>
+                <div class="rs-item">
+                    <div class="rs-icon blue"><i class="fa-solid fa-calendar-days"></i></div>
+                    <div><div class="rs-label">Period</div><div class="rs-value small"><?=htmlspecialchars($from)?> &rarr; <?=htmlspecialchars($to)?></div></div>
+                </div>
             </div>
             <?php endif;?>
 
             <?php if($report_type==='deliveries' && $preview_total):?>
             <div class="report-summary">
-                <div class="rs-item"><div class="rs-label">Deliveries</div><div class="rs-value"><?=number_format((int)$preview_total)?></div></div>
-                <div class="rs-item"><div class="rs-label">Received</div><div class="rs-value"><?=number_format((int)($dlv_received??0))?></div></div>
-                <div class="rs-item"><div class="rs-label">Period</div><div class="rs-value small"><?=htmlspecialchars($from)?> &rarr; <?=htmlspecialchars($to)?></div></div>
+                <div class="rs-item">
+                    <div class="rs-icon orange"><i class="fa-solid fa-truck-fast"></i></div>
+                    <div><div class="rs-label">Deliveries</div><div class="rs-value"><?=number_format((int)$preview_total)?></div></div>
+                </div>
+                <div class="rs-item">
+                    <div class="rs-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                    <div><div class="rs-label">Received</div><div class="rs-value"><?=number_format((int)($dlv_received??0))?></div></div>
+                </div>
+                <div class="rs-item">
+                    <div class="rs-icon blue"><i class="fa-solid fa-calendar-days"></i></div>
+                    <div><div class="rs-label">Period</div><div class="rs-value small"><?=htmlspecialchars($from)?> &rarr; <?=htmlspecialchars($to)?></div></div>
+                </div>
             </div>
             <?php endif;?>
 
-            <p class="preview-note">Showing <?=number_format(count($preview))?> of <?=number_format($preview_total)?> rows &middot; page <?=$page_num?>/<?=$pages?> &middot; the PDF includes all records.</p>
+            <p class="preview-note" id="reportPreview">Showing <?=number_format(count($preview))?> of <?=number_format($preview_total)?> rows &middot; page <?=$page_num?>/<?=$pages?> &middot; the PDF includes all records.</p>
             <div class="report-table-wrap">
             <table class="intel-table">
                 <thead><tr><?php foreach($preview_cols as $ci=>$col):?><th class="<?=isset($rcols[$ci])?'r':''?>"><?=htmlspecialchars($col)?></th><?php endforeach;?></tr></thead>
@@ -476,11 +499,11 @@ $conn->close();
                 $qp=http_build_query(array_filter(['type'=>$report_type,'branch'=>$branch,'from'=>$from,'to'=>$to]));
             ?>
             <div class="pagination">
-                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>#reportPreview" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
                 <?php for($pg=max(1,$page_num-2);$pg<=min($pages,$page_num+2);$pg++):?>
-                <a href="?<?=$qp?>&pg=<?=$pg?>" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
+                <a href="?<?=$qp?>&pg=<?=$pg?>#reportPreview" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
                 <?php endfor;?>
-                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>#reportPreview" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
             </div>
             <?php endif;?>
         </div>

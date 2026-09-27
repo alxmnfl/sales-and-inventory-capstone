@@ -80,11 +80,10 @@ $conn->close();
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky 8 — Audit Trail</title>
 <link rel="icon" type="image/jpeg" href="../../Images/background.jpg">
-<link rel="stylesheet" href="../styles/admin.css?v=20260901b">
-<link rel="stylesheet" href="../styles/audit-trail.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../styles/admin.css?v=20260927">
+<link rel="stylesheet" href="../styles/audit-trail.css?v=20260927b">
+<link href="../../vendor/fonts/fonts.css" rel="stylesheet">
+<link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
@@ -92,10 +91,6 @@ $conn->close();
 <div class="main" id="mainContent">
     <header class="topbar">
         <div style="font-size:15px;font-weight:700;color:#111827;">Audit Trail</div>
-        <div class="topbar-right">
-            <div class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></div>
-            <div class="user-chip"><?=htmlspecialchars($initials)?></div>
-        </div>
     </header>
 
     <div class="page-content">
@@ -127,6 +122,7 @@ $conn->close();
         <!-- Filter -->
         <div class="chart-card">
             <form method="GET" class="filter-bar">
+                <div class="filter-group">
                 <div class="branch-filter" title="Filter by branch">
                     <i class="fa-solid fa-location-dot branch-filter-icon"></i>
                     <button class="branch-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -176,15 +172,28 @@ $conn->close();
                         <?php foreach($actions as $a):?><option value="<?=htmlspecialchars($a)?>"<?=$a===$action_f?' selected':''?>><?=htmlspecialchars($a)?></option><?php endforeach;?>
                     </select>
                 </div>
-                <label>User</label>
-                <input name="user" placeholder="Search user…" value="<?=htmlspecialchars($user_f)?>">
-                <label>From</label><input type="date" name="from" value="<?=htmlspecialchars($date_from)?>">
-                <label>To</label><input type="date" name="to" value="<?=htmlspecialchars($date_to)?>">
-                <button type="submit" class="btn-orange"><i class="fa-solid fa-filter"></i> Filter</button>
-                <a href="audit-trail.php" class="btn-ghost"><i class="fa-solid fa-rotate-left"></i> Reset</a>
+                </div>
+                <div class="filter-divider"></div>
+
+                <div class="audit-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input name="user" placeholder="Search user…" value="<?=htmlspecialchars($user_f)?>">
+                </div>
+
+                <div class="filter-divider"></div>
+
+                <div class="filter-group">
+                    <label>From</label><input type="date" name="from" value="<?=htmlspecialchars($date_from)?>">
+                    <label>To</label><input type="date" name="to" value="<?=htmlspecialchars($date_to)?>">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-orange"><i class="fa-solid fa-filter"></i> Filter</button>
+                    <a href="audit-trail.php" class="btn-ghost"><i class="fa-solid fa-rotate-left"></i> Reset</a>
+                </div>
             </form>
 
-            <table class="intel-table audit-table">
+            <table class="intel-table audit-table" id="auditTable">
                 <thead><tr>
                     <th>Time</th><th>User</th><th>Branch</th>
                     <th>Action</th><th>Item</th><th>Details</th>
@@ -213,11 +222,11 @@ $conn->close();
                 $qp=http_build_query(array_filter(['branch'=>$branch,'action'=>$action_f,'user'=>$user_f,'from'=>$date_from,'to'=>$date_to]));
             ?>
             <div class="pagination">
-                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
+                <a href="?<?=$qp?>&pg=<?=max(1,$page_num-1)?>#auditTable" class="pg-btn<?=$page_num<=1?' disabled':''?>"><i class="fa-solid fa-chevron-left"></i></a>
                 <?php for($pg=max(1,$page_num-2);$pg<=min($pages,$page_num+2);$pg++):?>
-                <a href="?<?=$qp?>&pg=<?=$pg?>" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
+                <a href="?<?=$qp?>&pg=<?=$pg?>#auditTable" class="pg-btn<?=$pg===$page_num?' active':''?>"><?=$pg?></a>
                 <?php endfor;?>
-                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
+                <a href="?<?=$qp?>&pg=<?=min($pages,$page_num+1)?>#auditTable" class="pg-btn<?=$page_num>=$pages?' disabled':''?>"><i class="fa-solid fa-chevron-right"></i></a>
             </div>
             <?php endif;?>
         </div>

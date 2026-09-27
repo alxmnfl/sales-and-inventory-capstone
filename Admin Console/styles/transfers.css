@@ -11,20 +11,6 @@
    (admin.css + branch-filter-widget.js) — same fully-styled panel the rest
    of the console uses, so nothing extra is needed here. */
 
-.trf-region-input {
-    width: 100%;
-    max-width: 320px;
-    padding: 6px 10px;
-    border: 1px solid #e5e7eb;
-    border-radius: 7px;
-    font: inherit;
-    font-size: 13px;
-    color: #111827;
-    outline: none;
-    transition: border-color .15s;
-}
-.trf-region-input:focus { border-color: #e8611a; }
-
 /* In-transit badge (deliveries.css only ships sent/received/disputed/cancelled) */
 .dlv-badge.badge-transit { background: #eff6ff; color: #1d4ed8; }
 
