@@ -1,7 +1,28 @@
 /* ── Modals ── */
 function openAddModal(){
+    var form = document.getElementById('addModal').querySelector('form');
+    if (form) form.reset();
+    var addEmail = document.getElementById('addEmail');
+    if (addEmail) addEmail.dataset.userEdited = '';
     document.getElementById('addModal').classList.add('open');
 }
+
+/* Auto-fill the Add User email from the full name, unless the admin has typed their own */
+(function(){
+    var addFullName = document.getElementById('addFullName');
+    var addEmail     = document.getElementById('addEmail');
+    if (!addFullName || !addEmail) return;
+
+    addFullName.addEventListener('input', function(){
+        if (addEmail.dataset.userEdited === '1') return;
+        var slug = addFullName.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+        addEmail.value = slug ? slug + '@lucky8.com' : '';
+    });
+
+    addEmail.addEventListener('input', function(){
+        addEmail.dataset.userEdited = '1';
+    });
+})();
 
 function openEditModal(u){
     document.getElementById('editId').value   = u.id;

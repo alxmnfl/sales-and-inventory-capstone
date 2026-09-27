@@ -264,13 +264,13 @@ $conn->close();
         <form method="POST">
             <input type="hidden" name="action" value="add">
             <div class="form-row">
-                <div class="form-group"><label>Full Name</label><input name="full_name" required></div>
+                <div class="form-group"><label>Full Name</label><input name="full_name" id="addFullName" required></div>
                 <div class="form-group">
                     <label>Employee ID <span class="hint">auto-generated</span></label>
                     <input name="employee_id" value="<?=htmlspecialchars($next_employee_id)?>" readonly>
                 </div>
             </div>
-            <div class="form-group"><label>Email</label><input name="email" type="email" required></div>
+            <div class="form-group"><label>Email <span class="hint">auto-generated, editable</span></label><input name="email" id="addEmail" type="email" required></div>
             <div class="form-row">
                 <div class="form-group"><label>Role</label>
                     <div class="cselect" id="addRoleSelect">
@@ -383,6 +383,6 @@ $conn->close();
     <input type="hidden" name="id" id="deleteId">
 </form>
 
-<script src="../src/users.js?v=20260926"></script>
+<script src="../src/users.js?v=20260927"></script>
 </body>
 </html>
