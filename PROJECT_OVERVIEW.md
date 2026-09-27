@@ -18,12 +18,11 @@ There is no build step — files are served directly by XAMPP/Apache.
 
 | File | Purpose |
 |---|---|
-| `login.php` | The single entry page. Renders a two-tab (Sign In / Register) UI. Reads flash messages (`login_error`, `reg_error`, `reg_success`) from the session set by the two processors below. |
+| `login.php` | The single entry page. Sign-in only — public self-registration was removed; accounts are now created exclusively via Admin Console → Users → Add User. Reads the `login_error` flash message from the session set by `login_process.php`. |
 | `login_process.php` | Handles the sign-in POST. Verifies email/password (`password_verify`), checks account `status` (rejects `rejected` accounts), then starts the session and redirects: `administrator` → Admin Console, `branch_staff` → POS (also seeds `pos_cashier`/`pos_cashier_branch` session keys). |
-| `register.php` | Handles the registration POST. Validates required fields, email format, password length/match, and duplicate email/employee ID, then inserts a new `users` row (auto-approved — no pending-approval flow currently active). |
 | `db.php` | Shared DB connection. Defines `DB_HOST/USER/PASS/NAME` constants (`root`/no password/`lucky8_db`) and opens `$conn` as a `mysqli` instance. Included by nearly every other PHP file via `require_once`. |
-| `login.css` | Styling for the split-panel login/register screen. |
-| `login.js` | Client-side behavior for `login.php`: the hardcoded 18-branch picker (with search/filter) used by the registration form, tab switching, password show/hide, and role-card selection. |
+| `login.css` | Styling for the split-panel login screen. |
+| `login.js` | Client-side behavior for `login.php`: password show/hide and the page-loader fade-out. |
 
 ---
 
