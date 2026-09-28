@@ -206,7 +206,7 @@ function statusBadge(string $s): array {
 <link rel="stylesheet" href="../styles/admin.css?v=20260927e">
 <link rel="stylesheet" href="../styles/inventory.css?v=20260927b">
 <link rel="stylesheet" href="../styles/reports.css?v=20260829">
-<link rel="stylesheet" href="../styles/deliveries.css?v=20260830f">
+<link rel="stylesheet" href="../styles/deliveries.css?v=20260928">
 <link href="../../vendor/fonts/fonts.css" rel="stylesheet">
 <link rel="stylesheet" href="../../vendor/fontawesome/css/all.min.css">
 </head>
