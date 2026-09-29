@@ -32,10 +32,12 @@ function openCheckout() {
   document.getElementById('summaryTotal').textContent = fmt(total);
 
   document.getElementById('checkoutModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 }
 
 function closeCheckout() {
   document.getElementById('checkoutModal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 function selectPayment(btn, method) {

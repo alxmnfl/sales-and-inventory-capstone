@@ -64,8 +64,24 @@ def forecast():
         cursor.close()
         conn.close()
 
-        if len(rows) < 3:
-            return jsonify({'success': False, 'error': 'Not enough sales data (need at least 3 days).'}), 200
+        # Require the 3+ days to actually be recent, not just present somewhere
+        # in the last 90 days — e.g. 2 sale-days from 7 weeks ago plus 1
+        # yesterday would technically total 3, but really only reflects one
+        # current data point, and the zero-filled gap between old and new
+        # activity would skew the trend line. This single check also covers
+        # branches with fewer than 3 sales ever (recent_days maxes out at
+        # len(rows)), so every "not enough data" case gets the same message.
+        RECENT_WINDOW_DAYS = 30
+        today = datetime.now().date()
+        recent_days = sum(1 for r in rows if (today - r['day']).days <= RECENT_WINDOW_DAYS)
+        if recent_days < 3:
+            return jsonify({
+                'success': False,
+                'error': (
+                    f'Only {recent_days} day(s) with sales in the last {RECENT_WINDOW_DAYS} days — '
+                    'need at least 3 recent days to detect a trend.'
+                ),
+            }), 200
 
         df = pd.DataFrame(rows)
         df['day'] = pd.to_datetime(df['day'])

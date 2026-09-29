@@ -47,7 +47,7 @@ $ptStmt->close();
 <link rel="stylesheet" href="../style/header.css?v=20260926j">
 <link rel="stylesheet" href="../style/products.css?v=2">
 <link rel="stylesheet" href="../style/cart.css?v=20260926k">
-<link rel="stylesheet" href="../style/modal.css?v=20260926i">
+<link rel="stylesheet" href="../style/modal.css?v=20260929d">
 <link rel="stylesheet" href="../style/sale-complete.css">
 
 </head>

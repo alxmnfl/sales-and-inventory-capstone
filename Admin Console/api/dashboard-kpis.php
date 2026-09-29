@@ -60,28 +60,50 @@ if ($branch !== '') {
     $stmt->execute();
     $mtd_txn_count = (int)$stmt->get_result()->fetch_row()[0];
 
+    // Revenue and units are queried separately: joining pos_sale_items onto
+    // pos_sales before summing s.total fans out one row per line item and
+    // multiplies each sale's total by its item count, inflating the chart.
+    $revByDate = [];
     $stmt = $conn->prepare("
-        SELECT DATE(s.created_at) AS d,
-               SUM(s.total)                AS rev,
-               COALESCE(SUM(si.quantity),0) AS units
-        FROM pos_sales s
-        LEFT JOIN pos_sale_items si ON si.sale_id = s.id
-        WHERE MONTH(s.created_at) = MONTH(NOW())
-          AND YEAR(s.created_at)  = YEAR(NOW())
-          AND UPPER(s.branch) = ?
-        GROUP BY DATE(s.created_at)
+        SELECT DATE(created_at) AS d, SUM(total) AS rev
+        FROM pos_sales
+        WHERE MONTH(created_at) = MONTH(NOW())
+          AND YEAR(created_at)  = YEAR(NOW())
+          AND UPPER(branch) = ?
+        GROUP BY DATE(created_at)
         ORDER BY d
     ");
     $stmt->bind_param('s', $b);
     $stmt->execute();
     $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $revByDate[$row['d']] = (float)$row['rev'];
+    }
+
+    $unitsByDate = [];
+    $stmt = $conn->prepare("
+        SELECT DATE(s.created_at) AS d, COALESCE(SUM(si.quantity), 0) AS units
+        FROM pos_sales s
+        JOIN pos_sale_items si ON si.sale_id = s.id
+        WHERE MONTH(s.created_at) = MONTH(NOW())
+          AND YEAR(s.created_at)  = YEAR(NOW())
+          AND UPPER(s.branch) = ?
+        GROUP BY DATE(s.created_at)
+    ");
+    $stmt->bind_param('s', $b);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $unitsByDate[$row['d']] = (int)$row['units'];
+    }
+
     $daily_labels  = [];
     $daily_revenue = [];
     $daily_units   = [];
-    while ($row = $res->fetch_assoc()) {
-        $daily_labels[]  = date('M d', strtotime($row['d']));
-        $daily_revenue[] = (float)$row['rev'];
-        $daily_units[]   = (int)$row['units'];
+    foreach ($revByDate as $d => $rev) {
+        $daily_labels[]  = date('M d', strtotime($d));
+        $daily_revenue[] = $rev;
+        $daily_units[]   = $unitsByDate[$d] ?? 0;
     }
 
     $stmt = $conn->prepare("SELECT COUNT(*) FROM pos_products WHERE stock < 10 AND stock >= 0 AND branch = ?");
@@ -142,24 +164,41 @@ if ($branch !== '') {
     $r = $conn->query("SELECT COUNT(DISTINCT transaction_id) FROM pos_sales WHERE MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())");
     $mtd_txn_count = (int)$r->fetch_row()[0];
 
+    // Revenue and units are queried separately — see the branch-scoped block
+    // above for why summing s.total after joining pos_sale_items is wrong.
+    $revByDate = [];
     $r = $conn->query("
-        SELECT DATE(s.created_at) AS d,
-               SUM(s.total)                AS rev,
-               COALESCE(SUM(si.quantity),0) AS units
+        SELECT DATE(created_at) AS d, SUM(total) AS rev
+        FROM pos_sales
+        WHERE MONTH(created_at) = MONTH(NOW())
+          AND YEAR(created_at)  = YEAR(NOW())
+        GROUP BY DATE(created_at)
+        ORDER BY d
+    ");
+    while ($row = $r->fetch_assoc()) {
+        $revByDate[$row['d']] = (float)$row['rev'];
+    }
+
+    $unitsByDate = [];
+    $r = $conn->query("
+        SELECT DATE(s.created_at) AS d, COALESCE(SUM(si.quantity), 0) AS units
         FROM pos_sales s
-        LEFT JOIN pos_sale_items si ON si.sale_id = s.id
+        JOIN pos_sale_items si ON si.sale_id = s.id
         WHERE MONTH(s.created_at) = MONTH(NOW())
           AND YEAR(s.created_at)  = YEAR(NOW())
         GROUP BY DATE(s.created_at)
-        ORDER BY d
     ");
+    while ($row = $r->fetch_assoc()) {
+        $unitsByDate[$row['d']] = (int)$row['units'];
+    }
+
     $daily_labels  = [];
     $daily_revenue = [];
     $daily_units   = [];
-    while ($row = $r->fetch_assoc()) {
-        $daily_labels[]  = date('M d', strtotime($row['d']));
-        $daily_revenue[] = (float)$row['rev'];
-        $daily_units[]   = (int)$row['units'];
+    foreach ($revByDate as $d => $rev) {
+        $daily_labels[]  = date('M d', strtotime($d));
+        $daily_revenue[] = $rev;
+        $daily_units[]   = $unitsByDate[$d] ?? 0;
     }
 
     $r = $conn->query("SELECT COUNT(*) FROM pos_products WHERE stock < 10 AND stock >= 0");

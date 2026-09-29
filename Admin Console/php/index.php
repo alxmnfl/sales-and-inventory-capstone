@@ -53,26 +53,44 @@ $r = $conn->query("SELECT COUNT(*) FROM pos_products WHERE stock < 5 AND stock >
 $critical_count  = (int)$r->fetch_row()[0];
 
 // ── Daily sales trend (current month)
+// Revenue and units are queried separately: joining pos_sale_items onto
+// pos_sales before summing s.total would fan out one row per line item and
+// multiply each sale's total by its item count (e.g. a 3-item sale would be
+// counted 3x), inflating the chart far above the real MTD revenue.
 $daily_labels  = [];
 $daily_revenue = [];
 $daily_units   = [];
 
+$revByDate = [];
 $r = $conn->query("
-    SELECT
-        DATE(s.created_at)          AS d,
-        SUM(s.total)                AS rev,
-        COALESCE(SUM(si.quantity),0) AS units
-    FROM pos_sales s
-    LEFT JOIN pos_sale_items si ON si.sale_id = s.id
-    WHERE MONTH(s.created_at) = MONTH(NOW())
-      AND YEAR(s.created_at)  = YEAR(NOW())
-    GROUP BY DATE(s.created_at)
+    SELECT DATE(created_at) AS d, SUM(total) AS rev
+    FROM pos_sales
+    WHERE MONTH(created_at) = MONTH(NOW())
+      AND YEAR(created_at)  = YEAR(NOW())
+    GROUP BY DATE(created_at)
     ORDER BY d
 ");
 while ($row = $r->fetch_assoc()) {
-    $daily_labels[]  = date('M d', strtotime($row['d']));
-    $daily_revenue[] = (float)$row['rev'];
-    $daily_units[]   = (int)$row['units'];
+    $revByDate[$row['d']] = (float)$row['rev'];
+}
+
+$unitsByDate = [];
+$r = $conn->query("
+    SELECT DATE(s.created_at) AS d, COALESCE(SUM(si.quantity), 0) AS units
+    FROM pos_sales s
+    JOIN pos_sale_items si ON si.sale_id = s.id
+    WHERE MONTH(s.created_at) = MONTH(NOW())
+      AND YEAR(s.created_at)  = YEAR(NOW())
+    GROUP BY DATE(s.created_at)
+");
+while ($row = $r->fetch_assoc()) {
+    $unitsByDate[$row['d']] = (int)$row['units'];
+}
+
+foreach ($revByDate as $d => $rev) {
+    $daily_labels[]  = date('M d', strtotime($d));
+    $daily_revenue[] = $rev;
+    $daily_units[]   = $unitsByDate[$d] ?? 0;
 }
 
 // ── ABC inventory analysis

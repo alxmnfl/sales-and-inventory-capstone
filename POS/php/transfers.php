@@ -136,7 +136,7 @@ function trfWhen(?string $s): string {
 
 <link rel="stylesheet" href="../style/base.css">
 <link rel="stylesheet" href="../style/header.css?v=20260926j">
-<link rel="stylesheet" href="../style/modal.css?v=20260926i">
+<link rel="stylesheet" href="../style/modal.css?v=20260929d">
 <link rel="stylesheet" href="../style/deliveries.css?v=20260926l">
 <link rel="stylesheet" href="../style/transfers.css?v=20260926n">
 </head>
